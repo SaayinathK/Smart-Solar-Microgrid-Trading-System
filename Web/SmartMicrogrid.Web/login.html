@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/forms.css">
+</head>
+<body>
+  <div id="navbar-container"></div>
+
+  <div class="auth-wrapper">
+    <div class="glass-card auth-card">
+      <div class="auth-header">
+        <h2>Welcome Back</h2>
+        <p>Sign in to access your microgrid portal</p>
+      </div>
+
+      <div id="alert-box" class="alert alert-danger"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="name@domain.com" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+          Sign In
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="register.html">Register as Prosumer</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      &copy; 2026 Smart Microgrid Platform
+    </div>
+  </footer>
+
+  <script src="js/config/api-config.js"></script>
+  <script src="js/common/session.js"></script>
+  <script src="js/api/api-client.js"></script>
+  <script src="js/api/auth-api.js"></script>
+  <script src="js/common/auth.js"></script>
+  <script src="js/common/navbar.js"></script>
+  <script>
+    AuthGuard.redirectIfAuthenticated();
+    renderNavbar();
+
+    const loginForm = document.getElementById('login-form');
+    const alertBox = document.getElementById('alert-box');
+    const btnSubmit = document.getElementById('btn-submit');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.classList.remove('active');
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Authenticating...';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await AuthApi.login({ email, password });
+        if (response.success) {
+          SessionManager.setSession(response.data.token, response.data.user);
+          ApiClient.showToast('Login successful! Redirecting...', 'success');
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 800);
+        } else {
+          showError(response.message || 'Login failed.');
+        }
+      } catch (err) {
+        showError(err.message || 'Unable to connect to the Web API server.');
+      } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Sign In';
+      }
+    });
+
+    function showError(msg) {
+      alertBox.textContent = msg;
+      alertBox.classList.add('active');
+    }
+  </script>
+</body>
+</html>

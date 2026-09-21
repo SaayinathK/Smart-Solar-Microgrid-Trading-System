@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Microgrid Energy Management & Trading System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="navbar-container"></div>
+
+  <main class="main-content">
+    <div class="container" style="text-align: center; padding-top: 4rem;">
+      <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Smart Microgrid Platform</h1>
+      <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 2rem auto;">
+        Local-Network Solar Energy Management & Peer-to-Peer Trading System.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 1rem;">
+        <a href="login.html" class="btn btn-primary">Sign In</a>
+        <a href="register.html" class="btn btn-secondary">Create Prosumer Account</a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      &copy; 2026 Smart Microgrid University Group Project. Member 1 User Management Module.
+    </div>
+  </footer>
+
+  <script src="js/config/api-config.js"></script>
+  <script src="js/common/session.js"></script>
+  <script src="js/common/auth.js"></script>
+  <script src="js/common/navbar.js"></script>
+  <script>
+    renderNavbar();
+    // Redirect logged-in users straight to dashboard
+    if (SessionManager.isAuthenticated()) {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>

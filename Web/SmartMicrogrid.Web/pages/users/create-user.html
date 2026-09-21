@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create User - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/forms.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+</head>
+<body>
+  <div id="navbar-container"></div>
+
+  <main class="main-content">
+    <div class="container" style="max-width: 680px;">
+      
+      <div class="page-header">
+        <div class="page-title">
+          <h1>Create System User</h1>
+          <p>Register a new user account with a specified role</p>
+        </div>
+        <div>
+          <a href="users.html" class="btn btn-secondary">← Cancel</a>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div id="alert-box" class="alert alert-danger"></div>
+
+        <form id="create-user-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="firstName">First Name *</label>
+              <input type="text" id="firstName" class="form-control" required placeholder="Jane">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lastName">Last Name *</label>
+              <input type="text" id="lastName" class="form-control" required placeholder="Smith">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address *</label>
+            <input type="email" id="email" class="form-control" required placeholder="jane.smith@domain.com">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="phoneNumber">Phone Number</label>
+            <input type="tel" id="phoneNumber" class="form-control" placeholder="+1234567890">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="role">Assigned Role *</label>
+              <select id="role" class="form-select" required>
+                <option value="Prosumer">Prosumer</option>
+                <option value="MicrogridOperator">Microgrid Operator</option>
+                <option value="TransactionVerifier">Transaction Verifier</option>
+                <option value="Admin">System Administrator</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="isActive">Initial Status *</label>
+              <select id="isActive" class="form-select" required>
+                <option value="true">Active Account</option>
+                <option value="false">Inactive Account</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Initial Password *</label>
+            <input type="password" id="password" class="form-control" required minlength="6" placeholder="Minimum 6 characters">
+          </div>
+
+          <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
+            <a href="users.html" class="btn btn-secondary">Cancel</a>
+            <button type="submit" id="btn-submit" class="btn btn-primary">Create User</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      &copy; 2026 Smart Microgrid Platform
+    </div>
+  </footer>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/user-api.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/navbar.js"></script>
+  <script src="../../js/users/create-user.js"></script>
+</body>
+</html>

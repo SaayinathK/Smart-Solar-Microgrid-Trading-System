@@ -1,0 +1,42 @@
+## .NET & Visual Studio
+bin/
+obj/
+out/
+.vs/
+.vscode/
+.idea/
+*.user
+*.userossc
+*.sln.docstates
+*.suo
+
+## Build & Publish Output
+[Dd]ebug/
+[Rr]elease/
+publish/
+
+## Environment & Secrets
+appsettings.Local.json
+*.env
+*.pem
+*.pfx
+
+## Node & Web
+node_modules/
+dist/
+.DS_Store
+
+## Android & Gradle
+.gradle/
+build/
+local.properties
+.navigation/
+captures/
+*.apk
+*.aab
+
+## Database & Local Data
+*.db
+*.sqlite
+*.sqlite3
+*.log
