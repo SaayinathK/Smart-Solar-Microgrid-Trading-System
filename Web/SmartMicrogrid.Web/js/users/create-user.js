@@ -4,7 +4,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   AuthGuard.requireAuth('Admin');
-  renderNavbar('users');
 
   const form = document.getElementById('create-user-form');
   const alertBox = document.getElementById('alert-box');

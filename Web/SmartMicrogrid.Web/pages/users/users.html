@@ -5,78 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>User Management - Smart Microgrid</title>
   <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
   <link rel="stylesheet" href="../../css/forms.css">
   <link rel="stylesheet" href="../../css/tables.css">
 </head>
 <body>
-  <div id="navbar-container"></div>
 
-  <main class="main-content">
-    <div class="container">
-
-      <div class="page-header">
-        <div class="page-title">
-          <h1>User Management</h1>
-          <p>View, create, update, activate/deactivate, and manage system accounts</p>
-        </div>
-        <div>
-          <a href="create-user.html" class="btn btn-primary">+ Create New User</a>
-        </div>
+  <div id="app-layout-wrapper">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>User Management</h1>
+        <p>View, create, update, activate/deactivate, and manage system accounts</p>
       </div>
-
-      <!-- Toolbar Filter & Search -->
-      <div class="table-toolbar">
-        <div class="search-box">
-          <input type="text" id="search-input" class="search-input" placeholder="Search by name or email...">
-        </div>
-
-        <select id="role-filter" class="form-select" style="max-width: 200px;">
-          <option value="">All Roles</option>
-          <option value="Admin">Admin</option>
-          <option value="MicrogridOperator">Microgrid Operator</option>
-          <option value="Prosumer">Prosumer</option>
-          <option value="TransactionVerifier">Transaction Verifier</option>
-        </select>
-
-        <select id="status-filter" class="form-select" style="max-width: 180px;">
-          <option value="">All Statuses</option>
-          <option value="true">Active Only</option>
-          <option value="false">Inactive Only</option>
-        </select>
+      <div>
+        <a href="create-user.html" class="btn btn-primary">+ Create New User</a>
       </div>
-
-      <!-- Data Table -->
-      <div class="table-container glass-card" style="padding: 0;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>User Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th>Created Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="users-table-body">
-            <tr>
-              <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                Loading system users...
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
     </div>
-  </main>
 
-  <footer class="footer">
-    <div class="container">
-      &copy; 2026 Smart Microgrid Platform
+    <!-- Toolbar Filter & Search -->
+    <div class="table-toolbar">
+      <div class="search-box">
+        <input type="text" id="search-input" class="search-input" placeholder="Search by name or email...">
+      </div>
+
+      <select id="role-filter" class="form-select" style="max-width: 200px;">
+        <option value="">All Roles</option>
+        <option value="Admin">Admin</option>
+        <option value="MicrogridOperator">Microgrid Operator</option>
+        <option value="Prosumer">Prosumer</option>
+        <option value="TransactionVerifier">Transaction Verifier</option>
+      </select>
+
+      <select id="status-filter" class="form-select" style="max-width: 180px;">
+        <option value="">All Statuses</option>
+        <option value="true">Active Only</option>
+        <option value="false">Inactive Only</option>
+      </select>
     </div>
-  </footer>
+
+    <!-- Data Table -->
+    <div class="table-container glass-card" style="padding: 0;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>User Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Created Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="users-table-body">
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+              Loading system users...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
   <script src="../../js/config/api-config.js"></script>
   <script src="../../js/common/theme.js"></script>
@@ -84,7 +74,10 @@
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/api/user-api.js"></script>
   <script src="../../js/common/auth.js"></script>
-  <script src="../../js/common/navbar.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
   <script src="../../js/users/users.js"></script>
+  <script>
+    renderAppLayout('users', 'User Management');
+  </script>
 </body>
 </html>

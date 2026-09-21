@@ -4,7 +4,6 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   AuthGuard.requireAuth();
-  renderNavbar('users');
 
   const urlParams = new URLSearchParams(window.location.search);
   let userId = urlParams.get('id');

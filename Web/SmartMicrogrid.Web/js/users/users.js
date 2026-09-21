@@ -4,7 +4,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   AuthGuard.requireAuth('Admin');
-  renderNavbar('users');
 
   const tableBody = document.getElementById('users-table-body');
   const searchInput = document.getElementById('search-input');

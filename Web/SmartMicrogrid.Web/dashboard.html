@@ -5,126 +5,116 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - Smart Microgrid Platform</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/sidebar.css">
   <link rel="stylesheet" href="css/dashboard.css">
 </head>
 <body>
-  <div id="navbar-container"></div>
 
-  <main class="main-content">
-    <div class="container">
-      
-      <!-- Welcome Banner -->
-      <div class="dashboard-welcome">
-        <div class="welcome-text">
-          <h1>Welcome, <span id="user-display-name">User</span>!</h1>
-          <p id="role-description">Role: Prosumer • System Status: Connected to C# Web API & MongoDB</p>
-        </div>
-        <div id="admin-quick-btn"></div>
+  <div id="app-layout-wrapper">
+    <!-- Welcome Banner -->
+    <div class="dashboard-welcome">
+      <div class="welcome-text">
+        <h1>Welcome, <span id="user-display-name">User</span>!</h1>
+        <p id="role-description">System Status: Connected to C# Web API & MongoDB</p>
       </div>
-
-      <!-- Quick Stats -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon emerald">⚡</div>
-          <div class="stat-info">
-            <h3>API Status</h3>
-            <div class="stat-value" style="color: var(--accent-primary); font-size: 1.3rem;">ONLINE</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon cyan">👤</div>
-          <div class="stat-info">
-            <h3>Your Role</h3>
-            <div id="stat-role" class="stat-value" style="font-size: 1.3rem; text-transform: capitalize;">Prosumer</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon amber">🗄️</div>
-          <div class="stat-info">
-            <h3>Database</h3>
-            <div class="stat-value" style="font-size: 1.3rem;">MongoDB</div>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon indigo">📡</div>
-          <div class="stat-info">
-            <h3>Network Protocol</h3>
-            <div class="stat-value" style="font-size: 1.3rem;">REST / HTTP</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Module Availability Overview -->
-      <h2 style="font-size: 1.35rem; margin-bottom: 1.25rem;">System Modules Status</h2>
-      
-      <div class="modules-grid">
-        <div class="module-card">
-          <span class="tag tag-ready">IMPLEMENTED & READY</span>
-          <h3>User Management</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem;">
-            Complete authentication, JWT token issuance, password hashing, profiles, and Admin user management.
-          </p>
-          <div style="margin-top: auto;">
-            <a href="pages/users/users.html" class="btn btn-secondary btn-sm" id="btn-view-users" style="display: none; width: 100%;">
-              Manage Users
-            </a>
-          </div>
-        </div>
-
-        <div class="module-card">
-          <span class="tag tag-future">FUTURE - MEMBER 1</span>
-          <h3>Microgrid Infrastructure & Capacity</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem;">
-            Solar nodes, battery storage monitoring, energy availability, and time slot generation.
-          </p>
-        </div>
-
-        <div class="module-card">
-          <span class="tag tag-future">FUTURE - MEMBER 2</span>
-          <h3>Prosumer Energy Trading</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem;">
-            Energy searching, slot browsing, reservation management, and tracking.
-          </p>
-        </div>
-
-        <div class="module-card">
-          <span class="tag tag-future">FUTURE - MEMBER 3</span>
-          <h3>Transaction Verification & QR</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem;">
-            Transaction processing, QR code scanning, verification, and transfer confirmation.
-          </p>
-        </div>
-
-        <div class="module-card">
-          <span class="tag tag-future">FUTURE - MEMBER 4</span>
-          <h3>Operations & Administration</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem;">
-            System monitoring, operational analytics dashboards, and compliance reports.
-          </p>
-        </div>
-      </div>
-
+      <div id="admin-quick-btn"></div>
     </div>
-  </main>
 
-  <footer class="footer">
-    <div class="container">
-      &copy; 2026 Smart Microgrid Platform
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon emerald">⚡</div>
+        <div class="stat-info">
+          <h3>API Server Status</h3>
+          <div class="stat-value" style="color: var(--accent-primary); font-size: 1.3rem;">ONLINE</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon cyan">👤</div>
+        <div class="stat-info">
+          <h3>Your System Role</h3>
+          <div id="stat-role" class="stat-value" style="font-size: 1.3rem; text-transform: capitalize;">Prosumer</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon amber">🗄️</div>
+        <div class="stat-info">
+          <h3>Database Engine</h3>
+          <div class="stat-value" style="font-size: 1.3rem;">MongoDB</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon indigo">📡</div>
+        <div class="stat-info">
+          <h3>Protocol</h3>
+          <div class="stat-value" style="font-size: 1.3rem;">HTTP / REST</div>
+        </div>
+      </div>
     </div>
-  </footer>
+
+    <!-- System Modules Status -->
+    <h2 style="font-size: 1.35rem; margin-bottom: 1.25rem;">System Modules Breakdown</h2>
+    
+    <div class="modules-grid">
+      <div class="module-card">
+        <span class="tag tag-ready">READY & OPERATIONAL</span>
+        <h3>User Management</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+          Authentication, JWT token security, password hashing, roles, and administrator user CRUD operations.
+        </p>
+        <div style="margin-top: auto;">
+          <a href="pages/users/users.html" class="btn btn-secondary btn-sm" id="btn-view-users" style="display: none; width: 100%;">
+            Manage Users
+          </a>
+        </div>
+      </div>
+
+      <div class="module-card">
+        <span class="tag tag-future">FUTURE - MEMBER 1</span>
+        <h3>Microgrid Infrastructure & Capacity</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+          Solar nodes, battery storage monitoring, energy availability, and capacity slots.
+        </p>
+      </div>
+
+      <div class="module-card">
+        <span class="tag tag-future">FUTURE - MEMBER 2</span>
+        <h3>Prosumer Energy Trading</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+          Energy searching, slot browsing, reservation management, and tracking.
+        </p>
+      </div>
+
+      <div class="module-card">
+        <span class="tag tag-future">FUTURE - MEMBER 3</span>
+        <h3>Transaction Verification & QR</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+          Transaction processing, QR code scanning, verification, and transfer confirmation.
+        </p>
+      </div>
+
+      <div class="module-card">
+        <span class="tag tag-future">FUTURE - MEMBER 4</span>
+        <h3>Operations & Administration</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+          System monitoring, operational analytics dashboards, and compliance reports.
+        </p>
+      </div>
+    </div>
+  </div>
 
   <script src="js/config/api-config.js"></script>
   <script src="js/common/theme.js"></script>
   <script src="js/common/session.js"></script>
   <script src="js/api/api-client.js"></script>
   <script src="js/common/auth.js"></script>
-  <script src="js/common/navbar.js"></script>
+  <script src="js/common/sidebar.js"></script>
   <script>
     AuthGuard.requireAuth();
-    renderNavbar('dashboard');
+    renderAppLayout('dashboard', 'Dashboard Overview');
 
     const user = SessionManager.getUser();
     if (user) {
