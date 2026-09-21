@@ -60,7 +60,7 @@
   font-family: inherit;
   font-size: 0.95rem;
   color: var(--text-primary);
-  background: rgba(11, 15, 25, 0.6);
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   outline: none;
@@ -70,7 +70,7 @@
 .form-control:focus, .form-select:focus {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px var(--accent-glow);
-  background: rgba(11, 15, 25, 0.9);
+  background: var(--bg-secondary);
 }
 
 .form-select option {
@@ -105,15 +105,15 @@
 }
 
 .alert-danger {
-  background: rgba(244, 63, 94, 0.15);
-  border: 1px solid rgba(244, 63, 94, 0.3);
-  color: #fda4af;
+  background: rgba(225, 29, 72, 0.1);
+  border: 1px solid rgba(225, 29, 72, 0.25);
+  color: var(--accent-rose);
 }
 
 .alert-success {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #6ee7b7;
+  background: rgba(5, 150, 105, 0.1);
+  border: 1px solid rgba(5, 150, 105, 0.25);
+  color: var(--accent-emerald);
 }
 
 .alert.active {

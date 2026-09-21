@@ -111,6 +111,13 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// Seed Default Users for all 4 System Roles if database is empty
+using (var scope = app.Services.CreateScope())
+{
+    var mongoContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+    await DbSeeder.SeedDefaultUsersAsync(mongoContext);
+}
+
 // Global Exception Handler Middleware
 app.UseMiddleware<ExceptionMiddleware>();
 

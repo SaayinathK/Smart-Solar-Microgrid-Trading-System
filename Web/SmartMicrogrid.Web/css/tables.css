@@ -38,7 +38,7 @@
 .search-input {
   width: 100%;
   padding: 0.65rem 1rem 0.65rem 2.5rem;
-  background: rgba(11, 15, 25, 0.6);
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -60,6 +60,7 @@
   overflow-x: auto;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
+  background: var(--bg-card);
 }
 
 .data-table {
@@ -70,7 +71,7 @@
 }
 
 .data-table th {
-  background: rgba(17, 24, 39, 0.9);
+  background: var(--bg-primary);
   color: var(--text-secondary);
   font-weight: 600;
   text-transform: uppercase;
@@ -92,7 +93,7 @@
 }
 
 .data-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-card-hover);
 }
 
 .status-badge {
@@ -106,15 +107,15 @@
 }
 
 .status-active {
-  background: rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(5, 150, 105, 0.12);
+  color: #059669;
+  border: 1px solid rgba(5, 150, 105, 0.25);
 }
 
 .status-inactive {
-  background: rgba(244, 63, 94, 0.15);
-  color: #fda4af;
-  border: 1px solid rgba(244, 63, 94, 0.3);
+  background: rgba(225, 29, 72, 0.12);
+  color: #e11d48;
+  border: 1px solid rgba(225, 29, 72, 0.25);
 }
 
 .table-actions {

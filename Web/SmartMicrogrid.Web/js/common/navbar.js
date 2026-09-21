@@ -15,6 +15,8 @@ function renderNavbar(activePage = '') {
   else if (user?.role === 'MicrogridOperator') roleClass = 'role-operator';
   else if (user?.role === 'TransactionVerifier') roleClass = 'role-verifier';
 
+  const currentTheme = ThemeManager.getTheme();
+
   container.innerHTML = `
     <nav class="navbar">
       <div class="container navbar-container">
@@ -32,6 +34,9 @@ function renderNavbar(activePage = '') {
           </ul>
 
           <div class="user-menu">
+            <button id="theme-toggle-btn" onclick="ThemeManager.toggleTheme()" class="theme-toggle-btn" title="Toggle Light / Dark Theme">
+              ${currentTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
+            </button>
             <div class="user-badge">
               <span class="user-name">${user ? `${user.firstName} ${user.lastName}` : 'User'}</span>
               <span class="role-pill ${roleClass}">${user?.role || 'Guest'}</span>
@@ -40,6 +45,9 @@ function renderNavbar(activePage = '') {
           </div>
         ` : `
           <div class="user-menu">
+            <button id="theme-toggle-btn" onclick="ThemeManager.toggleTheme()" class="theme-toggle-btn" title="Toggle Light / Dark Theme">
+              ${currentTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
+            </button>
             <a href="/login.html" class="btn btn-secondary btn-sm">Sign In</a>
             <a href="/register.html" class="btn btn-primary btn-sm">Register</a>
           </div>
@@ -47,4 +55,6 @@ function renderNavbar(activePage = '') {
       </div>
     </nav>
   `;
+
+  ThemeManager.updateToggleIcon(currentTheme);
 }
