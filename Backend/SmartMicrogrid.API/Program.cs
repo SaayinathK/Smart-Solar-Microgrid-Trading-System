@@ -31,6 +31,17 @@ builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+// M3 - Transaction Verification & Operator Fulfilment
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+
+// M3 - Read approved reservation data from M2 API
+builder.Services.AddHttpClient<IReservationApiClient, ReservationApiClient>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5000/");
+});
+
 builder.Services.AddSingleton<JwtHelper>();
 
 // Configure JWT Authentication
