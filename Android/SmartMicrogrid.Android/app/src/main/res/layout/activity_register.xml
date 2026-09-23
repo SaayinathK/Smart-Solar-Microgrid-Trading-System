@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_dark"
+    android:background="?attr/android:windowBackground"
     android:fillViewport="true">
 
     <LinearLayout
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:text="Register as a Prosumer"
             android:textSize="14sp"
-            android:textColor="@color/text_secondary"
+            android:textColor="?attr/android:textColorSecondary"
             android:layout_marginBottom="32dp" />
 
         <!-- Error Message -->
@@ -59,7 +59,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="First Name"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/android:textColorPrimary"
             android:textSize="14sp"
             android:layout_marginBottom="6dp" />
 
@@ -67,9 +67,9 @@
             android:id="@+id/et_first_name"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:background="@color/card_bg"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary"
+            android:background="@drawable/bg_glass_input"
+            android:textColor="?attr/android:textColorPrimary"
+            android:textColorHint="?attr/android:textColorSecondary"
             android:hint="John"
             android:inputType="textPersonName"
             android:padding="14dp"
@@ -81,7 +81,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Last Name"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/android:textColorPrimary"
             android:textSize="14sp"
             android:layout_marginBottom="6dp" />
 
@@ -89,9 +89,9 @@
             android:id="@+id/et_last_name"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:background="@color/card_bg"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary"
+            android:background="@drawable/bg_glass_input"
+            android:textColor="?attr/android:textColorPrimary"
+            android:textColorHint="?attr/android:textColorSecondary"
             android:hint="Doe"
             android:inputType="textPersonName"
             android:padding="14dp"
@@ -103,7 +103,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Email Address"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/android:textColorPrimary"
             android:textSize="14sp"
             android:layout_marginBottom="6dp" />
 
@@ -111,9 +111,9 @@
             android:id="@+id/et_email"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:background="@color/card_bg"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary"
+            android:background="@drawable/bg_glass_input"
+            android:textColor="?attr/android:textColorPrimary"
+            android:textColorHint="?attr/android:textColorSecondary"
             android:hint="name@domain.com"
             android:inputType="textEmailAddress"
             android:padding="14dp"
@@ -125,7 +125,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Phone Number"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/android:textColorPrimary"
             android:textSize="14sp"
             android:layout_marginBottom="6dp" />
 
@@ -133,9 +133,9 @@
             android:id="@+id/et_phone"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:background="@color/card_bg"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary"
+            android:background="@drawable/bg_glass_input"
+            android:textColor="?attr/android:textColorPrimary"
+            android:textColorHint="?attr/android:textColorSecondary"
             android:hint="+94771234567"
             android:inputType="phone"
             android:padding="14dp"
@@ -147,7 +147,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Password"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/android:textColorPrimary"
             android:textSize="14sp"
             android:layout_marginBottom="6dp" />
 
@@ -155,9 +155,9 @@
             android:id="@+id/et_password"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:background="@color/card_bg"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary"
+            android:background="@drawable/bg_glass_input"
+            android:textColor="?attr/android:textColorPrimary"
+            android:textColorHint="?attr/android:textColorSecondary"
             android:hint="Min 6 characters"
             android:inputType="textPassword"
             android:padding="14dp"
@@ -169,7 +169,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Confirm Password"
-            android:textColor="@color/text_primary"
+            android:textColor="?attr/android:textColorPrimary"
             android:textSize="14sp"
             android:layout_marginBottom="6dp" />
 
@@ -177,9 +177,9 @@
             android:id="@+id/et_confirm_password"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:background="@color/card_bg"
-            android:textColor="@color/text_primary"
-            android:textColorHint="@color/text_secondary"
+            android:background="@drawable/bg_glass_input"
+            android:textColor="?attr/android:textColorPrimary"
+            android:textColorHint="?attr/android:textColorSecondary"
             android:hint="Re-enter password"
             android:inputType="textPassword"
             android:padding="14dp"
@@ -216,7 +216,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Already have an account? "
-                android:textColor="@color/text_secondary"
+                android:textColor="?attr/android:textColorSecondary"
                 android:textSize="14sp" />
 
             <TextView
