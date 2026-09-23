@@ -9,19 +9,18 @@
     <ImageView
         android:id="@+id/iv_background_header"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="320dp"
         android:scaleType="centerCrop"
         android:src="@drawable/bg_energy_home"
-        android:alpha="0.8"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Gradient Overlay to blend into background -->
+    <!-- Gradient Overlay to blend header into dark background -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:background="#66000000"
+        android:layout_height="320dp"
+        android:background="@drawable/bg_gradient_header_overlay"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
