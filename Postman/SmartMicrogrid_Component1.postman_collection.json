@@ -1,0 +1,250 @@
+{
+	"info": {
+		"_postman_id": "c1-smartmicrogrid-postman-collection",
+		"name": "Smart Microgrid - Component 1 API Collection",
+		"description": "Complete REST API collection for Component 1: Microgrid & Energy Resource Management",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Microgrids",
+			"item": [
+				{
+					"name": "GET Microgrids",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/microgrids?status=Active",
+							"host": ["{{baseUrl}}"],
+							"path": ["microgrids"],
+							"query": [{ "key": "status", "value": "Active" }]
+						}
+					}
+				},
+				{
+					"name": "GET Microgrid By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/microgrids/{{microgridId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["microgrids", "{{microgridId}}"]
+						}
+					}
+				},
+				{
+					"name": "POST Microgrid",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Kandy Solar Farm\",\n  \"location\": \"Kandy\",\n  \"description\": \"Highland Solar Array\",\n  \"latitude\": 7.2906,\n  \"longitude\": 80.6337,\n  \"capacity\": 500.0,\n  \"batteryCapacity\": 200.0,\n  \"currentBatteryLevel\": 150.0,\n  \"status\": \"Active\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/microgrids",
+							"host": ["{{baseUrl}}"],
+							"path": ["microgrids"]
+						}
+					}
+				},
+				{
+					"name": "PUT Microgrid",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Kandy Solar Farm Updated\",\n  \"location\": \"Kandy\",\n  \"description\": \"Updated Solar Array\",\n  \"latitude\": 7.2906,\n  \"longitude\": 80.6337,\n  \"capacity\": 600.0,\n  \"batteryCapacity\": 250.0,\n  \"status\": \"Active\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/microgrids/{{microgridId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["microgrids", "{{microgridId}}"]
+						}
+					}
+				},
+				{
+					"name": "PATCH Microgrid Status",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"Maintenance\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/microgrids/{{microgridId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["microgrids", "{{microgridId}}", "status"]
+						}
+					}
+				},
+				{
+					"name": "DELETE Microgrid",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/microgrids/{{microgridId}}",
+							"host": ["{{baseUrl}}"],
+							"path": ["microgrids", "{{microgridId}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Capacity",
+			"item": [
+				{
+					"name": "GET Capacity",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/microgrids/{{microgridId}}/capacity",
+							"host": ["{{baseUrl}}"],
+							"path": ["microgrids", "{{microgridId}}", "capacity"]
+						}
+					}
+				},
+				{
+					"name": "PUT Capacity",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"totalCapacity\": 500.0,\n  \"availableCapacity\": 300.0,\n  \"reservedCapacity\": 100.0,\n  \"usedCapacity\": 100.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/microgrids/{{microgridId}}/capacity",
+							"host": ["{{baseUrl}}"],
+							"path": ["microgrids", "{{microgridId}}", "capacity"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Battery",
+			"item": [
+				{
+					"name": "GET Battery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/microgrids/{{microgridId}}/battery",
+							"host": ["{{baseUrl}}"],
+							"path": ["microgrids", "{{microgridId}}", "battery"]
+						}
+					}
+				},
+				{
+					"name": "PUT Battery",
+					"request": {
+						"method": "PUT",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"batteryCapacity\": 200.0,\n  \"currentBatteryLevel\": 160.0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/microgrids/{{microgridId}}/battery",
+							"host": ["{{baseUrl}}"],
+							"path": ["microgrids", "{{microgridId}}", "battery"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Energy Slots",
+			"item": [
+				{
+					"name": "GET Energy Slots",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/energy-slots?status=Available",
+							"host": ["{{baseUrl}}"],
+							"path": ["energy-slots"],
+							"query": [{ "key": "status", "value": "Available" }]
+						}
+					}
+				},
+				{
+					"name": "POST Energy Slot",
+					"request": {
+						"method": "POST",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"microgridNodeId\": \"{{microgridId}}\",\n  \"energyAmount\": 100.0,\n  \"availableAmount\": 100.0,\n  \"startTime\": \"2026-09-25T09:00:00Z\",\n  \"endTime\": \"2026-09-25T13:00:00Z\",\n  \"pricePerUnit\": 25.00,\n  \"status\": \"Available\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/energy-slots",
+							"host": ["{{baseUrl}}"],
+							"path": ["energy-slots"]
+						}
+					}
+				},
+				{
+					"name": "PATCH Energy Slot Status",
+					"request": {
+						"method": "PATCH",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"Cancelled\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/energy-slots/{{energySlotId}}/status",
+							"host": ["{{baseUrl}}"],
+							"path": ["energy-slots", "{{energySlotId}}", "status"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Availability & Dashboard",
+			"item": [
+				{
+					"name": "GET Energy Availability",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/energy-availability",
+							"host": ["{{baseUrl}}"],
+							"path": ["energy-availability"]
+						}
+					}
+				},
+				{
+					"name": "GET Microgrid Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/microgrid-dashboard",
+							"host": ["{{baseUrl}}"],
+							"path": ["microgrid-dashboard"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:5000/api" },
+		{ "key": "microgridId", "value": "68c123456789abcdef123456" },
+		{ "key": "energySlotId", "value": "68c123456789abcdef654321" }
+	]
+}
