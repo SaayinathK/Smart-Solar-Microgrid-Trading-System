@@ -1,150 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Infrastructure Dashboard - Smart Microgrid Platform</title>
-  <link rel="stylesheet" href="../../css/style.css">
-  <link rel="stylesheet" href="../../css/sidebar.css">
-  <link rel="stylesheet" href="../../css/dashboard.css">
+  <link rel="stylesheet" href="../../css/style.css"><link rel="stylesheet" href="../../css/sidebar.css"><link rel="stylesheet" href="../../css/dashboard.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
   <div id="app-layout-wrapper">
-    <div class="dashboard-welcome">
-      <div class="welcome-text">
-        <h1>Microgrid Infrastructure Dashboard</h1>
-        <p>Real-time telemetry, generation capacity, battery storage, and active energy slots.</p>
-      </div>
-    </div>
-
-    <!-- Infrastructure Stats Grid -->
+    <section class="operations-hero">
+      <div class="operations-hero-copy"><div class="eyebrow"><span class="status-dot"></span> Live infrastructure command center</div><h1>Microgrid Infrastructure</h1><p>Monitor readiness, identify resource risks, and act on energy availability from one operational view.</p><div class="hero-actions"><a href="energy-slots.html" class="btn btn-primary">Manage energy slots</a><a href="microgrids.html" class="btn btn-secondary hero-secondary">View microgrids</a></div></div>
+      <div class="readiness-orb" aria-label="Fleet readiness"><span id="readiness-score">--</span><small>fleet readiness</small></div>
+    </section>
+    <section class="dashboard-toolbar"><div><strong>Operational pulse</strong><span id="last-updated">Connecting to live data...</span></div><button id="refresh-dashboard" class="btn btn-secondary btn-sm" type="button">Refresh data</button></section>
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon emerald">⚡</div>
-        <div class="stat-info">
-          <h3>Total Generation Capacity</h3>
-          <div id="dash-total-cap" class="stat-value">0 kWh</div>
-          <div id="dash-avail-cap" class="stat-trend"><span class="status-dot"></span> Available: 0 kWh</div>
-        </div>
-      </div>
-
-      <div class="stat-card cyan-card">
-        <div class="stat-icon cyan">🔋</div>
-        <div class="stat-info">
-          <h3>Current Battery Storage</h3>
-          <div id="dash-battery-lvl" class="stat-value">0 kWh</div>
-          <div id="dash-battery-pct" class="stat-trend" style="color: var(--accent-cyan);">Total: 0 kWh</div>
-        </div>
-      </div>
-
-      <div class="stat-card amber-card">
-        <div class="stat-icon amber">🌐</div>
-        <div class="stat-info">
-          <h3>Registered Microgrids</h3>
-          <div id="dash-total-mg" class="stat-value">0</div>
-          <div id="dash-active-mg" class="stat-trend" style="color: var(--accent-amber);">Active: 0</div>
-        </div>
-      </div>
-
-      <div class="stat-card indigo-card">
-        <div class="stat-icon indigo">📊</div>
-        <div class="stat-info">
-          <h3>Active Energy Slots</h3>
-          <div id="dash-slots-count" class="stat-value">0</div>
-          <div id="dash-avail-energy" class="stat-trend" style="color: var(--accent-indigo);">Total Energy: 0 kWh</div>
-        </div>
-      </div>
+      <div class="stat-card"><div class="stat-icon emerald">+</div><div class="stat-info"><h3>Total Generation Capacity</h3><div id="dash-total-cap" class="stat-value">0 kWh</div><div id="dash-avail-cap" class="stat-trend"><span class="status-dot"></span> Available: 0 kWh</div></div></div>
+      <div class="stat-card cyan-card"><div class="stat-icon cyan">B</div><div class="stat-info"><h3>Current Battery Storage</h3><div id="dash-battery-lvl" class="stat-value">0 kWh</div><div id="dash-battery-pct" class="stat-trend" style="color:var(--accent-cyan)">Capacity: 0 kWh</div></div></div>
+      <div class="stat-card amber-card"><div class="stat-icon amber">N</div><div class="stat-info"><h3>Registered Microgrids</h3><div id="dash-total-mg" class="stat-value">0</div><div id="dash-active-mg" class="stat-trend" style="color:var(--accent-amber)">Active: 0</div></div></div>
+      <div class="stat-card indigo-card"><div class="stat-icon indigo">S</div><div class="stat-info"><h3>Active Energy Slots</h3><div id="dash-slots-count" class="stat-value">0</div><div id="dash-avail-energy" class="stat-trend" style="color:var(--accent-indigo)">Available Energy: 0 kWh</div></div></div>
     </div>
-
-    <!-- Charts Section -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
-      <div class="card">
-        <h3>Operational Status Breakdown</h3>
-        <div style="max-height: 280px; margin-top: 1rem; position: relative;">
-          <canvas id="statusChart"></canvas>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Capacity Distribution</h3>
-        <div style="max-height: 280px; margin-top: 1rem; position: relative;">
-          <canvas id="capacityChart"></canvas>
-        </div>
-      </div>
+    <section class="resource-insights">
+      <div class="insight-card availability-insight"><div class="insight-heading"><span>Capacity headroom</span><strong id="capacity-headroom">0%</strong></div><div class="insight-meter"><span id="capacity-meter"></span></div><p id="capacity-guidance">Loading capacity signals...</p></div>
+      <div class="insight-card battery-insight"><div class="insight-heading"><span>Battery resilience</span><strong id="battery-readiness">0%</strong></div><div class="insight-meter"><span id="battery-meter"></span></div><p id="battery-guidance">Loading storage signals...</p></div>
+      <div class="insight-card slots-insight"><div class="insight-heading"><span>Market-ready energy</span><strong id="slot-energy">0 kWh</strong></div><p id="slot-guidance">Available energy is being calculated...</p><a href="energy-availability.html">Explore available supply &rarr;</a></div>
+    </section>
+    <div class="operations-grid">
+      <section class="card chart-card"><div class="card-title-row"><div><h3>Operational status</h3><p>Fleet condition by microgrid node</p></div></div><div class="chart-canvas"><canvas id="statusChart"></canvas></div></section>
+      <section class="card chart-card"><div class="card-title-row"><div><h3>Capacity distribution</h3><p>Available, reserved, used and total energy</p></div></div><div class="chart-canvas"><canvas id="capacityChart"></canvas></div></section>
+      <section class="card alerts-card"><div class="card-title-row"><div><h3>Attention queue</h3><p>Priority signals derived from live infrastructure data</p></div><span id="alert-count" class="alert-count">0</span></div><div id="operations-alerts" class="operations-alerts"><div class="empty-alert">Checking operational signals...</div></div></section>
     </div>
   </div>
-
-  <script src="../../js/config/api-config.js"></script>
-  <script src="../../js/common/theme.js"></script>
-  <script src="../../js/common/session.js"></script>
-  <script src="../../js/api/api-client.js"></script>
-  <script src="../../js/api/microgrid-api.js"></script>
-  <script src="../../js/common/auth.js"></script>
-  <script src="../../js/common/sidebar.js"></script>
-
+  <script src="../../js/config/api-config.js"></script><script src="../../js/common/theme.js"></script><script src="../../js/common/session.js"></script><script src="../../js/api/api-client.js"></script><script src="../../js/api/microgrid-api.js"></script><script src="../../js/common/auth.js"></script><script src="../../js/common/sidebar.js"></script>
   <script>
-    AuthGuard.requireAuth();
-    renderAppLayout('m1-dashboard', 'Infrastructure Dashboard');
-
-    let statusChartInstance = null;
-    let capacityChartInstance = null;
-
+    AuthGuard.requireAuth(); renderAppLayout('m1-dashboard', 'Infrastructure Dashboard');
+    let statusChartInstance = null, capacityChartInstance = null;
+    const value = (data, key) => Number(data[key]) || 0;
+    const percent = (part, total) => total > 0 ? Math.max(0, Math.min(100, part / total * 100)) : 0;
+    const energy = number => new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(number);
     async function loadDashboard() {
+      const button = document.getElementById('refresh-dashboard'); button.disabled = true; button.textContent = 'Refreshing...';
       try {
-        const response = await MicrogridApi.getDashboardStats();
-        const d = response.data || {};
-
-        document.getElementById('dash-total-cap').textContent = `${d.totalCapacity} kWh`;
-        document.getElementById('dash-avail-cap').textContent = `Available: ${d.totalAvailableCapacity} kWh`;
-        document.getElementById('dash-battery-lvl').textContent = `${d.currentBatteryLevel} kWh`;
-        document.getElementById('dash-battery-pct').textContent = `Capacity: ${d.totalBatteryCapacity} kWh (${d.averageBatteryPercentage.toFixed(1)}%)`;
-        document.getElementById('dash-total-mg').textContent = d.totalMicrogrids;
-        document.getElementById('dash-active-mg').textContent = `Active: ${d.activeMicrogrids} | Inactive: ${d.inactiveMicrogrids}`;
-        document.getElementById('dash-slots-count').textContent = d.activeEnergySlots;
-        document.getElementById('dash-avail-energy').textContent = `Available Energy: ${d.totalAvailableEnergy} kWh`;
-
-        renderCharts(d);
-      } catch (err) {
-        ApiClient.showToast('Failed to load dashboard statistics', 'error');
-      }
+        const response = await MicrogridApi.getDashboardStats(), d = response.data || {};
+        const availablePct = percent(value(d, 'totalAvailableCapacity'), value(d, 'totalCapacity'));
+        const batteryPct = value(d, 'averageBatteryPercentage') || percent(value(d, 'currentBatteryLevel'), value(d, 'totalBatteryCapacity'));
+        document.getElementById('dash-total-cap').textContent = `${energy(value(d, 'totalCapacity'))} kWh`;
+        document.getElementById('dash-avail-cap').innerHTML = `<span class="status-dot"></span> Available: ${energy(value(d, 'totalAvailableCapacity'))} kWh`;
+        document.getElementById('dash-battery-lvl').textContent = `${energy(value(d, 'currentBatteryLevel'))} kWh`;
+        document.getElementById('dash-battery-pct').textContent = `Capacity: ${energy(value(d, 'totalBatteryCapacity'))} kWh (${batteryPct.toFixed(1)}%)`;
+        document.getElementById('dash-total-mg').textContent = value(d, 'totalMicrogrids'); document.getElementById('dash-active-mg').textContent = `Active: ${value(d, 'activeMicrogrids')} | Inactive: ${value(d, 'inactiveMicrogrids')}`;
+        document.getElementById('dash-slots-count').textContent = value(d, 'activeEnergySlots'); document.getElementById('dash-avail-energy').textContent = `Available Energy: ${energy(value(d, 'totalAvailableEnergy'))} kWh`;
+        renderInsights(d, availablePct, batteryPct); renderCharts(d); document.getElementById('last-updated').textContent = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      } catch (err) { ApiClient.showToast('Failed to load dashboard statistics', 'error'); }
+      finally { button.disabled = false; button.textContent = 'Refresh data'; }
     }
-
+    function renderInsights(d, availablePct, batteryPct) {
+      const activePct = percent(value(d, 'activeMicrogrids'), value(d, 'totalMicrogrids'));
+      document.getElementById('readiness-score').textContent = `${Math.round(availablePct * .4 + batteryPct * .35 + activePct * .25)}%`;
+      document.getElementById('capacity-headroom').textContent = `${availablePct.toFixed(0)}%`; document.getElementById('capacity-meter').style.width = `${availablePct}%`;
+      document.getElementById('capacity-guidance').textContent = availablePct < 20 ? 'Low headroom - review reservations or bring additional generation online.' : `${energy(value(d, 'totalAvailableCapacity'))} kWh is ready to allocate across the network.`;
+      document.getElementById('battery-readiness').textContent = `${batteryPct.toFixed(0)}%`; document.getElementById('battery-meter').style.width = `${batteryPct}%`;
+      document.getElementById('battery-guidance').textContent = batteryPct < 30 ? 'Storage is below the resilience threshold. Schedule charging before the next demand peak.' : 'Storage is within the preferred operating range for reliable delivery.';
+      document.getElementById('slot-energy').textContent = `${energy(value(d, 'totalAvailableEnergy'))} kWh`; document.getElementById('slot-guidance').textContent = `${value(d, 'activeEnergySlots')} active slots are currently ready for market discovery.`;
+      const alerts = [];
+      if (value(d, 'offlineMicrogrids')) alerts.push(['critical', `${value(d, 'offlineMicrogrids')} microgrid${value(d, 'offlineMicrogrids') === 1 ? '' : 's'} offline`, 'Inspect connectivity and restore service.']);
+      if (value(d, 'maintenanceMicrogrids')) alerts.push(['warning', `${value(d, 'maintenanceMicrogrids')} node${value(d, 'maintenanceMicrogrids') === 1 ? '' : 's'} in maintenance`, 'Confirm expected completion before new allocations.']);
+      if (batteryPct < 30) alerts.push(['warning', 'Battery resilience is low', `Average battery level is ${batteryPct.toFixed(0)}%.`]); if (availablePct < 20) alerts.push(['warning', 'Limited capacity headroom', `Only ${energy(value(d, 'totalAvailableCapacity'))} kWh is unallocated.`]);
+      if (!alerts.length) alerts.push(['healthy', 'All core signals are healthy', 'Capacity, storage, and node availability are within target ranges.']);
+      document.getElementById('alert-count').textContent = alerts[0][0] === 'healthy' ? 'Clear' : `${alerts.length} open`;
+      document.getElementById('operations-alerts').innerHTML = alerts.map(([level, title, message]) => `<div class="alert-item ${level}"><span class="alert-icon">${level === 'critical' || level === 'warning' ? '!' : '&check;'}</span><div><strong>${title}</strong><p>${message}</p></div></div>`).join('');
+    }
     function renderCharts(d) {
-      // Status Doughnut Chart
-      const statusCtx = document.getElementById('statusChart').getContext('2d');
-      if (statusChartInstance) statusChartInstance.destroy();
-      statusChartInstance = new Chart(statusCtx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Active', 'Inactive', 'Maintenance', 'Offline'],
-          datasets: [{
-            data: [d.activeMicrogrids, d.inactiveMicrogrids, d.maintenanceMicrogrids, d.offlineMicrogrids],
-            backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444']
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-      });
-
-      // Capacity Bar Chart
-      const capCtx = document.getElementById('capacityChart').getContext('2d');
-      if (capacityChartInstance) capacityChartInstance.destroy();
-      capacityChartInstance = new Chart(capCtx, {
-        type: 'bar',
-        data: {
-          labels: ['Available', 'Reserved', 'Used', 'Total'],
-          datasets: [{
-            label: 'Capacity (kWh)',
-            data: [d.totalAvailableCapacity, d.totalReservedCapacity, d.totalUsedCapacity, d.totalCapacity],
-            backgroundColor: ['#10b981', '#f59e0b', '#6366f1', '#06b6d4']
-          }]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-      });
+      const common = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } } } };
+      if (statusChartInstance) statusChartInstance.destroy(); statusChartInstance = new Chart(document.getElementById('statusChart'), { type: 'doughnut', data: { labels: ['Active', 'Inactive', 'Maintenance', 'Offline'], datasets: [{ data: [value(d, 'activeMicrogrids'), value(d, 'inactiveMicrogrids'), value(d, 'maintenanceMicrogrids'), value(d, 'offlineMicrogrids')], backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444'], borderWidth: 0 }] }, options: common });
+      if (capacityChartInstance) capacityChartInstance.destroy(); capacityChartInstance = new Chart(document.getElementById('capacityChart'), { type: 'bar', data: { labels: ['Available', 'Reserved', 'Used', 'Total'], datasets: [{ label: 'Capacity (kWh)', data: [value(d, 'totalAvailableCapacity'), value(d, 'totalReservedCapacity'), value(d, 'totalUsedCapacity'), value(d, 'totalCapacity')], backgroundColor: ['#10b981', '#f59e0b', '#6366f1', '#06b6d4'], borderRadius: 7 }] }, options: { ...common, scales: { y: { beginAtZero: true, grid: { color: 'rgba(148,163,184,.15)' } }, x: { grid: { display: false } } } } });
     }
-
-    document.addEventListener('DOMContentLoaded', loadDashboard);
+    document.addEventListener('DOMContentLoaded', () => { loadDashboard(); document.getElementById('refresh-dashboard').addEventListener('click', loadDashboard); });
   </script>
 </body>
 </html>
