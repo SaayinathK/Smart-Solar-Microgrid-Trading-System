@@ -133,6 +133,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             var microgridDict = await GetMicrogridDictionaryAsync(slots.Select(s => s.MicrogridNodeId));
 
+            // Only show slots for Active microgrids
+            slots = slots.Where(s => 
+            {
+                var mg = microgridDict.GetValueOrDefault(s.MicrogridNodeId);
+                return mg != null && mg.Status == "Active";
+            });
+
             if (!string.IsNullOrWhiteSpace(query.Location))
             {
                 slots = slots.Where(s =>

@@ -38,6 +38,7 @@ builder.Services.AddScoped<IEnergyCapacityService, EnergyCapacityService>();
 builder.Services.AddScoped<IBatteryService, BatteryService>();
 builder.Services.AddScoped<IEnergySlotService, EnergySlotService>();
 builder.Services.AddScoped<IMicrogridDashboardService, MicrogridDashboardService>();
+builder.Services.AddHostedService<EnergySlotCleanupService>();
 builder.Services.AddSingleton<JwtHelper>();
 
 // Configure JWT Authentication

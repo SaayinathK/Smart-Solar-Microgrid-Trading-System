@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -44,11 +46,16 @@ class SearchEnergyFragment : Fragment() {
             viewModel.loadMicrogrids() // We filter active status in viewmodel or adapter if needed
         }
 
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                filterList(s.toString())
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
         viewModel.microgrids.observe(viewLifecycleOwner) { list ->
-            // For Prosumers, only show Active microgrids with available capacity or slots
-            val activeList = list.filter { it.status == "Active" }
-            adapter.updateData(activeList)
-            binding.tvEmpty.visibility = if (activeList.isEmpty()) View.VISIBLE else View.GONE
+            filterList(binding.etSearch.text.toString())
         }
 
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
@@ -61,6 +68,24 @@ class SearchEnergyFragment : Fragment() {
         }
 
         viewModel.loadMicrogrids()
+    }
+
+    private fun filterList(query: String) {
+        val currentList = viewModel.microgrids.value ?: emptyList()
+        val activeList = currentList.filter { it.status == "Active" }
+        
+        val filtered = if (query.isBlank()) {
+            activeList
+        } else {
+            activeList.filter {
+                it.name.contains(query, ignoreCase = true) ||
+                (it.location?.contains(query, ignoreCase = true) == true)
+            }
+        }
+        
+        adapter.updateData(filtered)
+        binding.tvEmpty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
+        binding.tvEmpty.text = if (filtered.isEmpty() && query.isNotBlank()) "No microgrids match your search." else "No active microgrids found in your area."
     }
 
     override fun onDestroyView() {
