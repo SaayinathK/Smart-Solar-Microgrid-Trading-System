@@ -21,8 +21,7 @@ class EnergySlotActivity : AppCompatActivity() {
         binding = ActivityEnergySlotsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        supportActionBar?.title = "Energy Slots Management"
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        binding.toolbar.setNavigationOnClickListener { finish() }
 
         adapter = EnergyAvailabilityAdapter(emptyList())
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
