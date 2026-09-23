@@ -20,9 +20,15 @@ class LoginActivity : AppCompatActivity() {
         // Initialize session manager
         SessionManager.init(this)
 
-        // If already logged in, skip to main
+        // If already logged in, skip to correct main
         if (SessionManager.isLoggedIn()) {
-            navigateToMain()
+            val role = SessionManager.getUserRole()
+            if (role == "Prosumer") {
+                startActivity(Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java))
+            } else if (role == "TransactionVerifier") {
+                startActivity(Intent(this, com.smartmicrogrid.M3.VerifierMainActivity::class.java))
+            }
+            finish()
             return
         }
 
@@ -72,7 +78,21 @@ class LoginActivity : AppCompatActivity() {
         viewModel.loginResult.observe(this) { result ->
             result?.let {
                 if (it.isSuccess) {
-                    navigateToMain()
+                    val role = SessionManager.getUserRole()
+                    when (role) {
+                        "Prosumer" -> {
+                            startActivity(Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java))
+                            finish()
+                        }
+                        "TransactionVerifier" -> {
+                            startActivity(Intent(this, com.smartmicrogrid.M3.VerifierMainActivity::class.java))
+                            finish()
+                        }
+                        else -> {
+                            SessionManager.logout() // Reject web roles
+                            showError("Please use the Web Portal for administration.")
+                        }
+                    }
                 } else {
                     showError(it.exceptionOrNull()?.message ?: "Login failed.")
                 }

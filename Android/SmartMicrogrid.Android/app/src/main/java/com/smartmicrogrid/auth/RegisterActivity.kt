@@ -16,7 +16,7 @@ class RegisterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        supportActionBar?.title = "Create Account"
+        supportActionBar?.title = "Prosumer Registration"
 
         setupListeners()
         observeViewModel()
