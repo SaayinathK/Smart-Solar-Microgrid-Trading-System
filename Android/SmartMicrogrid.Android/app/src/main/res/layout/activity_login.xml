@@ -3,27 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/android:windowBackground">
+    android:background="#0A0E17">
 
-    <!-- Background Image -->
+    <!-- Solar Rooftop Background Image -->
     <ImageView
         android:id="@+id/iv_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:src="@drawable/bg_energy_login"
-        android:alpha="0.4"
+        android:alpha="0.5"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Glass Overlay -->
+    <!-- Dark Gradient Overlay for optimal contrast -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/android:windowBackground"
-        android:alpha="0.75" />
+        android:background="@drawable/bg_gradient_header_overlay" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -34,46 +33,74 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="32dp"
+            android:padding="28dp"
             android:gravity="center">
 
-            <!-- App Icon / Brand -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⚡"
-                android:textSize="56sp"
-                android:layout_marginBottom="8dp" />
+            <!-- Solar Brand Badge Icon -->
+            <FrameLayout
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:background="@drawable/bg_pill_solar"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⚡"
+                    android:textSize="36sp"
+                    android:layout_gravity="center" />
+            </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Smart Microgrid"
-                android:textSize="28sp"
+                android:textSize="30sp"
                 android:textStyle="bold"
-                android:textColor="?attr/colorPrimary"
+                android:textColor="#FFFFFF"
                 android:layout_marginBottom="4dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sign in to your account"
+                android:text="Solar Energy Trading &amp; Monitoring"
                 android:textSize="14sp"
-                android:textColor="?attr/android:textColorSecondary"
-                android:layout_marginBottom="40dp" />
+                android:textColor="#94A3B8"
+                android:layout_marginBottom="32dp" />
 
             <!-- Glassy Form Card -->
             <com.google.android.material.card.MaterialCardView
                 style="?attr/materialCardViewStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="?attr/colorSurface">
+                app:cardBackgroundColor="#CC111827"
+                app:strokeColor="#332563EB"
+                app:strokeWidth="1dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="12dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="24dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Sign In"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Access your microgrid prosumer account"
+                        android:textSize="13sp"
+                        android:textColor="#94A3B8"
+                        android:layout_marginBottom="20dp" />
 
                     <!-- Error Message -->
                     <TextView
@@ -92,8 +119,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Email Address"
-                        android:textColor="?attr/android:textColorPrimary"
-                        android:textSize="14sp"
+                        android:textColor="#CBD5E1"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
                     <EditText
@@ -101,13 +129,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="52dp"
                         android:background="@drawable/bg_glass_input"
-                        android:textColor="?attr/android:textColorPrimary"
-                        android:textColorHint="?attr/android:textColorSecondary"
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#64748B"
                         android:hint="name@domain.com"
                         android:inputType="textEmailAddress"
                         android:padding="14dp"
                         android:textSize="15sp"
-                        android:layout_marginBottom="20dp"
+                        android:layout_marginBottom="18dp"
                         android:autofillHints="emailAddress" />
 
                     <!-- Password Field -->
@@ -115,8 +143,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Password"
-                        android:textColor="?attr/android:textColorPrimary"
-                        android:textSize="14sp"
+                        android:textColor="#CBD5E1"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
                     <EditText
@@ -124,24 +153,25 @@
                         android:layout_width="match_parent"
                         android:layout_height="52dp"
                         android:background="@drawable/bg_glass_input"
-                        android:textColor="?attr/android:textColorPrimary"
-                        android:textColorHint="?attr/android:textColorSecondary"
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#64748B"
                         android:hint="••••••••"
                         android:inputType="textPassword"
                         android:padding="14dp"
                         android:textSize="15sp"
-                        android:layout_marginBottom="28dp"
+                        android:layout_marginBottom="24dp"
                         android:autofillHints="password" />
 
                     <!-- Sign In Button -->
                     <Button
                         android:id="@+id/btn_login"
                         android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:text="Sign In"
+                        android:layout_height="54dp"
+                        android:text="Sign In to Microgrid"
                         android:textAllCaps="false"
                         android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:cornerRadius="14dp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -165,15 +195,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Don't have an account? "
-                    android:textColor="?attr/android:textColorSecondary"
+                    android:textColor="#94A3B8"
                     android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/tv_register_link"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Register"
-                    android:textColor="?attr/colorPrimary"
+                    android:text="Register Prosumer"
+                    android:textColor="#3B82F6"
                     android:textSize="14sp"
                     android:textStyle="bold" />
             </LinearLayout>
