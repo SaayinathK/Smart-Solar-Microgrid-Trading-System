@@ -31,7 +31,7 @@ class VerifierMainActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> loadFragment(com.smartmicrogrid.ui.HomeFragment())
-                R.id.nav_scan -> loadFragment(PlaceholderFragment.newInstance("Scan QR Code"))
+                R.id.nav_scan -> loadFragment(com.smartmicrogrid.M1.microgrid.VerifierMicrogridFragment())
                 R.id.nav_pending -> loadFragment(PlaceholderFragment.newInstance("Pending Tasks"))
                 R.id.nav_profile -> loadFragment(com.smartmicrogrid.ui.ProfileFragment())
                 else -> false
