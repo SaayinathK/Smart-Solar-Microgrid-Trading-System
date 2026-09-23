@@ -19,7 +19,11 @@ namespace SmartMicrogrid.API.Controllers
             _transactionService = transactionService;
         }
 
-        // GET /api/transactions
+
+        // ============================================================
+        // GET: /api/transactions
+        // Get transactions based on the logged-in user's role
+        // ============================================================
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -27,8 +31,9 @@ namespace SmartMicrogrid.API.Controllers
             var role = GetCurrentRole();
 
             var transactions =
-                await _transactionService
-                    .GetAllAsync(userId, role);
+                await _transactionService.GetAllAsync(
+                    userId,
+                    role);
 
             return Ok(new
             {
@@ -38,20 +43,33 @@ namespace SmartMicrogrid.API.Controllers
             });
         }
 
-        // GET /api/transactions/{id}
+
+        // ============================================================
+        // GET: /api/transactions/{transactionId}
+        // Get a single transaction
+        // ============================================================
         [HttpGet("{transactionId}")]
         public async Task<IActionResult> GetById(
             string transactionId)
         {
+            if (string.IsNullOrWhiteSpace(transactionId))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Transaction ID is required.",
+                    data = (object?)null
+                });
+            }
+
             var userId = GetCurrentUserId();
             var role = GetCurrentRole();
 
             var transaction =
-                await _transactionService
-                    .GetByIdAsync(
-                        transactionId,
-                        userId,
-                        role);
+                await _transactionService.GetByIdAsync(
+                    transactionId,
+                    userId,
+                    role);
 
             if (transaction == null)
             {
@@ -71,19 +89,43 @@ namespace SmartMicrogrid.API.Controllers
             });
         }
 
-        // POST /api/transactions
+
+        // ============================================================
+        // POST: /api/transactions
+        // Create a transaction from an approved reservation
+        // ============================================================
         [HttpPost]
         [Authorize(Roles = "TransactionVerifier")]
         public async Task<IActionResult> Create(
             [FromBody] CreateTransactionRequest request)
         {
+            if (request == null ||
+                string.IsNullOrWhiteSpace(request.ReservationId))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Reservation ID is required.",
+                    data = (object?)null
+                });
+            }
+
             var userId = GetCurrentUserId();
 
             var transaction =
-                await _transactionService
-                    .CreateAsync(
-                        request,
-                        userId);
+                await _transactionService.CreateAsync(
+                    request,
+                    userId);
+
+            if (transaction == null)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Unable to create transaction.",
+                    data = (object?)null
+                });
+            }
 
             return Ok(new
             {
@@ -93,26 +135,39 @@ namespace SmartMicrogrid.API.Controllers
             });
         }
 
-        // POST /api/transactions/{id}/generate-qr
+
+        // ============================================================
+        // POST: /api/transactions/{transactionId}/generate-qr
+        // Generate QR data for a transaction
+        // ============================================================
         [HttpPost("{transactionId}/generate-qr")]
         [Authorize(Roles = "TransactionVerifier")]
         public async Task<IActionResult> GenerateQr(
             string transactionId)
         {
+            if (string.IsNullOrWhiteSpace(transactionId))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Transaction ID is required.",
+                    data = (object?)null
+                });
+            }
+
             var userId = GetCurrentUserId();
 
             var result =
-                await _transactionService
-                    .GenerateQrAsync(
-                        transactionId,
-                        userId);
+                await _transactionService.GenerateQrAsync(
+                    transactionId,
+                    userId);
 
             if (result == null)
             {
                 return NotFound(new
                 {
                     success = false,
-                    message = "Transaction not found.",
+                    message = "Transaction not found or QR cannot be generated.",
                     data = (object?)null
                 });
             }
@@ -125,20 +180,49 @@ namespace SmartMicrogrid.API.Controllers
             });
         }
 
-        // POST /api/transactions/{id}/verify
+
+        // ============================================================
+        // POST: /api/transactions/{transactionId}/verify
+        // Verify QR and reservation information
+        // ============================================================
         [HttpPost("{transactionId}/verify")]
         [Authorize(Roles = "TransactionVerifier")]
         public async Task<IActionResult> Verify(
             string transactionId,
             [FromBody] VerifyTransactionRequest request)
         {
+            if (string.IsNullOrWhiteSpace(transactionId))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Transaction ID is required.",
+                    data = (object?)null
+                });
+            }
+
+            if (request == null ||
+                string.IsNullOrWhiteSpace(request.QrCodeData))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "QR code data is required.",
+                    data = (object?)null
+                });
+            }
+
             var userId = GetCurrentUserId();
 
+            // --------------------------------------------------------
+            // The transaction ID from the URL is now passed directly
+            // to the service together with the scanned QR data.
+            // --------------------------------------------------------
             var transaction =
-                await _transactionService
-                    .VerifyAsync(
-                        request,
-                        userId);
+                await _transactionService.VerifyAsync(
+                    transactionId,
+                    request,
+                    userId);
 
             if (transaction == null)
             {
@@ -158,21 +242,45 @@ namespace SmartMicrogrid.API.Controllers
             });
         }
 
-        // POST /api/transactions/{id}/complete
+
+        // ============================================================
+        // POST: /api/transactions/{transactionId}/complete
+        // Complete the energy transaction
+        // ============================================================
         [HttpPost("{transactionId}/complete")]
         [Authorize(Roles = "TransactionVerifier")]
         public async Task<IActionResult> Complete(
             string transactionId,
             [FromBody] CompleteTransactionRequest request)
         {
+            if (string.IsNullOrWhiteSpace(transactionId))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Transaction ID is required.",
+                    data = (object?)null
+                });
+            }
+
+            if (request == null ||
+                string.IsNullOrWhiteSpace(request.Confirmation))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Confirmation is required.",
+                    data = (object?)null
+                });
+            }
+
             var userId = GetCurrentUserId();
 
             var transaction =
-                await _transactionService
-                    .CompleteAsync(
-                        transactionId,
-                        request,
-                        userId);
+                await _transactionService.CompleteAsync(
+                    transactionId,
+                    request,
+                    userId);
 
             if (transaction == null)
             {
@@ -192,21 +300,44 @@ namespace SmartMicrogrid.API.Controllers
             });
         }
 
-        // PATCH /api/transactions/{id}/status
+
+        // ============================================================
+        // PATCH: /api/transactions/{transactionId}/status
+        // Update transaction status
+        // ============================================================
         [HttpPatch("{transactionId}/status")]
         [Authorize(Roles = "TransactionVerifier")]
         public async Task<IActionResult> UpdateStatus(
             string transactionId,
             [FromQuery] string status)
         {
+            if (string.IsNullOrWhiteSpace(transactionId))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Transaction ID is required.",
+                    data = (object?)null
+                });
+            }
+
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Transaction status is required.",
+                    data = (object?)null
+                });
+            }
+
             var userId = GetCurrentUserId();
 
             var transaction =
-                await _transactionService
-                    .UpdateStatusAsync(
-                        transactionId,
-                        status,
-                        userId);
+                await _transactionService.UpdateStatusAsync(
+                    transactionId,
+                    status,
+                    userId);
 
             if (transaction == null)
             {
@@ -226,6 +357,10 @@ namespace SmartMicrogrid.API.Controllers
             });
         }
 
+
+        // ============================================================
+        // GET CURRENT USER ID FROM JWT
+        // ============================================================
         private string GetCurrentUserId()
         {
             return User.FindFirstValue(
@@ -235,6 +370,10 @@ namespace SmartMicrogrid.API.Controllers
                        "User ID was not found in the token.");
         }
 
+
+        // ============================================================
+        // GET CURRENT USER ROLE FROM JWT
+        // ============================================================
         private string GetCurrentRole()
         {
             return User.FindFirstValue(
