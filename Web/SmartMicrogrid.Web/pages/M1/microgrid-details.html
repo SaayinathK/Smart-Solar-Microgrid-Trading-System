@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microgrid Details - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+
+  <div id="app-layout-wrapper">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h2 id="mg-title">Microgrid Details</h2>
+        <p id="mg-subtitle" style="color: var(--text-secondary); margin-top: 0.25rem;">Loading node specifications...</p>
+      </div>
+      <div>
+        <a href="microgrids.html" class="btn btn-secondary">← Back to Microgrids</a>
+      </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="stats-grid" style="margin-bottom: 1.5rem;">
+      <div class="stat-card">
+        <div class="stat-icon emerald">⚡</div>
+        <div class="stat-info">
+          <h3>Total Capacity</h3>
+          <div id="stat-capacity" class="stat-value">0 kWh</div>
+          <div class="stat-trend" id="stat-available">Available: 0 kWh</div>
+        </div>
+      </div>
+
+      <div class="stat-card cyan-card">
+        <div class="stat-icon cyan">🔋</div>
+        <div class="stat-info">
+          <h3>Battery Storage</h3>
+          <div id="stat-battery" class="stat-value">0 kWh</div>
+          <div class="stat-trend" id="stat-battery-pct">0% Charge</div>
+        </div>
+      </div>
+
+      <div class="stat-card amber-card">
+        <div class="stat-icon amber">📍</div>
+        <div class="stat-info">
+          <h3>Location & GPS</h3>
+          <div id="stat-location" class="stat-value" style="font-size: 1.1rem;">Colombo</div>
+          <div class="stat-trend" id="stat-gps">Lat: 0.0, Lng: 0.0</div>
+        </div>
+      </div>
+
+      <div class="stat-card indigo-card">
+        <div class="stat-icon indigo">⚙️</div>
+        <div class="stat-info">
+          <h3>Status</h3>
+          <div id="stat-status" class="stat-value" style="font-size: 1.2rem;">Active</div>
+          <div class="stat-trend" id="stat-updated">Updated: Just now</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details Breakdown Card -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <h3>Capacity & Storage Breakdown</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div style="background: var(--bg-tertiary); padding: 1rem; borderRadius: 8px;">
+          <div style="color: var(--text-secondary); font-size: 0.85rem;">Available Capacity</div>
+          <div id="val-available" style="font-size: 1.5rem; font-weight: 700; color: var(--accent-primary);">0 kWh</div>
+        </div>
+        <div style="background: var(--bg-tertiary); padding: 1rem; borderRadius: 8px;">
+          <div style="color: var(--text-secondary); font-size: 0.85rem;">Reserved Capacity</div>
+          <div id="val-reserved" style="font-size: 1.5rem; font-weight: 700; color: var(--accent-amber);">0 kWh</div>
+        </div>
+        <div style="background: var(--bg-tertiary); padding: 1rem; borderRadius: 8px;">
+          <div style="color: var(--text-secondary); font-size: 0.85rem;">Used Capacity</div>
+          <div id="val-used" style="font-size: 1.5rem; font-weight: 700; color: var(--accent-indigo);">0 kWh</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/microgrid-api.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+
+  <script>
+    AuthGuard.requireAuth();
+    renderAppLayout('microgrids', 'Microgrid Node Details');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const microgridId = urlParams.get('id');
+
+    async function loadDetails() {
+      if (!microgridId) return;
+
+      try {
+        const res = await MicrogridApi.getMicrogridById(microgridId);
+        const m = res.data;
+
+        document.getElementById('mg-title').textContent = m.name;
+        document.getElementById('mg-subtitle').textContent = `Location: ${m.location} • ID: ${m.id}`;
+        document.getElementById('stat-capacity').textContent = `${m.capacity} kWh`;
+        document.getElementById('stat-available').textContent = `Available: ${m.availableCapacity} kWh`;
+        document.getElementById('stat-battery').textContent = `${m.currentBatteryLevel} / ${m.batteryCapacity} kWh`;
+        document.getElementById('stat-battery-pct').textContent = `${m.batteryPercentage.toFixed(1)}% Charge Level`;
+        document.getElementById('stat-location').textContent = m.location;
+        document.getElementById('stat-gps').textContent = `Lat: ${m.latitude.toFixed(4)}, Lng: ${m.longitude.toFixed(4)}`;
+        document.getElementById('stat-status').textContent = m.status;
+        document.getElementById('stat-updated').textContent = `Updated: ${new Date(m.updatedAt).toLocaleTimeString()}`;
+
+        document.getElementById('val-available').textContent = `${m.availableCapacity} kWh`;
+        document.getElementById('val-reserved').textContent = `${m.reservedCapacity} kWh`;
+        document.getElementById('val-used').textContent = `${m.usedCapacity} kWh`;
+      } catch (err) {
+        ApiClient.showToast('Failed to load microgrid details', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDetails);
+  </script>
+</body>
+</html>

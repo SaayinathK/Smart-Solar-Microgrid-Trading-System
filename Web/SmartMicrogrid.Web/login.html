@@ -77,7 +77,11 @@
           SessionManager.setSession(response.data.token, response.data.user);
           ApiClient.showToast('Login successful! Redirecting...', 'success');
           setTimeout(() => {
-            window.location.href = 'dashboard.html';
+            if (response.data.user.role === 'Prosumer' || response.data.user.role === 'TransactionVerifier') {
+              window.location.href = 'mobile-redirect.html';
+            } else {
+              window.location.href = 'dashboard.html';
+            }
           }, 800);
         } else {
           showError(response.message || 'Login failed.');

@@ -1,29 +1,75 @@
-# Smart Microgrid Database Setup (MongoDB)
+# Database - Smart Microgrid MongoDB Setup
 
-## Primary Server Database
+## Overview
+The `Database/` folder documents the primary server-side database engine for the **Smart Microgrid Energy Management & Trading System**.
+
 - **Database Engine**: MongoDB Community Server
-- **Recommended Tools**: MongoDB Compass / `mongosh`
+- **Recommended GUI**: MongoDB Compass
 - **Default Connection String**: `mongodb://localhost:27017`
 - **Database Name**: `SmartMicrogridDB`
 
-## Main Collections Overview
+---
 
-### 1. `users` (User Management - Implemented)
-Stores user credentials, profiles, roles, and activation status.
-- **Indexes**:
-  - `Email` (Unique, Ascending)
+## 1. MongoDB Collections & Schemas
 
-### 2. `microgrid_nodes` / `capacity` (Member 1 - Future)
-Stores solar node data, battery storage capacities, availability slots.
+### A. `users` Collection (Implemented)
+Stores user credentials, profile attributes, role assignments, and account activation states.
 
-### 3. `reservations` (Member 2 - Future)
-Stores prosumer energy reservations and slot locks.
+```json
+{
+  "_id": { "$oid": "66ee1234567890abcdef1234" },
+  "firstName": "System",
+  "lastName": "Administrator",
+  "email": "admin@microgrid.com",
+  "phoneNumber": "+10000000001",
+  "passwordHash": "$2a$11$...",
+  "role": "Admin",
+  "isActive": true,
+  "createdAt": { "$date": "2026-09-21T16:00:00.000Z" },
+  "updatedAt": { "$date": "2026-09-21T16:00:00.000Z" }
+}
+```
 
-### 4. `transactions` (Member 3 - Future)
-Stores energy transfer transactions, verification statuses, and QR validation tokens.
+**Indexes**:
+- `Email` (Unique, Ascending) - Configured automatically by `MongoDbContext`.
 
-### 5. `audit_logs` / `system_reports` (Member 4 - Future)
-Stores system activity logs and operational analytics snapshots.
+---
 
-## Seed Admin Credentials
-To initialize an initial Admin user via MongoDB Compass or shell, run the API endpoint `/api/auth/register` or create a seed user using the backend user creation service.
+### B. `microgrid_nodes` & `capacity` Collections (Member 1 - Future)
+Stores solar node data, solar panel capacities, battery storage levels, and generated energy slots.
+
+---
+
+### C. `reservations` Collection (Member 2 - Future)
+Stores energy slot browsing locks, prosumer reservations, and reservation modification logs.
+
+---
+
+### D. `transactions` Collection (Member 3 - Future)
+Stores energy transfer transaction orders, QR code verification hashes, and completion confirmations.
+
+---
+
+### E. `audit_logs` Collection (Member 4 - Future)
+Stores system audit records, administrative activity logs, and performance metric snapshots.
+
+---
+
+## 2. Automatic Seed Users
+
+When the C# Web API starts up, `DbSeeder` checks if the `users` collection is empty. If empty, it populates the following test accounts:
+
+| System Role | Email | Password | Role Enum |
+| :--- | :--- | :--- | :--- |
+| **System Administrator** | `admin@microgrid.com` | `Admin123!` | `Admin` |
+| **Microgrid Operator** | `operator@microgrid.com` | `Operator123!` | `MicrogridOperator` |
+| **Prosumer** | `prosumer@microgrid.com` | `Prosumer123!` | `Prosumer` |
+| **Transaction Verifier** | `verifier@microgrid.com` | `Verifier123!` | `TransactionVerifier` |
+
+---
+
+## 3. Viewing Database in MongoDB Compass
+
+1. Open **MongoDB Compass**.
+2. Connect to `mongodb://localhost:27017`.
+3. In the left panel, click on **`SmartMicrogridDB`** → **`users`**.

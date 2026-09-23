@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Battery Storage Management - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/forms.css">
+</head>
+<body>
+
+  <div id="app-layout-wrapper">
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <h2>Battery Storage Monitoring & Management</h2>
+      <p style="color: var(--text-secondary); margin-top: 0.25rem;">
+        Monitor real-time stored energy, battery capacities, percentage levels, and update battery charge status.
+      </p>
+    </div>
+
+    <!-- Battery Cards Grid -->
+    <div id="battery-cards-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+      <div class="card" style="text-align: center; padding: 2rem;">Loading battery status...</div>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/microgrid-api.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+
+  <script>
+    AuthGuard.requireAuth();
+    renderAppLayout('battery', 'Battery Storage Management');
+
+    const user = SessionManager.getUser();
+    const canUpdate = user && (user.role === 'MicrogridOperator' || user.role === 'Admin');
+
+    async function loadBatteries() {
+      const container = document.getElementById('battery-cards-container');
+
+      try {
+        const response = await MicrogridApi.getMicrogrids();
+        const list = response.data || [];
+
+        if (list.length === 0) {
+          container.innerHTML = `<div class="card" style="text-align: center; padding: 2rem;">No microgrid battery systems registered.</div>`;
+          return;
+        }
+
+        container.innerHTML = list.map(m => {
+          const pct = m.batteryPercentage.toFixed(1);
+          let pctColor = 'var(--accent-primary)';
+          if (pct < 20) pctColor = 'var(--accent-danger)';
+          else if (pct > 90) pctColor = 'var(--accent-cyan)';
+
+          return `
+            <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                  <div>
+                    <h3 style="margin: 0;">${m.name}</h3>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">${m.location}</span>
+                  </div>
+                  <span class="status-badge status-active">🔋 Status</span>
+                </div>
+
+                <div style="text-align: center; margin: 1.5rem 0;">
+                  <div style="font-size: 2.5rem; font-weight: 800; color: ${pctColor};">${pct}%</div>
+                  <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                    ${m.currentBatteryLevel} kWh / ${m.batteryCapacity} kWh
+                  </div>
+                </div>
+
+                <!-- Battery Bar -->
+                <div style="height: 12px; width: 100%; background: var(--bg-tertiary); border-radius: 6px; overflow: hidden; margin-bottom: 1rem;">
+                  <div style="width: ${pct}%; height: 100%; background: ${pctColor}; transition: width 0.3s ease;"></div>
+                </div>
+              </div>
+
+              ${canUpdate ? `
+                <div style="margin-top: 1rem; border-top: 1fr solid var(--bg-tertiary); padding-top: 1rem;">
+                  <button onclick="showUpdateModal('${m.id}', ${m.batteryCapacity}, ${m.currentBatteryLevel})" class="btn btn-secondary btn-sm" style="width: 100%;">
+                    Update Battery Charge Level
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        container.innerHTML = `<div class="card" style="text-align: center; color: var(--accent-danger); padding: 2rem;">Failed to load battery data.</div>`;
+      }
+    }
+
+    async function showUpdateModal(id, currentCap, currentLvl) {
+      const newLvlStr = prompt(`Enter new battery charge level in kWh (Max capacity: ${currentCap} kWh):`, currentLvl);
+      if (newLvlStr === null) return;
+
+      const newLvl = parseFloat(newLvlStr);
+      if (isNaN(newLvl) || newLvl < 0 || newLvl > currentCap) {
+        alert(`Invalid level. Must be between 0 and ${currentCap} kWh.`);
+        return;
+      }
+
+      try {
+        await MicrogridApi.updateBattery(id, { batteryCapacity: currentCap, currentBatteryLevel: newLvl });
+        ApiClient.showToast('Battery level updated successfully!', 'success');
+        loadBatteries();
+      } catch (err) {
+        ApiClient.showToast(err.message || 'Battery update failed', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadBatteries);
+  </script>
+</body>
+</html>

@@ -85,8 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (user.role === 'TransactionVerifier') roleClass = 'role-verifier';
 
       const statusBadge = user.isActive
-        ? '<span class="status-badge status-active">● Active</span>'
-        : '<span class="status-badge status-inactive">○ Inactive</span>';
+        ? '<span class="status-badge status-active"><span class="status-dot"></span> Active</span>'
+        : '<span class="status-badge status-inactive">Inactive</span>';
 
       const createdDate = new Date(user.createdAt).toLocaleDateString(undefined, {
         year: 'numeric',

@@ -42,6 +42,13 @@ builder.Services.AddHttpClient<IReservationApiClient, ReservationApiClient>(clie
     client.BaseAddress = new Uri("http://localhost:5000/");
 });
 
+builder.Services.AddScoped<IMicrogridRepository, MicrogridRepository>();
+builder.Services.AddScoped<IEnergySlotRepository, EnergySlotRepository>();
+builder.Services.AddScoped<IMicrogridService, MicrogridService>();
+builder.Services.AddScoped<IEnergyCapacityService, EnergyCapacityService>();
+builder.Services.AddScoped<IBatteryService, BatteryService>();
+builder.Services.AddScoped<IEnergySlotService, EnergySlotService>();
+builder.Services.AddScoped<IMicrogridDashboardService, MicrogridDashboardService>();
 builder.Services.AddSingleton<JwtHelper>();
 
 // Configure JWT Authentication
