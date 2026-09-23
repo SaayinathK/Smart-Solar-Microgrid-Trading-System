@@ -40,8 +40,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, EnergySlotActivity::class.java))
         }
 
-        binding.btnProfile.setOnClickListener {
-            startActivity(Intent(this, com.smartmicrogrid.auth.ProfileActivity::class.java))
-        }
+
     }
 }
