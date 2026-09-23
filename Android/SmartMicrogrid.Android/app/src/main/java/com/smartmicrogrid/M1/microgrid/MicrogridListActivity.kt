@@ -20,8 +20,7 @@ class MicrogridListActivity : AppCompatActivity() {
         binding = ActivityMicrogridListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        supportActionBar?.title = "Microgrid Nodes"
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        binding.toolbar.setNavigationOnClickListener { finish() }
 
         adapter = MicrogridAdapter(emptyList()) { microgrid ->
             val intent = Intent(this, MicrogridDetailsActivity::class.java).apply {
