@@ -7,6 +7,11 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 2rem;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(120deg, var(--bg-card), color-mix(in srgb, var(--accent-light) 58%, var(--bg-card)));
+  box-shadow: var(--shadow-sm);
   flex-wrap: wrap;
   gap: 1rem;
 }
@@ -81,7 +86,7 @@
 }
 
 .data-table th {
-  background: var(--bg-primary);
+  background: color-mix(in srgb, var(--bg-primary) 90%, var(--accent-light));
   color: var(--text-secondary);
   font-weight: 700;
   text-transform: uppercase;
@@ -107,7 +112,7 @@
 }
 
 .data-table tbody tr:hover {
-  background: var(--bg-card-hover);
+  background: color-mix(in srgb, var(--bg-card-hover) 90%, var(--accent-light));
 }
 
 .status-badge {
