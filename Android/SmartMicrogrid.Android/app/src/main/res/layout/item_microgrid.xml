@@ -1,101 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    android:background="@drawable/bg_glass_input"
-    android:padding="16dp">
-
-    <TextView
-        android:id="@+id/tv_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/tv_status"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_glass_input"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="4dp"
-        android:textColor="@color/neon_cyan"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_location"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_name" />
+    app:cardBackgroundColor="#CC111827"
+    app:strokeColor="#332563EB"
+    app:strokeWidth="1dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp">
 
     <LinearLayout
-        android:id="@+id/layout_stats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:baselineAligned="false"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/tv_location">
+        android:orientation="vertical">
+
+        <!-- Solar Farm Banner Image -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="120dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/img_solar_farm" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_gradient_header_overlay" />
+
+            <TextView
+                android:id="@+id/tv_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="12dp"
+                android:background="@drawable/bg_pill_emerald"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="5dp"
+                android:textColor="#10B981"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="12dp"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </FrameLayout>
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/tv_location"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Available Capacity"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="12sp" />
+                android:textColor="#94A3B8"
+                android:textSize="13sp" />
 
-            <TextView
-                android:id="@+id/tv_capacity"
-                android:layout_width="wrap_content"
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="12dp"
+                android:background="#1AFFFFFF" />
+
+            <LinearLayout
+                android:id="@+id/layout_stats"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+                android:baselineAligned="false"
+                android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Battery Level"
-                android:textColor="?android:attr/textColorSecondary"
-                android:textSize="12sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Available Capacity"
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp" />
 
-            <TextView
-                android:id="@+id/tv_battery"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/neon_green"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tv_capacity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="#F8FAFC"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Battery Level"
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_battery"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="#10B981"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
