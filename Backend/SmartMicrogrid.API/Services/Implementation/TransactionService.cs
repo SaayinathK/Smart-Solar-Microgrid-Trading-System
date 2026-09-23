@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+
 using SmartMicrogrid.API.DTOs.Transactions;
 using SmartMicrogrid.API.Models.Transactions;
 using SmartMicrogrid.API.Repositories.Interfaces;
@@ -19,19 +20,33 @@ namespace SmartMicrogrid.API.Services.Implementation
             _reservationApiClient = reservationApiClient;
         }
 
+
+        // ============================================================
+        // CREATE TRANSACTION
+        // ============================================================
         public async Task<TransactionResponse> CreateAsync(
             CreateTransactionRequest request,
             string currentUserId)
         {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
             if (string.IsNullOrWhiteSpace(request.ReservationId))
             {
                 throw new ArgumentException(
                     "Reservation ID is required.");
             }
 
+
+            // --------------------------------------------------------
+            // Get reservation from M2
+            // --------------------------------------------------------
             var reservation =
                 await _reservationApiClient
-                    .GetReservationAsync(request.ReservationId);
+                    .GetReservationAsync(
+                        request.ReservationId);
 
             if (reservation == null)
             {
@@ -39,6 +54,10 @@ namespace SmartMicrogrid.API.Services.Implementation
                     "Reservation was not found.");
             }
 
+
+            // --------------------------------------------------------
+            // Only approved reservations can create transactions
+            // --------------------------------------------------------
             if (!string.Equals(
                     reservation.Status,
                     "Approved",
@@ -48,6 +67,10 @@ namespace SmartMicrogrid.API.Services.Implementation
                     "Only approved reservations can initiate transaction processing.");
             }
 
+
+            // --------------------------------------------------------
+            // Prevent duplicate transaction for same reservation
+            // --------------------------------------------------------
             var existing =
                 await _transactionRepository
                     .GetByReservationIdAsync(
@@ -58,6 +81,10 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return Map(existing);
             }
 
+
+            // --------------------------------------------------------
+            // Create new transaction
+            // --------------------------------------------------------
             var transaction = new Transaction
             {
                 ReservationId = reservation.Id,
@@ -65,10 +92,20 @@ namespace SmartMicrogrid.API.Services.Implementation
                 MicrogridNodeId = reservation.MicrogridNodeId,
                 EnergySlotId = reservation.EnergySlotId,
                 EnergyAmount = reservation.EnergyAmount,
+
+                TransactionCode = string.Empty,
+                QrCodeData = string.Empty,
+
+                VerifiedBy = null,
+                VerificationTime = null,
+                EnergyTransferTime = null,
+
                 Status = "Pending",
+
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
+
 
             transaction =
                 await _transactionRepository
@@ -77,45 +114,106 @@ namespace SmartMicrogrid.API.Services.Implementation
             return Map(transaction);
         }
 
+
+        // ============================================================
+        // GET ALL TRANSACTIONS
+        // ============================================================
         public async Task<List<TransactionResponse>> GetAllAsync(
             string currentUserId,
             string currentRole)
         {
             List<Transaction> transactions;
 
+
+            // --------------------------------------------------------
+            // PROSUMER
+            // Only own transactions
+            // --------------------------------------------------------
             if (currentRole.Equals(
                     "Prosumer",
                     StringComparison.OrdinalIgnoreCase))
             {
                 transactions =
                     await _transactionRepository
-                        .GetByProsumerIdAsync(currentUserId);
+                        .GetByProsumerIdAsync(
+                            currentUserId);
             }
+
+
+            // --------------------------------------------------------
+            // TRANSACTION VERIFIER
+            // Verifier needs access to transactions that require
+            // operational verification, including pending ones.
+            // --------------------------------------------------------
             else if (currentRole.Equals(
                          "TransactionVerifier",
                          StringComparison.OrdinalIgnoreCase))
             {
                 transactions =
                     await _transactionRepository
-                        .GetByVerifierIdAsync(currentUserId);
+                        .GetAllAsync();
             }
-            else
+
+
+            // --------------------------------------------------------
+            // MICROGRID OPERATOR
+            // Relevant operational transaction information
+            // --------------------------------------------------------
+            else if (currentRole.Equals(
+                         "MicrogridOperator",
+                         StringComparison.OrdinalIgnoreCase))
             {
                 transactions =
                     await _transactionRepository
                         .GetAllAsync();
             }
 
+
+            // --------------------------------------------------------
+            // SYSTEM ADMINISTRATOR
+            // System-level monitoring
+            // --------------------------------------------------------
+            else if (currentRole.Equals(
+                         "SystemAdministrator",
+                         StringComparison.OrdinalIgnoreCase))
+            {
+                transactions =
+                    await _transactionRepository
+                        .GetAllAsync();
+            }
+
+
+            // --------------------------------------------------------
+            // Unknown role
+            // --------------------------------------------------------
+            else
+            {
+                throw new UnauthorizedAccessException(
+                    "You are not authorized to view transactions.");
+            }
+
+
             return transactions
                 .Select(Map)
                 .ToList();
         }
 
+
+        // ============================================================
+        // GET TRANSACTION BY ID
+        // ============================================================
         public async Task<TransactionResponse?> GetByIdAsync(
             string transactionId,
             string currentUserId,
             string currentRole)
         {
+            if (string.IsNullOrWhiteSpace(transactionId))
+            {
+                throw new ArgumentException(
+                    "Transaction ID is required.");
+            }
+
+
             var transaction =
                 await _transactionRepository
                     .GetByIdAsync(transactionId);
@@ -125,28 +223,72 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return null;
             }
 
-            var allowed =
-                currentRole.Equals(
-                    "Admin",
-                    StringComparison.OrdinalIgnoreCase)
-                || currentRole.Equals(
-                    "TransactionVerifier",
-                    StringComparison.OrdinalIgnoreCase)
-                || transaction.ProsumerId == currentUserId;
 
-            if (!allowed)
+            // --------------------------------------------------------
+            // Authorization
+            // --------------------------------------------------------
+            var isProsumer =
+                currentRole.Equals(
+                    "Prosumer",
+                    StringComparison.OrdinalIgnoreCase);
+
+            var isVerifier =
+                currentRole.Equals(
+                    "TransactionVerifier",
+                    StringComparison.OrdinalIgnoreCase);
+
+            var isOperator =
+                currentRole.Equals(
+                    "MicrogridOperator",
+                    StringComparison.OrdinalIgnoreCase);
+
+            var isAdministrator =
+                currentRole.Equals(
+                    "SystemAdministrator",
+                    StringComparison.OrdinalIgnoreCase);
+
+
+            var isTransactionOwner =
+                transaction.ProsumerId == currentUserId;
+
+
+            // Prosumer can only see own transaction
+            if (isProsumer && !isTransactionOwner)
             {
                 throw new UnauthorizedAccessException(
                     "You are not allowed to view this transaction.");
             }
 
+
+            // Other authorized operational roles can view
+            if (!isProsumer &&
+                !isVerifier &&
+                !isOperator &&
+                !isAdministrator)
+            {
+                throw new UnauthorizedAccessException(
+                    "You are not authorized to view this transaction.");
+            }
+
+
             return Map(transaction);
         }
 
+
+        // ============================================================
+        // GENERATE QR
+        // ============================================================
         public async Task<GenerateQrResponse?> GenerateQrAsync(
             string transactionId,
             string currentUserId)
         {
+            if (string.IsNullOrWhiteSpace(transactionId))
+            {
+                throw new ArgumentException(
+                    "Transaction ID is required.");
+            }
+
+
             var transaction =
                 await _transactionRepository
                     .GetByIdAsync(transactionId);
@@ -156,26 +298,47 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return null;
             }
 
-            if (transaction.Status != "Pending")
+
+            // --------------------------------------------------------
+            // QR can only be generated once for Pending transaction
+            // --------------------------------------------------------
+            if (!transaction.Status.Equals(
+                    "Pending",
+                    StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException(
                     "QR can only be generated for a pending transaction.");
             }
 
+
+            // --------------------------------------------------------
+            // Generate unique transaction code
+            // --------------------------------------------------------
             var transactionCode =
                 GenerateTransactionCode();
+
 
             transaction.TransactionCode =
                 transactionCode;
 
+
+            // --------------------------------------------------------
+            // QR payload
+            // --------------------------------------------------------
             transaction.QrCodeData =
                 $"SMART-MICROGRID|TRANSACTION|{transaction.Id}|{transactionCode}";
 
-            transaction.Status = "QRGenerated";
-            transaction.UpdatedAt = DateTime.UtcNow;
+
+            transaction.Status =
+                "QRGenerated";
+
+            transaction.UpdatedAt =
+                DateTime.UtcNow;
+
 
             await _transactionRepository
                 .UpdateAsync(transaction);
+
 
             return new GenerateQrResponse
             {
@@ -187,43 +350,105 @@ namespace SmartMicrogrid.API.Services.Implementation
             };
         }
 
+
+        // ============================================================
+        // VERIFY TRANSACTION
+        // ============================================================
         public async Task<TransactionResponse?> VerifyAsync(
+            string transactionId,
             VerifyTransactionRequest request,
             string currentUserId)
         {
+            if (string.IsNullOrWhiteSpace(transactionId))
+            {
+                throw new ArgumentException(
+                    "Transaction ID is required.");
+            }
+
+
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+
             if (string.IsNullOrWhiteSpace(request.QrCodeData))
             {
                 throw new ArgumentException(
                     "QR code data is required.");
             }
 
+
+            // --------------------------------------------------------
+            // Get transaction using URL transaction ID
+            // --------------------------------------------------------
             var transaction =
                 await _transactionRepository
-                    .GetByQrCodeDataAsync(
-                        request.QrCodeData);
+                    .GetByIdAsync(transactionId);
 
             if (transaction == null)
             {
                 throw new KeyNotFoundException(
-                    "Transaction associated with the QR code was not found.");
+                    "Transaction was not found.");
             }
 
-            if (transaction.Status != "QRGenerated"
-                && transaction.Status != "VerificationPending")
+
+            // --------------------------------------------------------
+            // Check QR exists
+            // --------------------------------------------------------
+            if (string.IsNullOrWhiteSpace(
+                    transaction.QrCodeData))
+            {
+                throw new InvalidOperationException(
+                    "QR code has not been generated for this transaction.");
+            }
+
+
+            // --------------------------------------------------------
+            // Make sure scanned QR belongs to this transaction
+            // --------------------------------------------------------
+            if (!string.Equals(
+                    transaction.QrCodeData,
+                    request.QrCodeData,
+                    StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "The scanned QR code does not belong to this transaction.");
+            }
+
+
+            // --------------------------------------------------------
+            // Transaction must be ready for verification
+            // --------------------------------------------------------
+            if (!transaction.Status.Equals(
+                    "QRGenerated",
+                    StringComparison.OrdinalIgnoreCase)
+                &&
+                !transaction.Status.Equals(
+                    "VerificationPending",
+                    StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException(
                     $"Transaction cannot be verified from status '{transaction.Status}'.");
             }
 
+
+            // --------------------------------------------------------
+            // Get reservation from M2
+            // --------------------------------------------------------
             var reservation =
                 await _reservationApiClient
                     .GetReservationAsync(
                         transaction.ReservationId);
 
+
             if (reservation == null)
             {
-                transaction.Status = "Rejected";
-                transaction.UpdatedAt = DateTime.UtcNow;
+                transaction.Status =
+                    "Rejected";
+
+                transaction.UpdatedAt =
+                    DateTime.UtcNow;
 
                 await _transactionRepository
                     .UpdateAsync(transaction);
@@ -232,13 +457,20 @@ namespace SmartMicrogrid.API.Services.Implementation
                     "The associated reservation could not be found.");
             }
 
+
+            // --------------------------------------------------------
+            // Reservation must still be approved
+            // --------------------------------------------------------
             if (!string.Equals(
                     reservation.Status,
                     "Approved",
                     StringComparison.OrdinalIgnoreCase))
             {
-                transaction.Status = "Rejected";
-                transaction.UpdatedAt = DateTime.UtcNow;
+                transaction.Status =
+                    "Rejected";
+
+                transaction.UpdatedAt =
+                    DateTime.UtcNow;
 
                 await _transactionRepository
                     .UpdateAsync(transaction);
@@ -247,22 +479,137 @@ namespace SmartMicrogrid.API.Services.Implementation
                     "The reservation is not approved for transaction processing.");
             }
 
-            transaction.VerifiedBy = currentUserId;
-            transaction.VerificationTime = DateTime.UtcNow;
-            transaction.Status = "Verified";
-            transaction.UpdatedAt = DateTime.UtcNow;
+
+            // --------------------------------------------------------
+            // Validate reservation against transaction
+            // --------------------------------------------------------
+
+            // Prosumer validation
+            if (!string.Equals(
+                    transaction.ProsumerId,
+                    reservation.ProsumerId,
+                    StringComparison.Ordinal))
+            {
+                transaction.Status =
+                    "Rejected";
+
+                transaction.UpdatedAt =
+                    DateTime.UtcNow;
+
+                await _transactionRepository
+                    .UpdateAsync(transaction);
+
+                throw new InvalidOperationException(
+                    "Transaction prosumer does not match the reservation.");
+            }
+
+
+            // Microgrid validation
+            if (!string.Equals(
+                    transaction.MicrogridNodeId,
+                    reservation.MicrogridNodeId,
+                    StringComparison.Ordinal))
+            {
+                transaction.Status =
+                    "Rejected";
+
+                transaction.UpdatedAt =
+                    DateTime.UtcNow;
+
+                await _transactionRepository
+                    .UpdateAsync(transaction);
+
+                throw new InvalidOperationException(
+                    "Transaction microgrid does not match the reservation.");
+            }
+
+
+            // Energy slot validation
+            if (!string.Equals(
+                    transaction.EnergySlotId,
+                    reservation.EnergySlotId,
+                    StringComparison.Ordinal))
+            {
+                transaction.Status =
+                    "Rejected";
+
+                transaction.UpdatedAt =
+                    DateTime.UtcNow;
+
+                await _transactionRepository
+                    .UpdateAsync(transaction);
+
+                throw new InvalidOperationException(
+                    "Transaction energy slot does not match the reservation.");
+            }
+
+
+            // Energy amount validation
+            if (transaction.EnergyAmount !=
+                reservation.EnergyAmount)
+            {
+                transaction.Status =
+                    "Rejected";
+
+                transaction.UpdatedAt =
+                    DateTime.UtcNow;
+
+                await _transactionRepository
+                    .UpdateAsync(transaction);
+
+                throw new InvalidOperationException(
+                    "Transaction energy amount does not match the reservation.");
+            }
+
+
+            // --------------------------------------------------------
+            // Verification successful
+            // --------------------------------------------------------
+            transaction.VerifiedBy =
+                currentUserId;
+
+            transaction.VerificationTime =
+                DateTime.UtcNow;
+
+            transaction.Status =
+                "Verified";
+
+            transaction.UpdatedAt =
+                DateTime.UtcNow;
+
 
             await _transactionRepository
                 .UpdateAsync(transaction);
 
+
             return Map(transaction);
         }
 
+
+        // ============================================================
+        // COMPLETE TRANSACTION
+        // ============================================================
         public async Task<TransactionResponse?> CompleteAsync(
             string transactionId,
             CompleteTransactionRequest request,
             string currentUserId)
         {
+            if (string.IsNullOrWhiteSpace(transactionId))
+            {
+                throw new ArgumentException(
+                    "Transaction ID is required.");
+            }
+
+
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+
+            // --------------------------------------------------------
+            // Confirmation validation
+            // --------------------------------------------------------
             if (!string.Equals(
                     request.Confirmation,
                     "CONFIRMED",
@@ -272,6 +619,7 @@ namespace SmartMicrogrid.API.Services.Implementation
                     "Confirmation must be 'CONFIRMED'.");
             }
 
+
             var transaction =
                 await _transactionRepository
                     .GetByIdAsync(transactionId);
@@ -281,68 +629,98 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return null;
             }
 
-            if (transaction.Status != "Verified"
-                && transaction.Status != "EnergyTransferInProgress")
+
+            // --------------------------------------------------------
+            // Transaction must be verified first
+            // --------------------------------------------------------
+            if (!transaction.Status.Equals(
+                    "Verified",
+                    StringComparison.OrdinalIgnoreCase)
+                &&
+                !transaction.Status.Equals(
+                    "EnergyTransferInProgress",
+                    StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException(
                     "Only a verified transaction can be completed.");
             }
 
-            if (transaction.VerifiedBy != currentUserId
-                && !string.IsNullOrWhiteSpace(transaction.VerifiedBy))
+
+            // --------------------------------------------------------
+            // Only the verifier who verified the transaction
+            // can complete it
+            // --------------------------------------------------------
+            if (!string.IsNullOrWhiteSpace(
+                    transaction.VerifiedBy)
+                &&
+                transaction.VerifiedBy != currentUserId)
             {
                 throw new UnauthorizedAccessException(
                     "Only the verifying transaction verifier can complete this transaction.");
             }
 
-            transaction.Status =
-                "EnergyTransferInProgress";
 
-            transaction.EnergyTransferTime =
-                DateTime.UtcNow;
+            // --------------------------------------------------------
+            // Energy transfer begins
+            // --------------------------------------------------------
+            if (!transaction.Status.Equals(
+                    "EnergyTransferInProgress",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                transaction.Status =
+                    "EnergyTransferInProgress";
 
-            transaction.UpdatedAt =
-                DateTime.UtcNow;
+                transaction.EnergyTransferTime =
+                    DateTime.UtcNow;
 
-            await _transactionRepository
-                .UpdateAsync(transaction);
+                transaction.UpdatedAt =
+                    DateTime.UtcNow;
 
+
+                await _transactionRepository
+                    .UpdateAsync(transaction);
+            }
+
+
+            // --------------------------------------------------------
+            // Complete transaction
+            // --------------------------------------------------------
             transaction.Status =
                 "Completed";
 
             transaction.UpdatedAt =
                 DateTime.UtcNow;
 
+
             await _transactionRepository
                 .UpdateAsync(transaction);
+
 
             return Map(transaction);
         }
 
+
+        // ============================================================
+        // UPDATE STATUS
+        // ============================================================
         public async Task<TransactionResponse?> UpdateStatusAsync(
             string transactionId,
             string status,
             string currentUserId)
         {
-            var allowedStatuses = new[]
-            {
-                "Pending",
-                "QRGenerated",
-                "VerificationPending",
-                "Verified",
-                "EnergyTransferInProgress",
-                "Completed",
-                "Rejected",
-                "Cancelled"
-            };
-
-            if (!allowedStatuses.Contains(
-                    status,
-                    StringComparer.OrdinalIgnoreCase))
+            if (string.IsNullOrWhiteSpace(transactionId))
             {
                 throw new ArgumentException(
-                    "Invalid transaction status.");
+                    "Transaction ID is required.");
             }
+
+
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                throw new ArgumentException(
+                    "Transaction status is required.");
+            }
+
 
             var transaction =
                 await _transactionRepository
@@ -353,39 +731,228 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return null;
             }
 
-            transaction.Status = status;
-            transaction.UpdatedAt = DateTime.UtcNow;
+
+            // --------------------------------------------------------
+            // Normalize requested status
+            // --------------------------------------------------------
+            var requestedStatus =
+                status.Trim();
+
+
+            // --------------------------------------------------------
+            // Validate status transition
+            // --------------------------------------------------------
+            var validTransition =
+                IsValidStatusTransition(
+                    transaction.Status,
+                    requestedStatus);
+
+
+            if (!validTransition)
+            {
+                throw new InvalidOperationException(
+                    $"Invalid transaction status transition: '{transaction.Status}' -> '{requestedStatus}'.");
+            }
+
+
+            transaction.Status =
+                requestedStatus;
+
+            transaction.UpdatedAt =
+                DateTime.UtcNow;
+
 
             await _transactionRepository
                 .UpdateAsync(transaction);
 
+
             return Map(transaction);
         }
 
-        private static string GenerateTransactionCode()
+
+        // ============================================================
+        // VALIDATE TRANSACTION STATUS TRANSITION
+        // ============================================================
+        private static bool IsValidStatusTransition(
+            string currentStatus,
+            string newStatus)
         {
-            return $"TX-{DateTime.UtcNow:yyyyMMddHHmmss}-{RandomNumberGenerator.GetInt32(100000, 999999)}";
+            if (string.IsNullOrWhiteSpace(
+                    currentStatus)
+                ||
+                string.IsNullOrWhiteSpace(
+                    newStatus))
+            {
+                return false;
+            }
+
+
+            // Same status does not require an update
+            if (currentStatus.Equals(
+                    newStatus,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+
+            switch (currentStatus.ToLowerInvariant())
+            {
+                case "pending":
+
+                    return newStatus.Equals(
+                               "QRGenerated",
+                               StringComparison.OrdinalIgnoreCase)
+                           ||
+                           newStatus.Equals(
+                               "Cancelled",
+                               StringComparison.OrdinalIgnoreCase);
+
+
+                case "qrgenerated":
+
+                    return newStatus.Equals(
+                               "VerificationPending",
+                               StringComparison.OrdinalIgnoreCase)
+                           ||
+                           newStatus.Equals(
+                               "Verified",
+                               StringComparison.OrdinalIgnoreCase)
+                           ||
+                           newStatus.Equals(
+                               "Rejected",
+                               StringComparison.OrdinalIgnoreCase)
+                           ||
+                           newStatus.Equals(
+                               "Cancelled",
+                               StringComparison.OrdinalIgnoreCase);
+
+
+                case "verificationpending":
+
+                    return newStatus.Equals(
+                               "Verified",
+                               StringComparison.OrdinalIgnoreCase)
+                           ||
+                           newStatus.Equals(
+                               "Rejected",
+                               StringComparison.OrdinalIgnoreCase)
+                           ||
+                           newStatus.Equals(
+                               "Cancelled",
+                               StringComparison.OrdinalIgnoreCase);
+
+
+                case "verified":
+
+                    return newStatus.Equals(
+                               "EnergyTransferInProgress",
+                               StringComparison.OrdinalIgnoreCase)
+                           ||
+                           newStatus.Equals(
+                               "Rejected",
+                               StringComparison.OrdinalIgnoreCase)
+                           ||
+                           newStatus.Equals(
+                               "Cancelled",
+                               StringComparison.OrdinalIgnoreCase);
+
+
+                case "energytransferinprogress":
+
+                    return newStatus.Equals(
+                               "Completed",
+                               StringComparison.OrdinalIgnoreCase)
+                           ||
+                           newStatus.Equals(
+                               "Rejected",
+                               StringComparison.OrdinalIgnoreCase);
+
+
+                case "completed":
+
+                    // Completed is final
+                    return false;
+
+
+                case "rejected":
+
+                    // Rejected is final
+                    return false;
+
+
+                case "cancelled":
+
+                    // Cancelled is final
+                    return false;
+
+
+                default:
+
+                    return false;
+            }
         }
 
+
+        // ============================================================
+        // GENERATE TRANSACTION CODE
+        // ============================================================
+        private static string GenerateTransactionCode()
+        {
+            return
+                $"TX-{DateTime.UtcNow:yyyyMMddHHmmss}-" +
+                $"{RandomNumberGenerator.GetInt32(100000, 999999)}";
+        }
+
+
+        // ============================================================
+        // MAP MODEL -> RESPONSE DTO
+        // ============================================================
         private static TransactionResponse Map(
             Transaction transaction)
         {
             return new TransactionResponse
             {
                 Id = transaction.Id,
-                ReservationId = transaction.ReservationId,
-                ProsumerId = transaction.ProsumerId,
-                MicrogridNodeId = transaction.MicrogridNodeId,
-                EnergySlotId = transaction.EnergySlotId,
-                EnergyAmount = transaction.EnergyAmount,
-                TransactionCode = transaction.TransactionCode,
-                QrCodeData = transaction.QrCodeData,
-                VerifiedBy = transaction.VerifiedBy,
-                VerificationTime = transaction.VerificationTime,
-                EnergyTransferTime = transaction.EnergyTransferTime,
-                Status = transaction.Status,
-                CreatedAt = transaction.CreatedAt,
-                UpdatedAt = transaction.UpdatedAt
+
+                ReservationId =
+                    transaction.ReservationId,
+
+                ProsumerId =
+                    transaction.ProsumerId,
+
+                MicrogridNodeId =
+                    transaction.MicrogridNodeId,
+
+                EnergySlotId =
+                    transaction.EnergySlotId,
+
+                EnergyAmount =
+                    transaction.EnergyAmount,
+
+                TransactionCode =
+                    transaction.TransactionCode,
+
+                QrCodeData =
+                    transaction.QrCodeData,
+
+                VerifiedBy =
+                    transaction.VerifiedBy,
+
+                VerificationTime =
+                    transaction.VerificationTime,
+
+                EnergyTransferTime =
+                    transaction.EnergyTransferTime,
+
+                Status =
+                    transaction.Status,
+
+                CreatedAt =
+                    transaction.CreatedAt,
+
+                UpdatedAt =
+                    transaction.UpdatedAt
             };
         }
     }
