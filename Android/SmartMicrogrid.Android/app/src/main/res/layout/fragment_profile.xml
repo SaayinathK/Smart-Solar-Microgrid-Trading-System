@@ -9,10 +9,9 @@
     <ImageView
         android:id="@+id/iv_background_header"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="260dp"
         android:scaleType="centerCrop"
         android:src="@drawable/bg_energy_login"
-        android:alpha="0.8"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -20,8 +19,8 @@
     <!-- Gradient Overlay -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:background="#66000000"
+        android:layout_height="260dp"
+        android:background="@drawable/bg_gradient_header_overlay"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
