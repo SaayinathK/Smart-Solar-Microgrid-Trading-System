@@ -22,6 +22,7 @@
         
         <!-- Glass Card Style -->
         <item name="materialCardViewStyle">@style/Widget.SmartMicrogrid.CardView.Glass</item>
+        <item name="materialButtonStyle">@style/Widget.SmartMicrogrid.Button</item>
     </style>
 
     <style name="Widget.SmartMicrogrid.CardView.Glass" parent="Widget.Material3.CardView.Elevated">
