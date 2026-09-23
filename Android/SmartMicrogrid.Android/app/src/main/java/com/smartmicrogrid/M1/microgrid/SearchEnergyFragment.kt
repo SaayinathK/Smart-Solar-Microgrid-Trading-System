@@ -20,6 +20,7 @@ class SearchEnergyFragment : Fragment() {
 
     private lateinit var viewModel: MicrogridViewModel
     private lateinit var adapter: MicrogridAdapter
+    private var sortByHighestCapacity = true
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSearchEnergyBinding.inflate(inflater, container, false)
@@ -54,6 +55,12 @@ class SearchEnergyFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
+        binding.btnSortCapacity.setOnClickListener {
+            sortByHighestCapacity = !sortByHighestCapacity
+            binding.btnSortCapacity.text = if (sortByHighestCapacity) "Highest kWh" else "Lowest kWh"
+            filterList(binding.etSearch.text.toString())
+        }
+
         viewModel.microgrids.observe(viewLifecycleOwner) { list ->
             filterList(binding.etSearch.text.toString())
         }
@@ -83,9 +90,11 @@ class SearchEnergyFragment : Fragment() {
             }
         }
         
-        adapter.updateData(filtered)
+        val sorted = if (sortByHighestCapacity) filtered.sortedByDescending { it.availableCapacity } else filtered.sortedBy { it.availableCapacity }
+        adapter.updateData(sorted)
         binding.tvEmpty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
         binding.tvEmpty.text = if (filtered.isEmpty() && query.isNotBlank()) "No microgrids match your search." else "No active microgrids found in your area."
+        binding.tvResultsSummary.text = if (sorted.isEmpty()) "No active local capacity available" else "${sorted.size} active microgrids - ${"%.1f".format(sorted.sumOf { it.availableCapacity })} kWh available"
     }
 
     override fun onDestroyView() {
