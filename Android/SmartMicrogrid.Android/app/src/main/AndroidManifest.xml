@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.SmartMicrogrid"
+        android:usesCleartextTraffic="true">
+
+        <activity
+            android:name=".auth.LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".MainActivity" />
+        <activity android:name=".auth.RegisterActivity" />
+        <activity android:name=".auth.ProfileActivity" />
+        <activity android:name=".auth.EditProfileActivity" />
+        <activity android:name=".auth.ChangePasswordActivity" />
+
+        <activity android:name=".M1.microgrid.MicrogridListActivity" />
+        <activity android:name=".M1.microgrid.MicrogridDetailsActivity" />
+        <activity android:name=".M1.capacity.CapacityActivity" />
+        <activity android:name=".M1.battery.BatteryActivity" />
+        <activity android:name=".M1.availability.EnergyAvailabilityActivity" />
+        <activity android:name=".M1.slots.EnergySlotActivity" />
+
+    </application>
+
+</manifest>
