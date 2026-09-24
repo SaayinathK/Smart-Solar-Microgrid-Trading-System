@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Smart Microgrid</string>
+    <string name="transaction_details">Transaction Details</string>
+    <string name="scan_transaction_qr">Scan Transaction QR</string>
+    <string name="verify_transaction">Verify Transaction</string>
+    <string name="cancel">Cancel</string>
+    <string name="retry">Retry</string>
+    <string name="pending_transactions">Pending Transactions</string>
+    <string name="no_pending_transactions_found">No pending transactions found.</string>
+    <string name="transactions_ready_for_verifier_action">Transactions ready for verifier action</string>
 </resources>

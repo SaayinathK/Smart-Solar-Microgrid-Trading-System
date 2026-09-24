@@ -30,7 +30,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Transaction Details"
+                    android:text="@string/transaction_details"
                     android:textColor="@color/text_dark_primary"
                     android:textSize="22sp"
                     android:textStyle="bold" />
@@ -86,7 +86,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:text="Scan Transaction QR" />
+                    android:text="@string/scan_transaction_qr" />
 
                 <TextView
                     android:id="@+id/tv_scan_result"
@@ -118,14 +118,14 @@
                         android:id="@+id/btn_verify_transaction"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Verify Transaction" />
+                        android:text="@string/verify_transaction" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_cancel_verification"
                         style="@style/Widget.Material3.Button.TextButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Cancel" />
+                        android:text="@string/cancel" />
 
                     <ProgressBar
                         android:id="@+id/verification_progress"
@@ -168,6 +168,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Retry" />
+            android:text="@string/retry" />
     </LinearLayout>
 </FrameLayout>

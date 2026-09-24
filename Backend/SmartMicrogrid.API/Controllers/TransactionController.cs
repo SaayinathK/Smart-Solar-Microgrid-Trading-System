@@ -1,6 +1,10 @@
+using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using MongoDB.Driver;
 using SmartMicrogrid.API.DTOs.Transactions;
+using SmartMicrogrid.API.Models.Common;
 using SmartMicrogrid.API.Services.Interfaces;
 using System.Security.Claims;
 
@@ -9,6 +13,7 @@ namespace SmartMicrogrid.API.Controllers
     [ApiController]
     [Route("api/transactions")]
     [Authorize]
+    [M3ExceptionFilter]
     public class TransactionController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
@@ -35,12 +40,9 @@ namespace SmartMicrogrid.API.Controllers
                     userId,
                     role);
 
-            return Ok(new
-            {
-                success = true,
-                message = "Transactions retrieved successfully.",
-                data = transactions
-            });
+            return Ok(ApiResponse<object>.SuccessResponse(
+                transactions,
+                "Transactions retrieved successfully."));
         }
 
 
@@ -54,12 +56,8 @@ namespace SmartMicrogrid.API.Controllers
         {
             if (string.IsNullOrWhiteSpace(transactionId))
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Transaction ID is required.",
-                    data = (object?)null
-                });
+                return BadRequest(ApiResponse<object>.FailureResponse(
+                    "Transaction ID is required."));
             }
 
             var userId = GetCurrentUserId();
@@ -73,20 +71,13 @@ namespace SmartMicrogrid.API.Controllers
 
             if (transaction == null)
             {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "Transaction not found.",
-                    data = (object?)null
-                });
+                return NotFound(ApiResponse<object>.FailureResponse(
+                    "Transaction not found."));
             }
 
-            return Ok(new
-            {
-                success = true,
-                message = "Transaction retrieved successfully.",
-                data = transaction
-            });
+            return Ok(ApiResponse<object>.SuccessResponse(
+                transaction,
+                "Transaction retrieved successfully."));
         }
 
 
@@ -102,12 +93,8 @@ namespace SmartMicrogrid.API.Controllers
             if (request == null ||
                 string.IsNullOrWhiteSpace(request.ReservationId))
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Reservation ID is required.",
-                    data = (object?)null
-                });
+                return BadRequest(ApiResponse<object>.FailureResponse(
+                    "Reservation ID is required."));
             }
 
             var userId = GetCurrentUserId();
@@ -119,20 +106,13 @@ namespace SmartMicrogrid.API.Controllers
 
             if (transaction == null)
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Unable to create transaction.",
-                    data = (object?)null
-                });
+                return BadRequest(ApiResponse<object>.FailureResponse(
+                    "Unable to create transaction."));
             }
 
-            return Ok(new
-            {
-                success = true,
-                message = "Transaction created successfully.",
-                data = transaction
-            });
+            return Ok(ApiResponse<object>.SuccessResponse(
+                transaction,
+                "Transaction created successfully."));
         }
 
 
@@ -147,12 +127,8 @@ namespace SmartMicrogrid.API.Controllers
         {
             if (string.IsNullOrWhiteSpace(transactionId))
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Transaction ID is required.",
-                    data = (object?)null
-                });
+                return BadRequest(ApiResponse<object>.FailureResponse(
+                    "Transaction ID is required."));
             }
 
             var userId = GetCurrentUserId();
@@ -164,20 +140,13 @@ namespace SmartMicrogrid.API.Controllers
 
             if (result == null)
             {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "Transaction not found or QR cannot be generated.",
-                    data = (object?)null
-                });
+                return NotFound(ApiResponse<object>.FailureResponse(
+                    "Transaction not found or QR cannot be generated."));
             }
 
-            return Ok(new
-            {
-                success = true,
-                message = "QR data generated successfully.",
-                data = result
-            });
+            return Ok(ApiResponse<object>.SuccessResponse(
+                result,
+                "QR data generated successfully."));
         }
 
 
@@ -193,23 +162,15 @@ namespace SmartMicrogrid.API.Controllers
         {
             if (string.IsNullOrWhiteSpace(transactionId))
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Transaction ID is required.",
-                    data = (object?)null
-                });
+                return BadRequest(ApiResponse<object>.FailureResponse(
+                    "Transaction ID is required."));
             }
 
             if (request == null ||
                 string.IsNullOrWhiteSpace(request.QrCodeData))
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "QR code data is required.",
-                    data = (object?)null
-                });
+                return BadRequest(ApiResponse<object>.FailureResponse(
+                    "QR code data is required."));
             }
 
             var userId = GetCurrentUserId();
@@ -226,20 +187,13 @@ namespace SmartMicrogrid.API.Controllers
 
             if (transaction == null)
             {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "Transaction not found.",
-                    data = (object?)null
-                });
+                return NotFound(ApiResponse<object>.FailureResponse(
+                    "Transaction not found."));
             }
 
-            return Ok(new
-            {
-                success = true,
-                message = "Transaction verified successfully.",
-                data = transaction
-            });
+            return Ok(ApiResponse<object>.SuccessResponse(
+                transaction,
+                "Transaction verified successfully."));
         }
 
 
@@ -255,23 +209,15 @@ namespace SmartMicrogrid.API.Controllers
         {
             if (string.IsNullOrWhiteSpace(transactionId))
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Transaction ID is required.",
-                    data = (object?)null
-                });
+                return BadRequest(ApiResponse<object>.FailureResponse(
+                    "Transaction ID is required."));
             }
 
             if (request == null ||
                 string.IsNullOrWhiteSpace(request.Confirmation))
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Confirmation is required.",
-                    data = (object?)null
-                });
+                return BadRequest(ApiResponse<object>.FailureResponse(
+                    "Confirmation is required."));
             }
 
             var userId = GetCurrentUserId();
@@ -284,20 +230,13 @@ namespace SmartMicrogrid.API.Controllers
 
             if (transaction == null)
             {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "Transaction not found.",
-                    data = (object?)null
-                });
+                return NotFound(ApiResponse<object>.FailureResponse(
+                    "Transaction not found."));
             }
 
-            return Ok(new
-            {
-                success = true,
-                message = "Energy transaction completed successfully.",
-                data = transaction
-            });
+            return Ok(ApiResponse<object>.SuccessResponse(
+                transaction,
+                "Energy transaction completed successfully."));
         }
 
 
@@ -313,22 +252,14 @@ namespace SmartMicrogrid.API.Controllers
         {
             if (string.IsNullOrWhiteSpace(transactionId))
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Transaction ID is required.",
-                    data = (object?)null
-                });
+                return BadRequest(ApiResponse<object>.FailureResponse(
+                    "Transaction ID is required."));
             }
 
             if (string.IsNullOrWhiteSpace(status))
             {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Transaction status is required.",
-                    data = (object?)null
-                });
+                return BadRequest(ApiResponse<object>.FailureResponse(
+                    "Transaction status is required."));
             }
 
             var userId = GetCurrentUserId();
@@ -341,20 +272,13 @@ namespace SmartMicrogrid.API.Controllers
 
             if (transaction == null)
             {
-                return NotFound(new
-                {
-                    success = false,
-                    message = "Transaction not found.",
-                    data = (object?)null
-                });
+                return NotFound(ApiResponse<object>.FailureResponse(
+                    "Transaction not found."));
             }
 
-            return Ok(new
-            {
-                success = true,
-                message = "Transaction status updated successfully.",
-                data = transaction
-            });
+            return Ok(ApiResponse<object>.SuccessResponse(
+                transaction,
+                "Transaction status updated successfully."));
         }
 
 
@@ -380,6 +304,57 @@ namespace SmartMicrogrid.API.Controllers
                        ClaimTypes.Role)
                    ?? User.FindFirstValue("role")
                    ?? string.Empty;
+        }
+
+        private sealed class M3ExceptionFilterAttribute : Attribute, IAsyncExceptionFilter
+        {
+            public Task OnExceptionAsync(ExceptionContext context)
+            {
+                var (statusCode, message) = GetError(context.Exception);
+
+                context.Result = new ObjectResult(
+                    ApiResponse<object>.FailureResponse(message))
+                {
+                    StatusCode = statusCode
+                };
+                context.ExceptionHandled = true;
+
+                return Task.CompletedTask;
+            }
+
+            private static (int StatusCode, string Message) GetError(
+                Exception exception)
+            {
+                if (exception is MongoWriteException mongoException &&
+                    mongoException.WriteError?.Code == 11000)
+                {
+                    return (
+                        (int)HttpStatusCode.Conflict,
+                        "A transaction already exists for this reservation.");
+                }
+
+                return exception switch
+                {
+                    ArgumentException => (
+                        (int)HttpStatusCode.BadRequest,
+                        "Invalid transaction request."),
+                    KeyNotFoundException => (
+                        (int)HttpStatusCode.NotFound,
+                        "Transaction or reservation not found."),
+                    UnauthorizedAccessException => (
+                        (int)HttpStatusCode.Forbidden,
+                        "You are not authorized to perform this transaction operation."),
+                    HttpRequestException => (
+                        (int)HttpStatusCode.BadGateway,
+                        "The reservation service is currently unavailable."),
+                    InvalidOperationException => (
+                        (int)HttpStatusCode.BadRequest,
+                        "The transaction operation is invalid."),
+                    _ => (
+                        (int)HttpStatusCode.InternalServerError,
+                        "An unexpected transaction error occurred.")
+                };
+            }
         }
     }
 }
