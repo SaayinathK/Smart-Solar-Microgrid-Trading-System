@@ -2,10 +2,21 @@
    Smart Microgrid Energy System - Route Guard & Authentication Controller
    ========================================================================== */
 
+function getAuthAppUrl(path) {
+  const authScript = Array.from(document.scripts).find(script =>
+    new URL(script.src, document.baseURI).pathname.endsWith('/js/common/auth.js')
+  );
+  const appBase = authScript
+    ? new URL('../../', authScript.src)
+    : new URL('.', window.location.href);
+
+  return new URL(path, appBase).href;
+}
+
 const AuthGuard = {
   requireAuth(requiredRole = null) {
     if (!SessionManager.isAuthenticated()) {
-      window.location.href = '/login.html';
+      window.location.href = getAuthAppUrl('login.html');
       return false;
     }
 
@@ -30,7 +41,7 @@ const AuthGuard = {
     SessionManager.clearSession();
     ApiClient.showToast('You have been logged out successfully.', 'info');
     setTimeout(() => {
-      window.location.href = '/login.html';
+      window.location.href = getAuthAppUrl('login.html');
     }, 1000);
   }
 };

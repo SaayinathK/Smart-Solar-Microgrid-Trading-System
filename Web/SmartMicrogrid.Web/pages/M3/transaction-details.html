@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction Details - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/transactions.css">
+</head>
+<body>
+  <div id="app-layout-wrapper">
+    <section class="page-header transaction-page-header">
+      <div class="page-title">
+        <h1>Transaction Details</h1>
+        <p>Review transaction information and continue the verification workflow.</p>
+      </div>
+      <div class="transaction-detail-header-actions">
+        <button type="button" id="refresh-transaction" class="btn btn-secondary">Refresh</button>
+        <a href="transactions.html" class="btn btn-secondary">Back to Transactions</a>
+      </div>
+    </section>
+
+    <div id="transaction-message" class="transactions-state" role="status" aria-live="polite">
+      Loading transaction...
+    </div>
+
+    <div id="transaction-content" hidden>
+      <section class="card transaction-detail-status-card">
+        <div>
+          <span class="transaction-detail-eyebrow">Current Status</span>
+          <div id="transaction-status" class="transaction-detail-status"></div>
+        </div>
+        <div id="transaction-action" class="transaction-detail-action"></div>
+      </section>
+
+      <section class="card transaction-detail-card">
+        <h2>Transaction Information</h2>
+        <dl class="transaction-details-grid">
+          <div><dt>Transaction ID</dt><dd id="detail-id">Not available</dd></div>
+          <div><dt>Transaction Code</dt><dd id="detail-code">Not available</dd></div>
+          <div><dt>Reservation ID</dt><dd id="detail-reservation">Not available</dd></div>
+          <div><dt>Prosumer ID</dt><dd id="detail-prosumer">Not available</dd></div>
+          <div><dt>Microgrid Node ID</dt><dd id="detail-microgrid">Not available</dd></div>
+          <div><dt>Energy Slot ID</dt><dd id="detail-slot">Not available</dd></div>
+          <div><dt>Energy Amount</dt><dd id="detail-energy">Not available</dd></div>
+        </dl>
+      </section>
+
+      <section class="card transaction-detail-card">
+        <h2>Verification Information</h2>
+        <dl class="transaction-details-grid">
+          <div><dt>Verified By</dt><dd id="detail-verified-by">Not verified</dd></div>
+          <div><dt>Verification Time</dt><dd id="detail-verification-time">Not available</dd></div>
+        </dl>
+      </section>
+
+      <section class="card transaction-detail-card">
+        <h2>Timestamps</h2>
+        <dl class="transaction-details-grid">
+          <div><dt>Created At</dt><dd id="detail-created">Not available</dd></div>
+          <div><dt>Updated At</dt><dd id="detail-updated">Not available</dd></div>
+          <div><dt>Energy Transfer Time</dt><dd id="detail-transfer-time">Not available</dd></div>
+        </dl>
+      </section>
+
+      <section class="card transaction-detail-card">
+        <h2>QR Information</h2>
+        <pre id="detail-qr" class="transaction-qr-data">QR code has not been generated.</pre>
+      </section>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/api/transaction-api.js"></script>
+  <script src="../../js/transactions/transaction-details.js"></script>
+</body>
+</html>

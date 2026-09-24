@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Transaction - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/forms.css">
+  <link rel="stylesheet" href="../../css/transactions.css">
+</head>
+<body>
+  <div id="app-layout-wrapper">
+    <section class="page-header transaction-page-header">
+      <div class="page-title">
+        <h1>Energy Transfer Confirmation</h1>
+        <p>Complete the transaction after the physical energy transfer has finished.</p>
+      </div>
+      <div class="transaction-detail-header-actions">
+        <button type="button" id="refresh-completion-transaction" class="btn btn-secondary">Refresh</button>
+        <a href="transactions.html" class="btn btn-secondary">Back to Transactions</a>
+      </div>
+    </section>
+
+    <div id="completion-page-message" class="transactions-state" role="status" aria-live="polite">Loading transaction...</div>
+
+    <div id="completion-page-content" hidden>
+      <section class="card transaction-detail-status-card">
+        <div>
+          <span class="transaction-detail-eyebrow">Current Status</span>
+          <div id="completion-current-status" class="transaction-detail-status"></div>
+        </div>
+        <a id="completion-view-details" class="btn btn-secondary" href="#">View Transaction</a>
+      </section>
+
+      <section class="card transaction-detail-card">
+        <h2>Transaction Summary</h2>
+        <dl class="transaction-details-grid">
+          <div><dt>Transaction ID</dt><dd id="completion-transaction-id">Not available</dd></div>
+          <div><dt>Reservation ID</dt><dd id="completion-reservation-id">Not available</dd></div>
+          <div><dt>Prosumer ID</dt><dd id="completion-prosumer-id">Not available</dd></div>
+          <div><dt>Energy Amount</dt><dd id="completion-energy-amount">Not available</dd></div>
+        </dl>
+      </section>
+
+      <section id="completion-unavailable" class="transactions-state" role="status" aria-live="polite" hidden></section>
+
+      <section id="completion-confirmation-card" class="card transaction-detail-card" hidden>
+        <h2>Confirm Energy Transfer</h2>
+        <p class="transaction-help-text">Confirm this only after the physical energy transfer has been completed.</p>
+        <label class="transaction-confirm-checkbox">
+          <input type="checkbox" id="energy-transfer-confirmed">
+          <span>I confirm that the energy transfer has been completed.</span>
+        </label>
+        <button type="button" id="complete-transaction-button" class="btn btn-primary" disabled>Complete Transaction</button>
+      </section>
+
+      <section id="completion-final-confirmation" class="card transaction-confirmation" role="dialog" aria-labelledby="completion-confirmation-title" aria-describedby="completion-confirmation-description" hidden>
+        <h2 id="completion-confirmation-title">Confirm Completion</h2>
+        <p id="completion-confirmation-description">Are you sure the energy transfer for this transaction has been completed?</p>
+        <div class="transaction-verification-buttons">
+          <button type="button" id="confirm-completion-button" class="btn btn-primary">Confirm Completion</button>
+          <button type="button" id="cancel-completion-button" class="btn btn-secondary">Cancel</button>
+        </div>
+      </section>
+
+      <div id="completion-progress" class="transactions-state" role="status" aria-live="polite" hidden></div>
+      <div id="completion-result" class="transaction-verification-result" role="status" aria-live="polite" hidden></div>
+
+      <section id="completion-success" class="card transaction-detail-card transaction-completion-success" hidden>
+        <h2>Transaction Completed Successfully</h2>
+        <dl class="transaction-details-grid">
+          <div><dt>Transaction ID</dt><dd id="completed-transaction-id">Not available</dd></div>
+          <div><dt>Reservation ID</dt><dd id="completed-reservation-id">Not available</dd></div>
+          <div><dt>Energy Amount</dt><dd id="completed-energy-amount">Not available</dd></div>
+          <div><dt>Energy Transfer Time</dt><dd id="completed-transfer-time">Not available</dd></div>
+          <div><dt>Final Status</dt><dd id="completed-final-status">Not available</dd></div>
+          <div><dt>Updated At</dt><dd id="completed-updated-at">Not available</dd></div>
+        </dl>
+        <div class="transaction-verification-buttons">
+          <a id="completed-view-transaction" class="btn btn-secondary" href="#">View Transaction</a>
+          <a href="transactions.html" class="btn btn-primary">Back to Transactions</a>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/api/transaction-api.js"></script>
+  <script src="../../js/transactions/transaction-complete.js"></script>
+</body>
+</html>

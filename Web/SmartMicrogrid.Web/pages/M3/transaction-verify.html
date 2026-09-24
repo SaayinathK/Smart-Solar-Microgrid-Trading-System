@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Transaction - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/forms.css">
+  <link rel="stylesheet" href="../../css/transactions.css">
+</head>
+<body>
+  <div id="app-layout-wrapper">
+    <section class="page-header transaction-page-header">
+      <div class="page-title">
+        <h1>Verify Transaction</h1>
+        <p>Review the transaction and submit the scanned QR data for backend verification.</p>
+      </div>
+      <div class="transaction-detail-header-actions">
+        <button type="button" id="refresh-verification-transaction" class="btn btn-secondary">Refresh</button>
+        <a href="transactions.html" class="btn btn-secondary">Back to Transactions</a>
+      </div>
+    </section>
+
+    <div id="verification-page-message" class="transactions-state" role="status" aria-live="polite">
+      Loading transaction...
+    </div>
+
+    <div id="verification-page-content" hidden>
+      <section class="card transaction-verification-summary">
+        <div class="transaction-list-toolbar">
+          <div>
+            <h2>Transaction Summary</h2>
+            <p>Confirm you are verifying the intended transaction.</p>
+          </div>
+          <div>
+            <span class="transaction-detail-eyebrow">Current Status</span>
+            <div id="verification-current-status" class="transaction-detail-status"></div>
+          </div>
+        </div>
+        <dl class="transaction-details-grid">
+          <div><dt>Transaction ID</dt><dd id="verification-transaction-id">Not available</dd></div>
+          <div><dt>Reservation ID</dt><dd id="verification-reservation-id">Not available</dd></div>
+          <div><dt>Prosumer ID</dt><dd id="verification-prosumer-id">Not available</dd></div>
+          <div><dt>Microgrid Node ID</dt><dd id="verification-microgrid-id">Not available</dd></div>
+          <div><dt>Energy Slot ID</dt><dd id="verification-energy-slot-id">Not available</dd></div>
+          <div><dt>Energy Amount</dt><dd id="verification-energy-amount">Not available</dd></div>
+        </dl>
+      </section>
+
+      <section id="verification-unavailable" class="transactions-state" role="status" aria-live="polite" hidden></section>
+
+      <section id="verification-form-card" class="card transaction-detail-card" hidden>
+        <h2>Scanned QR Code</h2>
+        <p class="transaction-help-text">Paste the QR data read by the verifier. Expected format: <code>SMART-MICROGRID|TRANSACTION|{transactionId}|{transactionCode}</code></p>
+        <form id="transaction-verification-form" novalidate>
+          <label class="transaction-qr-label" for="qr-code-data">Scanned QR Code Data</label>
+          <textarea id="qr-code-data" class="form-control transaction-qr-input" rows="4" placeholder="Paste the scanned QR code data here..."></textarea>
+          <div class="transaction-verification-buttons">
+            <button type="submit" id="verify-transaction-button" class="btn btn-primary">Verify Transaction</button>
+            <a id="cancel-verification-link" href="transactions.html" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </section>
+
+      <section id="verification-confirmation" class="card transaction-confirmation" role="dialog" aria-labelledby="verification-confirmation-title" aria-describedby="verification-confirmation-description" hidden>
+        <h2 id="verification-confirmation-title">Confirm Transaction Verification</h2>
+        <p id="verification-confirmation-description">Are you sure you want to verify this transaction?</p>
+        <div class="transaction-verification-buttons">
+          <button type="button" id="confirm-verification-button" class="btn btn-primary">Confirm Verification</button>
+          <button type="button" id="cancel-confirmation-button" class="btn btn-secondary">Cancel</button>
+        </div>
+      </section>
+
+      <div id="verification-progress" class="transactions-state" role="status" aria-live="polite" hidden></div>
+      <div id="verification-result" class="transaction-verification-result" role="status" aria-live="polite" hidden></div>
+      <section id="verification-success-details" class="card transaction-detail-card" aria-labelledby="verification-success-title" hidden>
+        <h2 id="verification-success-title">Transaction Verified</h2>
+        <dl class="transaction-details-grid">
+          <div><dt>Transaction ID</dt><dd id="verified-transaction-id">Not available</dd></div>
+          <div><dt>Reservation ID</dt><dd id="verified-reservation-id">Not available</dd></div>
+          <div><dt>Energy Amount</dt><dd id="verified-energy-amount">Not available</dd></div>
+          <div><dt>Verified By</dt><dd id="verified-by">Not available</dd></div>
+          <div><dt>Verification Time</dt><dd id="verified-at">Not available</dd></div>
+          <div><dt>Current Status</dt><dd id="verified-status">Not available</dd></div>
+        </dl>
+        <div class="transaction-verification-buttons">
+          <a id="verified-view-transaction" class="btn btn-secondary" href="#">View Transaction</a>
+          <a id="verified-continue-transfer" class="btn btn-primary" href="#">Continue to Energy Transfer</a>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/api/transaction-api.js"></script>
+  <script src="../../js/transactions/transaction-verify.js"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifier Dashboard - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/transactions.css">
+</head>
+<body>
+  <div id="app-layout-wrapper">
+    <section class="page-header transaction-page-header">
+      <div class="page-title">
+        <h1>Transaction Verifier Dashboard</h1>
+        <p>Review verification work and transaction progress.</p>
+      </div>
+      <div class="transaction-detail-header-actions">
+        <a href="transactions.html" class="btn btn-secondary">All Transactions</a>
+        <a href="transactions.html?view=history" class="btn btn-secondary">Transaction History</a>
+        <button type="button" id="refresh-verifier-dashboard" class="btn btn-secondary">Refresh</button>
+      </div>
+    </section>
+
+    <section class="transaction-summary verifier-dashboard-summary" aria-label="Transaction summary">
+      <article class="transaction-summary-card"><span>Total Transactions</span><strong id="dashboard-total">0</strong></article>
+      <article class="transaction-summary-card"><span>Pending Verification</span><strong id="dashboard-pending">0</strong></article>
+      <article class="transaction-summary-card"><span>Verified</span><strong id="dashboard-verified">0</strong></article>
+      <article class="transaction-summary-card"><span>Completed</span><strong id="dashboard-completed">0</strong></article>
+      <article class="transaction-summary-card"><span>Rejected</span><strong id="dashboard-rejected">0</strong></article>
+    </section>
+
+    <section class="card transaction-list-card">
+      <div class="transaction-list-toolbar">
+        <div>
+          <h2>Transactions Requiring Attention</h2>
+          <p>Continue verification or completion for transactions in progress.</p>
+        </div>
+      </div>
+      <div id="dashboard-transactions-state" class="transactions-state" role="status" aria-live="polite">Loading transactions...</div>
+      <div class="table-responsive">
+        <table class="data-table transaction-table">
+          <thead>
+            <tr><th>Transaction ID</th><th>Reservation ID</th><th>Prosumer</th><th>Energy</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody id="dashboard-attention-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/api/transaction-api.js"></script>
+  <script src="../../js/transactions/dashboard.js"></script>
+</body>
+</html>

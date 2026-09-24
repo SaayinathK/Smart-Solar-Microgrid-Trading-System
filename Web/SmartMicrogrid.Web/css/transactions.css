@@ -1,0 +1,373 @@
+/* ============================================================================
+   Smart Microgrid Energy System - Transaction List & History
+   ============================================================================ */
+
+.transaction-page-header {
+  margin-bottom: 1.25rem;
+}
+
+.transaction-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.transaction-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.2rem 1.35rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.transaction-summary-card span,
+.transaction-list-toolbar p {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.transaction-summary-card strong {
+  color: var(--text-primary);
+  font-size: 1.65rem;
+  line-height: 1.2;
+}
+
+.transaction-list-card {
+  padding: 1.4rem;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.verifier-dashboard-summary {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.transaction-list-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.transaction-list-controls .transaction-filter-label {
+  min-width: 220px;
+}
+
+.transaction-list-controls .transaction-filter-label:first-child {
+  min-width: min(34vw, 340px);
+}
+
+.transaction-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  min-width: 190px;
+}
+
+.transaction-confirm-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 1rem 0;
+  color: var(--text-primary);
+}
+
+.transaction-confirm-checkbox input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.2rem;
+  accent-color: var(--accent-primary);
+}
+
+.transaction-completion-success {
+  border-color: color-mix(in srgb, var(--accent-emerald) 45%, var(--border-color));
+}
+
+.transaction-detail-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.transaction-verification-summary {
+  margin-bottom: 1rem;
+  padding: 1.35rem 1.4rem;
+}
+
+.transaction-verification-summary .transaction-list-toolbar {
+  align-items: center;
+}
+
+.transaction-help-text {
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+.transaction-help-text code {
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+}
+
+.transaction-qr-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.transaction-qr-input {
+  width: 100%;
+  min-height: 7rem;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.transaction-verification-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.transaction-confirmation {
+  margin-top: 1rem;
+  padding: 1.35rem 1.4rem;
+  border-color: var(--accent-primary);
+}
+
+.transaction-confirmation p {
+  color: var(--text-secondary);
+}
+
+.transaction-verification-result {
+  margin-top: 1rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.transaction-verification-result p {
+  font-weight: 600;
+}
+
+.transaction-result-success {
+  border-color: color-mix(in srgb, var(--accent-emerald) 45%, var(--border-color));
+}
+
+.transaction-result-error {
+  border-color: color-mix(in srgb, var(--accent-rose) 45%, var(--border-color));
+}
+
+.transaction-result-info {
+  border-color: color-mix(in srgb, var(--accent-cyan) 45%, var(--border-color));
+}
+
+.transaction-detail-status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1.25rem 1.4rem;
+}
+
+.transaction-detail-eyebrow {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.transaction-detail-status .status-badge {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.9rem;
+}
+
+.transaction-detail-card {
+  margin-bottom: 1rem;
+  padding: 1.35rem 1.4rem;
+}
+
+.transaction-detail-card h2 {
+  margin-bottom: 1rem;
+  font-size: 1.08rem;
+}
+
+.transaction-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+}
+
+.transaction-details-grid > div {
+  min-width: 0;
+}
+
+.transaction-details-grid dt {
+  margin-bottom: 0.2rem;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.transaction-details-grid dd {
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.transaction-detail-action {
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-align: right;
+}
+
+.transaction-action-terminal {
+  color: var(--text-primary);
+}
+
+.transaction-qr-data {
+  max-height: 10rem;
+  overflow: auto;
+  padding: 0.9rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font: 0.85rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.transaction-list-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.transaction-filter-label {
+  display: grid;
+  gap: 0.35rem;
+  min-width: min(100%, 280px);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.transactions-state {
+  padding: 1.5rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.transactions-state[hidden] {
+  display: none;
+}
+
+.transaction-table {
+  min-width: 1040px;
+}
+
+.transaction-status-pending,
+.transaction-status-qrgenerated,
+.transaction-status-verificationpending,
+.transaction-status-energytransferinprogress {
+  color: var(--accent-amber);
+  background: color-mix(in srgb, var(--accent-amber) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-amber) 30%, transparent);
+}
+
+.transaction-status-verified {
+  color: var(--accent-cyan);
+  background: color-mix(in srgb, var(--accent-cyan) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-cyan) 30%, transparent);
+}
+
+.transaction-status-completed {
+  color: var(--accent-emerald);
+  background: color-mix(in srgb, var(--accent-emerald) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-emerald) 30%, transparent);
+}
+
+.transaction-status-rejected,
+.transaction-status-cancelled {
+  color: var(--accent-rose);
+  background: color-mix(in srgb, var(--accent-rose) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-rose) 30%, transparent);
+}
+
+.transaction-status-unknown {
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+}
+
+@media (max-width: 760px) {
+  .transaction-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .transaction-list-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .transaction-list-controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .transaction-list-controls .transaction-filter-label,
+  .transaction-list-controls .transaction-filter-label:first-child {
+    min-width: 100%;
+  }
+
+  .transaction-filter-label {
+    min-width: 100%;
+  }
+
+  .transaction-list-card {
+    padding: 1rem;
+  }
+
+  .transaction-detail-status-card {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .transaction-detail-action {
+    text-align: left;
+  }
+
+  .transaction-detail-card {
+    padding: 1rem;
+  }
+
+  .transaction-verification-summary,
+  .transaction-confirmation {
+    padding: 1rem;
+  }
+
+  .verifier-dashboard-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .transaction-details-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

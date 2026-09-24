@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energy Transactions - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/forms.css">
+  <link rel="stylesheet" href="../../css/transactions.css">
+</head>
+<body>
+  <div id="app-layout-wrapper">
+    <section class="page-header transaction-page-header">
+      <div class="page-title">
+        <h1>Energy Transactions</h1>
+        <p id="transactions-page-description">View and verify energy transactions.</p>
+      </div>
+      <button type="button" id="refresh-transactions" class="btn btn-secondary">Refresh</button>
+    </section>
+
+    <section class="transaction-summary" aria-label="Transaction summary">
+      <article class="transaction-summary-card">
+        <span>Total Transactions</span>
+        <strong id="total-transactions">0</strong>
+      </article>
+      <article class="transaction-summary-card">
+        <span>Pending Verification</span>
+        <strong id="pending-transactions">0</strong>
+      </article>
+      <article class="transaction-summary-card">
+        <span>Verified</span>
+        <strong id="verified-transactions">0</strong>
+      </article>
+      <article class="transaction-summary-card">
+        <span>Completed</span>
+        <strong id="completed-transactions">0</strong>
+      </article>
+    </section>
+
+    <section class="card transaction-list-card">
+      <div class="transaction-list-toolbar">
+        <div>
+          <h2 id="transactions-list-title">Energy Transactions</h2>
+          <p>Review current and past energy transactions.</p>
+        </div>
+        <div class="transaction-list-controls">
+          <label class="transaction-filter-label" for="transaction-search">
+            Search transactions
+            <input id="transaction-search" class="form-control" type="search" placeholder="ID, reservation, prosumer, or microgrid">
+          </label>
+          <label class="transaction-filter-label" for="transaction-filter">
+            Filter by status
+            <select id="transaction-filter" class="form-control">
+              <option value="all">All transactions</option>
+              <option value="pending">Pending / QRGenerated / VerificationPending</option>
+              <option value="Verified">Verified</option>
+              <option value="EnergyTransferInProgress">Energy Transfer In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Cancelled">Cancelled</option>
+              <option value="history">History: Completed / Rejected / Cancelled</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div id="transactions-state" class="transactions-state" role="status" aria-live="polite">
+        Loading transactions...
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table transaction-table">
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>Reservation ID</th>
+              <th>Prosumer</th>
+              <th>Energy</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Verification Time</th>
+              <th>Energy Transfer Time</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="transactions-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/api/transaction-api.js"></script>
+  <script src="../../js/transactions/transactions.js"></script>
+</body>
+</html>
