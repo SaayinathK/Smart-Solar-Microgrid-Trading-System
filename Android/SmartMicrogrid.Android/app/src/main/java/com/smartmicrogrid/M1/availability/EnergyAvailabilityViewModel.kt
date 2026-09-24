@@ -29,11 +29,11 @@ class EnergyAvailabilityViewModel(application: Application) : AndroidViewModel(a
         repository = EnergySlotRepository(RetrofitClient.apiService, db.energySlotDao())
     }
 
-    fun loadAvailability(location: String? = null) {
+    fun loadAvailability(location: String? = null, minimumEnergy: Double? = null) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
-            val result = repository.getEnergyAvailability(location)
+            val result = repository.getEnergyAvailability(location, minimumEnergy)
             _isLoading.value = false
             result.onSuccess {
                 _availableSlots.value = it

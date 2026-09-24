@@ -11,7 +11,7 @@
 /* Sidebar Container */
 .sidebar {
   width: 280px;
-  background: var(--bg-secondary);
+  background: linear-gradient(180deg, var(--bg-secondary), var(--bg-primary));
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -32,6 +32,7 @@
   align-items: center;
   gap: 0.85rem;
   border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(100deg, var(--accent-light), transparent);
 }
 
 .sidebar-logo {
@@ -207,7 +208,8 @@
 /* Top App Header */
 .app-header {
   height: 76px;
-  background: var(--bg-secondary);
+  background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
+  backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--border-color);
   padding: 0 2.25rem;
   display: flex;
@@ -235,7 +237,8 @@
 
 .header-title {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--text-primary);
 }
 

@@ -34,10 +34,10 @@ class EnergySlotRepository(
         }
     }
 
-    suspend fun getEnergyAvailability(location: String? = null): Result<List<EnergyAvailabilitySlot>> {
+    suspend fun getEnergyAvailability(location: String? = null, minimumEnergy: Double? = null): Result<List<EnergyAvailabilitySlot>> {
         return withContext(Dispatchers.IO) {
             try {
-                val response = apiService.getEnergyAvailability(location = location)
+                val response = apiService.getEnergyAvailability(location = location, minimumEnergy = minimumEnergy)
                 if (response.isSuccessful && response.body()?.success == true) {
                     Result.success(response.body()?.data ?: emptyList())
                 } else {

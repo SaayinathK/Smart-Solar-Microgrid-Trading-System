@@ -10,6 +10,7 @@
 :root {
   --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
   --bg-card: #ffffff;
   --bg-card-hover: #f1f5f9;
   --border-color: #e2e8f0;
@@ -50,6 +51,7 @@
 [data-theme="dark"] {
   --bg-primary: #0a0e17;
   --bg-secondary: #111827;
+  --bg-tertiary: #1e293b;
   --bg-card: rgba(17, 24, 39, 0.85);
   --bg-card-hover: rgba(30, 41, 59, 0.9);
   --border-color: rgba(255, 255, 255, 0.09);
@@ -106,12 +108,22 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(37, 99, 235, 0.08), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.08), transparent 25%);
+  background-image:
+    linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(248, 250, 252, 0.98)),
+    radial-gradient(circle at 15% 50%, rgba(37, 99, 235, 0.10), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.10), transparent 25%),
+    url('../assets/images/bg_web_dashboard.png');
   background-attachment: fixed;
   background-size: cover;
   transition: background-color var(--transition-smooth), color var(--transition-smooth);
+}
+
+[data-theme="dark"] body {
+  background-image:
+    linear-gradient(180deg, rgba(10, 14, 23, 0.86), rgba(10, 14, 23, 0.96)),
+    radial-gradient(circle at 15% 50%, rgba(37, 99, 235, 0.16), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.13), transparent 25%),
+    url('../assets/images/bg_web_dashboard.png');
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -191,14 +203,14 @@ a:hover {
   border-radius: var(--radius-md);
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
   text-decoration: none;
 }
 
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%);
   color: #ffffff;
-  box-shadow: 0 4px 14px var(--accent-glow);
+  box-shadow: 0 7px 18px var(--accent-glow);
 }
 
 .btn-primary:hover {
@@ -271,7 +283,7 @@ a:hover {
 }
 
 /* Glassmorphism / Modern Card */
-.glass-card {
+.card {
   background: var(--bg-card);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -282,7 +294,10 @@ a:hover {
   transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), background var(--transition-smooth), border-color var(--transition-smooth);
 }
 
-.glass-card:hover {
+.card > h2:first-child, .card > h3:first-child { margin-bottom: 0.35rem; }
+.card > p:first-child, .card > h2 + p, .card > h3 + p { color: var(--text-secondary); }
+
+.card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
   border-color: var(--border-glow);

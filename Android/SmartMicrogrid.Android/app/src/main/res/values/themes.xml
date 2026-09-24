@@ -11,6 +11,7 @@
         <item name="colorOnSecondary">@color/text_dark_primary</item>
         <item name="colorSecondaryContainer">@color/primary</item>
         <item name="colorOnSecondaryContainer">#FFFFFF</item>
+        <item name="colorTertiary">@color/neon_cyan</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         
@@ -23,6 +24,7 @@
         
         <!-- Glass Card Style -->
         <item name="materialCardViewStyle">@style/Widget.SmartMicrogrid.CardView.Glass</item>
+        <item name="materialButtonStyle">@style/Widget.SmartMicrogrid.Button</item>
     </style>
 
     <style name="Widget.SmartMicrogrid.CardView.Glass" parent="Widget.Material3.CardView.Elevated">
@@ -31,5 +33,13 @@
         <item name="strokeWidth">1dp</item>
         <item name="cardElevation">8dp</item>
         <item name="cardCornerRadius">16dp</item>
+    </style>
+
+    <style name="Widget.SmartMicrogrid.Button" parent="Widget.Material3.Button">
+        <item name="cornerRadius">16dp</item>
+        <item name="android:minHeight">52dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:insetTop">3dp</item>
+        <item name="android:insetBottom">3dp</item>
     </style>
 </resources>

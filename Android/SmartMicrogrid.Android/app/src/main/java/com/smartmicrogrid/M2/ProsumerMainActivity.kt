@@ -31,7 +31,7 @@ class ProsumerMainActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> loadFragment(com.smartmicrogrid.ui.HomeFragment())
-                R.id.nav_search -> loadFragment(PlaceholderFragment.newInstance("Search Energy"))
+                R.id.nav_search -> loadFragment(com.smartmicrogrid.M1.microgrid.SearchEnergyFragment())
                 R.id.nav_reservations -> loadFragment(PlaceholderFragment.newInstance("My Reservations"))
                 R.id.nav_profile -> loadFragment(com.smartmicrogrid.ui.ProfileFragment())
                 else -> false

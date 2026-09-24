@@ -11,32 +11,58 @@
   <div id="navbar-container"></div>
 
   <div class="auth-wrapper">
-    <div class="glass-card auth-card">
-      <div class="auth-header">
-        <h2>Welcome Back</h2>
-        <p>Sign in to access your microgrid portal</p>
+    <div class="auth-container">
+      <!-- Solar Visual Hero Side -->
+      <div class="auth-visual-side">
+        <div class="auth-visual-brand">
+          <div class="logo-icon">⚡</div>
+          <h1>Smart Microgrid</h1>
+        </div>
+        <div class="auth-visual-content">
+          <h2>Empowering Clean Energy Trading</h2>
+          <p>Join a modern decentralized solar ecosystem. Monitor microgrids, trade energy slots, and track battery storage in real-time.</p>
+          <div class="auth-feature-list">
+            <div class="auth-feature-item">
+              <span>☀️</span> Real-Time Solar Yield & Storage Insights
+            </div>
+            <div class="auth-feature-item">
+              <span>⚡</span> Direct Peer-to-Peer Energy Reservation
+            </div>
+            <div class="auth-feature-item">
+              <span>🛡️</span> Verified Microgrid Security & Operations
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div id="alert-box" class="alert alert-danger"></div>
-
-      <form id="login-form">
-        <div class="form-group">
-          <label class="form-label" for="email">Email Address</label>
-          <input type="email" id="email" class="form-control" placeholder="name@domain.com" required autocomplete="email">
+      <!-- Form Card Side -->
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Welcome Back</h2>
+          <p>Sign in to access your microgrid portal</p>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="password">Password</label>
-          <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+        <div id="alert-box" class="alert alert-danger"></div>
+
+        <form id="login-form">
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address</label>
+            <input type="email" id="email" class="form-control" placeholder="name@domain.com" required autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.85rem;">
+            Sign In
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          Don't have an account? <a href="register.html">Register as Prosumer</a>
         </div>
-
-        <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
-          Sign In
-        </button>
-      </form>
-
-      <div class="auth-footer">
-        Don't have an account? <a href="register.html">Register as Prosumer</a>
       </div>
     </div>
   </div>
