@@ -29,4 +29,22 @@
     <string name="energy_transfer_confirmation_title">Energy Transfer Confirmation</string>
     <string name="energy_amount_kwh">%1$s kWh</string>
     <string name="transfer_confirmation_requires_verified_status">Transfer confirmation is available only for Verified transactions.</string>
+    <string name="my_transactions">My Transactions</string>
+    <string name="prosumer_transaction_records">Your transaction records</string>
+    <string name="my_transactions_list">My transactions list</string>
+    <string name="no_transactions_found">No transactions found.</string>
+    <string name="prosumer_transaction_details">Transaction Details</string>
+    <string name="microgrid_node_id">Microgrid Node ID</string>
+    <string name="energy_slot_id">Energy Slot ID</string>
+    <string name="created_at">Created At</string>
+    <string name="updated_at">Updated At</string>
+    <string name="verification_time">Verification Time</string>
+    <string name="energy_transfer_time">Energy Transfer Time</string>
+    <string name="view_qr">View QR</string>
+    <string name="qr_not_generated_yet">QR code has not been generated yet.</string>
+    <string name="transaction_qr">Transaction QR</string>
+    <string name="show_transaction_qr_to_verifier">Show this QR code to the verifier</string>
+    <string name="transaction_qr_image">Transaction QR code</string>
+    <string name="qr_payload_missing">QR data is missing. Return to transaction details and try again.</string>
+    <string name="qr_render_failed">Could not display the transaction QR code.</string>
 </resources>

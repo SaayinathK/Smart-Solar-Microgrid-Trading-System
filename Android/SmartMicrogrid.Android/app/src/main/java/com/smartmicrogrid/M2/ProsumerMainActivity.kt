@@ -33,6 +33,7 @@ class ProsumerMainActivity : AppCompatActivity() {
                 R.id.nav_home -> loadFragment(com.smartmicrogrid.ui.HomeFragment())
                 R.id.nav_search -> loadFragment(com.smartmicrogrid.M1.microgrid.SearchEnergyFragment())
                 R.id.nav_reservations -> loadFragment(PlaceholderFragment.newInstance("My Reservations"))
+                R.id.nav_transactions -> loadFragment(com.smartmicrogrid.M3.MyTransactionsFragment())
                 R.id.nav_profile -> loadFragment(com.smartmicrogrid.ui.ProfileFragment())
                 else -> false
             }
