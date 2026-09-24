@@ -10,7 +10,7 @@ out/
 *.sln.docstates
 *.suo
 
-## Build & Publish Output
+## .NET Build & Publish Output
 [Dd]ebug/
 [Rr]elease/
 publish/
@@ -21,7 +21,7 @@ appsettings.Local.json
 *.pem
 *.pfx
 
-## Node & Web
+## Node.js & Web
 node_modules/
 dist/
 .DS_Store
@@ -29,14 +29,29 @@ dist/
 ## Android & Gradle
 .gradle/
 build/
+*/build/
 local.properties
 .navigation/
 captures/
 *.apk
 *.aab
+.externalNativeBuild/
+.cxx/
+
+## Android Studio
+*.iml
+
+## Kotlin / Java Generated Files
+*.class
 
 ## Database & Local Data
 *.db
 *.sqlite
 *.sqlite3
+
+## Logs
 *.log
+
+## OS / IDE Temporary Files
+Thumbs.db
+.DS_Store
