@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microgrids - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/forms.css">
+</head>
+<body>
+
+  <div id="app-layout-wrapper">
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2>Solar Microgrid Nodes</h2>
+          <p style="color: var(--text-secondary); margin-top: 0.25rem;">
+            Manage microgrid generators, locations, capacities, and operational statuses.
+          </p>
+        </div>
+        <div id="operator-actions" style="display: none;">
+          <a href="create-microgrid.html" class="btn btn-primary">+ Register New Microgrid</a>
+        </div>
+      </div>
+
+      <!-- Filters & Search -->
+      <div style="display: flex; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap;">
+        <input type="text" id="search-input" class="form-control" placeholder="Search by name or location..." style="flex: 1; min-width: 200px;">
+        <select id="status-filter" class="form-control" style="width: 180px;">
+          <option value="">All Statuses</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+          <option value="Maintenance">Maintenance</option>
+          <option value="Offline">Offline</option>
+        </select>
+        <button onclick="loadMicrogrids()" class="btn btn-secondary">Filter</button>
+      </div>
+    </div>
+
+    <!-- Microgrid List Table -->
+    <div class="card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Microgrid Name</th>
+              <th>Location</th>
+              <th>Capacity</th>
+              <th>Battery Level</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="microgrids-table-body">
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 2rem;">Loading microgrids...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/microgrid-api.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+
+  <script>
+    AuthGuard.requireAuth();
+    renderAppLayout('microgrids', 'Microgrid Nodes');
+
+    const user = SessionManager.getUser();
+    const canEdit = user && (user.role === 'MicrogridOperator' || user.role === 'Admin');
+
+    if (canEdit) {
+      document.getElementById('operator-actions').style.display = 'block';
+    }
+
+    async function loadMicrogrids() {
+      const search = document.getElementById('search-input').value;
+      const status = document.getElementById('status-filter').value;
+      const tbody = document.getElementById('microgrids-table-body');
+
+      try {
+        const response = await MicrogridApi.getMicrogrids({ search, status });
+        const list = response.data || [];
+
+        if (list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;">No microgrids found matching criteria.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = list.map(m => {
+          let statusBadgeClass = 'status-active';
+          if (m.status === 'Inactive') statusBadgeClass = 'status-inactive';
+          else if (m.status === 'Maintenance') statusBadgeClass = 'status-warning';
+          else if (m.status === 'Offline') statusBadgeClass = 'status-offline';
+
+          return `
+            <tr>
+              <td>
+                <div style="font-weight: 600;">${m.name}</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">${m.description || 'Solar Node'}</div>
+              </td>
+              <td>${m.location}</td>
+              <td>
+                <div>${m.capacity} kWh</div>
+                <div style="font-size: 0.75rem; color: var(--accent-primary);">Available: ${m.availableCapacity} kWh</div>
+              </td>
+              <td>
+                <div>${m.currentBatteryLevel} / ${m.batteryCapacity} kWh</div>
+                <div style="font-size: 0.75rem; color: var(--accent-cyan);">${m.batteryPercentage.toFixed(1)}%</div>
+              </td>
+              <td><span class="status-badge ${statusBadgeClass}">${m.status}</span></td>
+              <td>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                  <a href="microgrid-details.html?id=${m.id}" class="btn btn-secondary btn-sm">Details</a>
+                  ${canEdit ? `
+                    <a href="edit-microgrid.html?id=${m.id}" class="btn btn-secondary btn-sm">Edit</a>
+                    <button onclick="toggleStatus('${m.id}', '${m.status}')" class="btn btn-warning btn-sm">Toggle Status</button>
+                  ` : ''}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-danger); padding: 2rem;">Failed to load microgrids: ${err.message || 'Server error'}</td></tr>`;
+      }
+    }
+
+    async function toggleStatus(id, currentStatus) {
+      const nextStatus = currentStatus === 'Active' ? 'Maintenance' : 'Active';
+      if (!confirm(`Are you sure you want to change status from ${currentStatus} to ${nextStatus}?`)) return;
+
+      try {
+        await MicrogridApi.updateStatus(id, nextStatus);
+        ApiClient.showToast(`Microgrid status changed to ${nextStatus}`, 'success');
+        loadMicrogrids();
+      } catch (err) {
+        ApiClient.showToast(err.message || 'Status update failed', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadMicrogrids);
+  </script>
+</body>
+</html>

@@ -11,54 +11,80 @@
   <div id="navbar-container"></div>
 
   <div class="auth-wrapper">
-    <div class="glass-card auth-card" style="max-width: 540px;">
-      <div class="auth-header">
-        <h2>Create Prosumer Account</h2>
-        <p>Join the local solar microgrid energy network</p>
+    <div class="auth-container">
+      <!-- Solar Visual Hero Side -->
+      <div class="auth-visual-side">
+        <div class="auth-visual-brand">
+          <div class="logo-icon">☀️</div>
+          <h1>Join Smart Microgrid</h1>
+        </div>
+        <div class="auth-visual-content">
+          <h2>Start Microgrid Prosumer Trading</h2>
+          <p>Produce, store, and trade solar power directly with your local community microgrid network.</p>
+          <div class="auth-feature-list">
+            <div class="auth-feature-item">
+              <span>🔋</span> Integrated Battery Storage Management
+            </div>
+            <div class="auth-feature-item">
+              <span>📊</span> Live Capacity & Consumption Analytics
+            </div>
+            <div class="auth-feature-item">
+              <span>🌱</span> Zero Carbon Solar Energy Grid
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div id="alert-box" class="alert alert-danger"></div>
-
-      <form id="register-form">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="firstName">First Name</label>
-            <input type="text" id="firstName" class="form-control" placeholder="John" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="lastName">Last Name</label>
-            <input type="text" id="lastName" class="form-control" placeholder="Doe" required>
-          </div>
+      <!-- Form Card Side -->
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Create Account</h2>
+          <p>Join the local solar microgrid energy network</p>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="email">Email Address</label>
-          <input type="email" id="email" class="form-control" placeholder="john.doe@domain.com" required>
-        </div>
+        <div id="alert-box" class="alert alert-danger"></div>
 
-        <div class="form-group">
-          <label class="form-label" for="phoneNumber">Phone Number</label>
-          <input type="tel" id="phoneNumber" class="form-control" placeholder="+1234567890">
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="password">Password</label>
-            <input type="password" id="password" class="form-control" placeholder="Minimum 6 chars" required minlength="6">
+        <form id="register-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="firstName">First Name</label>
+              <input type="text" id="firstName" class="form-control" placeholder="John" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lastName">Last Name</label>
+              <input type="text" id="lastName" class="form-control" placeholder="Doe" required>
+            </div>
           </div>
+
           <div class="form-group">
-            <label class="form-label" for="confirmPassword">Confirm Password</label>
-            <input type="password" id="confirmPassword" class="form-control" placeholder="Re-type password" required minlength="6">
+            <label class="form-label" for="email">Email Address</label>
+            <input type="email" id="email" class="form-control" placeholder="john.doe@domain.com" required>
           </div>
+
+          <div class="form-group">
+            <label class="form-label" for="phoneNumber">Phone Number</label>
+            <input type="tel" id="phoneNumber" class="form-control" placeholder="+1234567890">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="password">Password</label>
+              <input type="password" id="password" class="form-control" placeholder="Min 6 chars" required minlength="6">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="confirmPassword">Confirm Password</label>
+              <input type="password" id="confirmPassword" class="form-control" placeholder="Re-type" required minlength="6">
+            </div>
+          </div>
+
+          <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.85rem;">
+            Register Account
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          Already have an account? <a href="login.html">Sign In</a>
         </div>
-
-        <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
-          Register Account
-        </button>
-      </form>
-
-      <div class="auth-footer">
-        Already have an account? <a href="login.html">Sign In</a>
       </div>
     </div>
   </div>

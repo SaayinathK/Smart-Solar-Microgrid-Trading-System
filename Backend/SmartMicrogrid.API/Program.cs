@@ -31,6 +31,14 @@ builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IMicrogridRepository, MicrogridRepository>();
+builder.Services.AddScoped<IEnergySlotRepository, EnergySlotRepository>();
+builder.Services.AddScoped<IMicrogridService, MicrogridService>();
+builder.Services.AddScoped<IEnergyCapacityService, EnergyCapacityService>();
+builder.Services.AddScoped<IBatteryService, BatteryService>();
+builder.Services.AddScoped<IEnergySlotService, EnergySlotService>();
+builder.Services.AddScoped<IMicrogridDashboardService, MicrogridDashboardService>();
+builder.Services.AddHostedService<EnergySlotCleanupService>();
 builder.Services.AddSingleton<JwtHelper>();
 
 // Configure JWT Authentication

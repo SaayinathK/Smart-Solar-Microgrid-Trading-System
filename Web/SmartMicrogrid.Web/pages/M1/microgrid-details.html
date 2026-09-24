@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microgrid Details - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+  <style>
+    .details-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .metric-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="app-layout-wrapper">
+    <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+      <a href="microgrids.html" class="btn btn-secondary">← Back</a>
+      <h2 id="node-name">Loading Node...</h2>
+      <span id="node-status" class="status-badge" style="margin-left: auto;"></span>
+    </div>
+
+    <div class="details-grid">
+      <!-- Battery Status -->
+      <div class="metric-card">
+        <h3>Battery Storage</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">Current charge level and capacity</p>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span style="font-size: 1.5rem; font-weight: bold;" id="battery-level">0 kWh</span>
+          <span style="color: var(--accent-cyan); font-weight: bold;" id="battery-pct">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill fill-cyan" id="battery-progress" style="width: 0%;"></div>
+        </div>
+        <div style="text-align: right; color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem;" id="battery-cap">Total: 0 kWh</div>
+      </div>
+
+      <!-- Capacity Status -->
+      <div class="metric-card">
+        <h3>Energy Capacity</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">Available vs Reserved power</p>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+          <span style="font-size: 1.5rem; font-weight: bold;" id="capacity-avail">0 kWh</span>
+          <span style="color: var(--accent-green); font-weight: bold;">Available</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill fill-green" id="capacity-progress" style="width: 0%;"></div>
+        </div>
+        <div style="text-align: right; color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem;" id="capacity-total">Total: 0 kWh | Reserved: 0 kWh</div>
+      </div>
+    </div>
+
+    <!-- Active Slots -->
+    <div class="card">
+      <h3>Active Energy Slots</h3>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">Future energy blocks available for purchase</p>
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Time Window</th>
+              <th>Available Energy</th>
+              <th>Price</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="slots-table-body">
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 2rem;">Loading slots...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/microgrid-api.js"></script>
+  <script src="../../js/api/energy-slots-api.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+
+  <script>
+    AuthGuard.requireAuth();
+    renderAppLayout('microgrids', 'Microgrid Details');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const nodeId = urlParams.get('id');
+
+    if (!nodeId) {
+      window.location.href = 'microgrids.html';
+    }
+
+    async function loadDetails() {
+      try {
+        const response = await MicrogridApi.getMicrogridById(nodeId);
+        const node = response.data;
+
+        document.getElementById('node-name').textContent = `${node.name} (${node.location})`;
+        
+        const statusEl = document.getElementById('node-status');
+        statusEl.textContent = node.status;
+        if (node.status === 'Inactive') statusEl.className = 'status-badge status-inactive';
+        else if (node.status === 'Maintenance') statusEl.className = 'status-badge status-warning';
+        else if (node.status === 'Offline') statusEl.className = 'status-badge status-offline';
+        else statusEl.className = 'status-badge status-active';
+
+        // Battery
+        document.getElementById('battery-level').textContent = `${node.currentBatteryLevel} kWh`;
+        document.getElementById('battery-pct').textContent = `${node.batteryPercentage.toFixed(1)}%`;
+        document.getElementById('battery-cap').textContent = `Total Capacity: ${node.batteryCapacity} kWh`;
+        document.getElementById('battery-progress').style.width = `${node.batteryPercentage}%`;
+
+        // Capacity
+        const capPct = node.capacity > 0 ? (node.availableCapacity / node.capacity) * 100 : 0;
+        document.getElementById('capacity-avail').textContent = `${node.availableCapacity} kWh`;
+        document.getElementById('capacity-progress').style.width = `${capPct}%`;
+        document.getElementById('capacity-total').textContent = `Total: ${node.capacity} kWh | Reserved: ${node.reservedCapacity} kWh`;
+
+        loadSlots();
+      } catch (err) {
+        ApiClient.showToast(err.message || 'Failed to load details', 'error');
+      }
+    }
+
+    async function loadSlots() {
+      const tbody = document.getElementById('slots-table-body');
+      try {
+        const response = await EnergySlotApi.getSlots({ microgridId: nodeId, status: 'Available' });
+        const list = response.data || [];
+
+        if (list.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 2rem;">No active energy slots available for this microgrid.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = list.map(s => {
+          const start = new Date(s.startTime).toLocaleString();
+          const end = new Date(s.endTime).toLocaleTimeString();
+          return `
+            <tr>
+              <td><div style="font-weight: 600;">${start} - ${end}</div></td>
+              <td>${s.availableAmount} / ${s.energyAmount} kWh</td>
+              <td><span style="color: var(--accent-green); font-weight: bold;">$${s.pricePerUnit.toFixed(2)}</span> / kWh</td>
+              <td><span class="status-badge status-active">${s.status}</span></td>
+            </tr>
+          `;
+        }).join('');
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--accent-danger); padding: 2rem;">Failed to load slots.</td></tr>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDetails);
+  </script>
+</body>
+</html>

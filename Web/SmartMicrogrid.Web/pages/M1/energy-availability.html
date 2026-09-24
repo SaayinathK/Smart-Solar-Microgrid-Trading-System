@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energy Availability - Smart Microgrid Platform</title>
+  <link rel="stylesheet" href="../../css/style.css"><link rel="stylesheet" href="../../css/sidebar.css"><link rel="stylesheet" href="../../css/forms.css"><link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+  <div id="app-layout-wrapper">
+    <section class="availability-hero"><div><div class="eyebrow"><span class="status-dot"></span> Live marketplace inventory</div><h1>Find clean energy, faster.</h1><p>Compare active solar slots by location, volume, schedule, and unit price.</p></div><div class="availability-hero-stat"><span id="availability-total">0</span><small>active offers</small></div></section>
+    <div class="availability-summary"><div><span>Available today</span><strong id="summary-energy">0 kWh</strong></div><div><span>Best unit price</span><strong id="summary-price">-</strong></div><div><span>Locations online</span><strong id="summary-locations">0</strong></div></div>
+    <div class="card availability-filter-card">
+      <div class="filter-heading"><div><h2>Available solar energy slots</h2><p>Refine supply to match your required delivery window and volume.</p></div><button type="button" id="clear-filters" class="btn btn-secondary btn-sm">Clear filters</button></div>
+      <div style="display:flex;gap:1rem;margin-top:1.25rem;flex-wrap:wrap"><input type="text" id="filter-location" class="form-control" placeholder="Location (e.g. Colombo)" style="flex:1;min-width:180px"><input type="number" id="filter-min-energy" class="form-control" min="0" placeholder="Minimum kWh" style="width:160px"><select id="sort-by" class="form-control" style="width:175px"><option value="soonest">Sort: earliest window</option><option value="price">Sort: lowest price</option><option value="energy">Sort: most energy</option></select><button id="search-supply" class="btn btn-primary">Search supply</button></div>
+    </div>
+    <div id="availability-results" class="availability-results"><div class="availability-empty">Loading available energy slots...</div></div>
+  </div>
+  <script src="../../js/config/api-config.js"></script><script src="../../js/common/theme.js"></script><script src="../../js/common/session.js"></script><script src="../../js/api/api-client.js"></script><script src="../../js/api/microgrid-api.js"></script><script src="../../js/common/auth.js"></script><script src="../../js/common/sidebar.js"></script>
+  <script>
+    AuthGuard.requireAuth(); renderAppLayout('availability', 'Energy Availability');
+    async function loadAvailability() {
+      const location = document.getElementById('filter-location').value.trim(); const minEnergy = document.getElementById('filter-min-energy').value; const results = document.getElementById('availability-results'); const button = document.getElementById('search-supply');
+      button.disabled = true; button.textContent = 'Searching...';
+      try {
+        const params = {}; if (location) params.location = location; if (minEnergy) params.minimumEnergy = minEnergy;
+        const response = await MicrogridApi.getEnergyAvailability(params); const list = response.data || []; const sortBy = document.getElementById('sort-by').value;
+        list.sort((a, b) => sortBy === 'price' ? Number(a.pricePerUnit) - Number(b.pricePerUnit) : sortBy === 'energy' ? Number(b.availableAmount) - Number(a.availableAmount) : new Date(a.startTime) - new Date(b.startTime)); updateSummary(list);
+        if (!list.length) { results.innerHTML = '<div class="availability-empty"><strong>No matching energy slots</strong><span>Try reducing the minimum energy or broadening the location.</span></div>'; return; }
+        results.innerHTML = list.map(slot => { const remaining = Number(slot.energyAmount) > 0 ? Math.min(100, Number(slot.availableAmount) / Number(slot.energyAmount) * 100) : 0; return `<article class="energy-offer-card"><div class="offer-header"><div><span class="offer-location">${slot.location || 'Location unavailable'}</span><h3>${slot.microgridName}</h3></div><span class="status-badge status-active">${slot.status}</span></div><div class="offer-metrics"><div><span>Available energy</span><strong>${slot.availableAmount} <small>kWh</small></strong></div><div><span>Unit price</span><strong class="price-value">$${Number(slot.pricePerUnit).toFixed(2)} <small>/ kWh</small></strong></div></div><div class="offer-meter"><span style="width:${remaining}%"></span></div><div class="offer-meter-label"><span>${remaining.toFixed(0)}% of this slot remains</span><span>Total ${slot.energyAmount} kWh</span></div><div class="offer-window"><span>Delivery window</span><strong>${new Date(slot.startTime).toLocaleString()} to ${new Date(slot.endTime).toLocaleString()}</strong></div></article>`; }).join('');
+      } catch (err) { results.innerHTML = `<div class="availability-empty error"><strong>Could not load energy availability</strong><span>${err.message || 'Please refresh and try again.'}</span></div>`; }
+      finally { button.disabled = false; button.textContent = 'Search supply'; }
+    }
+    function updateSummary(list) { const available = list.reduce((total, slot) => total + (Number(slot.availableAmount) || 0), 0); const prices = list.map(slot => Number(slot.pricePerUnit)).filter(Number.isFinite); document.getElementById('availability-total').textContent = list.length; document.getElementById('summary-energy').textContent = `${available.toLocaleString(undefined, { maximumFractionDigits: 1 })} kWh`; document.getElementById('summary-price').textContent = prices.length ? `$${Math.min(...prices).toFixed(2)} / kWh` : '-'; document.getElementById('summary-locations').textContent = new Set(list.map(slot => slot.location).filter(Boolean)).size; }
+    document.addEventListener('DOMContentLoaded', () => { loadAvailability(); document.getElementById('search-supply').addEventListener('click', loadAvailability); document.getElementById('sort-by').addEventListener('change', loadAvailability); document.getElementById('clear-filters').addEventListener('click', () => { document.getElementById('filter-location').value = ''; document.getElementById('filter-min-energy').value = ''; document.getElementById('sort-by').value = 'soonest'; loadAvailability(); }); });
+  </script>
+</body>
+</html>
