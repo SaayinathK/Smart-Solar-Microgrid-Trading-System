@@ -31,6 +31,7 @@
         <activity android:name=".auth.ChangePasswordActivity" />
 
         <activity android:name=".M2.ProsumerMainActivity" />
+        <activity android:name=".M2.AvailableSlotsActivity" />
         <activity android:name=".M3.VerifierMainActivity" />
 
         <activity android:name=".M1.microgrid.MicrogridListActivity" />

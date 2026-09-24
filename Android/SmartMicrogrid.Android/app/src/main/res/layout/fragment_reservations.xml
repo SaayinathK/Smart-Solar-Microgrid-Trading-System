@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:paddingHorizontal="16dp" android:paddingTop="16dp">
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="My reservations" android:textColor="?android:attr/textColorPrimary" android:textSize="24sp" android:textStyle="bold"/>
+    <TextView android:id="@+id/reservation_count" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="?android:attr/textColorSecondary"/>
+    <Button android:id="@+id/reservation_browse_slots" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Browse available energy"/>
+    <com.google.android.material.tabs.TabLayout android:id="@+id/reservation_tabs" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+        <EditText android:id="@+id/reservation_search" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:hint="Search node or slot" android:singleLine="true"/>
+        <Spinner android:id="@+id/reservation_status" android:layout_width="140dp" android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <EditText android:id="@+id/reservation_date_filter" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Optional date filter (YYYY-MM-DD)" android:inputType="date" android:singleLine="true"/>
+    <TextView android:id="@+id/reservation_sync" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingVertical="5dp" android:text="Loading…" android:textColor="?android:attr/textColorSecondary" android:textSize="12sp"/>
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout android:id="@+id/reservation_refresh" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1">
+        <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+            <androidx.recyclerview.widget.RecyclerView android:id="@+id/reservation_list" android:layout_width="match_parent" android:layout_height="match_parent" android:clipToPadding="false" android:paddingTop="8dp"/>
+            <TextView android:id="@+id/reservation_empty" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="No reservations here yet" android:textColor="?android:attr/textColorSecondary" android:visibility="gone"/>
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</LinearLayout>
