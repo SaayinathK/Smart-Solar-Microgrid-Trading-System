@@ -80,6 +80,22 @@
                 <TextView
                     android:id="@+id/tv_energy_transfer_time"
                     style="@style/TransactionDetailValue" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_scan_qr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Scan Transaction QR" />
+
+                <TextView
+                    android:id="@+id/tv_scan_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/text_dark_secondary"
+                    android:textSize="13sp"
+                    android:visibility="gone" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </ScrollView>

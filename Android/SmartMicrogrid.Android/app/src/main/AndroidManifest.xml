@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -33,6 +34,7 @@
         <activity android:name=".M2.ProsumerMainActivity" />
         <activity android:name=".M3.VerifierMainActivity" />
         <activity android:name=".M3.TransactionDetailsActivity" />
+        <activity android:name=".M3.QRScannerActivity" />
 
         <activity android:name=".M1.microgrid.MicrogridListActivity" />
         <activity android:name=".M1.microgrid.MicrogridDetailsActivity" />

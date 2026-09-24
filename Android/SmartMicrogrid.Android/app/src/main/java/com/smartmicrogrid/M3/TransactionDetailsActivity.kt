@@ -1,8 +1,10 @@
 package com.smartmicrogrid.M3
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.smartmicrogrid.databinding.ActivityTransactionDetailsBinding
@@ -11,6 +13,23 @@ class TransactionDetailsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTransactionDetailsBinding
     private val viewModel: TransactionDetailsViewModel by viewModels()
+    private val scannerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            val transactionId = data?.getStringExtra(QRScannerActivity.EXTRA_TRANSACTION_ID)
+            val transactionCode = data?.getStringExtra(QRScannerActivity.EXTRA_TRANSACTION_CODE)
+            val qrData = data?.getStringExtra(QRScannerActivity.EXTRA_QR_DATA)
+
+            binding.tvScanResult.text = "Scanned transaction: $transactionId\nCode: $transactionCode\nPayload: $qrData"
+            binding.tvScanResult.visibility = View.VISIBLE
+        } else {
+            val message = result.data?.getStringExtra(QRScannerActivity.EXTRA_ERROR)
+                ?: "QR scan cancelled."
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,6 +40,10 @@ class TransactionDetailsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val transactionId = intent.getStringExtra("TRANSACTION_ID") ?: ""
+
+        binding.btnScanQr.setOnClickListener {
+            scannerLauncher.launch(Intent(this, QRScannerActivity::class.java))
+        }
 
         binding.btnRetry.setOnClickListener {
             viewModel.loadTransaction(transactionId)
@@ -66,6 +89,7 @@ class TransactionDetailsActivity : AppCompatActivity() {
         binding.tvUpdatedAt.text = valueOrFallback(transaction.updatedAt)
         binding.tvVerificationTime.text = valueOrFallback(transaction.verificationTime)
         binding.tvEnergyTransferTime.text = valueOrFallback(transaction.energyTransferTime)
+        binding.btnScanQr.visibility = View.VISIBLE
     }
 
     private fun valueOrFallback(value: String?, fallback: String = "Not available"): String {
