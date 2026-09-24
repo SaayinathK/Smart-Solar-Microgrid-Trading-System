@@ -34,6 +34,8 @@
         <activity android:name=".M2.ProsumerMainActivity" />
         <activity android:name=".M3.VerifierMainActivity" />
         <activity android:name=".M3.TransactionDetailsActivity" />
+        <activity android:name=".M3.EnergyTransferConfirmationActivity" />
+        <activity android:name=".M3.TransactionCompletionActivity" />
         <activity android:name=".M3.QRScannerActivity" />
 
         <activity android:name=".M1.microgrid.MicrogridListActivity" />

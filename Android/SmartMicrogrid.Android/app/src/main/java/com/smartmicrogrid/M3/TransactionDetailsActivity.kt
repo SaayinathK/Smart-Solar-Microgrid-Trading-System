@@ -58,6 +58,16 @@ class TransactionDetailsActivity : AppCompatActivity() {
             scannerLauncher.launch(Intent(this, QRScannerActivity::class.java))
         }
 
+        binding.btnConfirmEnergyTransfer.setOnClickListener {
+            if (viewModel.transaction.value?.status.equals("Verified", ignoreCase = true)) {
+                startActivity(
+                    Intent(this, EnergyTransferConfirmationActivity::class.java).apply {
+                        putExtra(EXTRA_TRANSACTION_ID, displayedTransactionId)
+                    }
+                )
+            }
+        }
+
         binding.btnCancelVerification.setOnClickListener {
             scannedQrData = null
             binding.verificationControls.visibility = View.GONE
@@ -142,6 +152,9 @@ class TransactionDetailsActivity : AppCompatActivity() {
         binding.tvVerificationTime.text = valueOrFallback(transaction.verificationTime)
         binding.tvEnergyTransferTime.text = valueOrFallback(transaction.energyTransferTime)
         binding.btnScanQr.visibility = View.VISIBLE
+        binding.btnConfirmEnergyTransfer.visibility = if (
+            transaction.status.equals("Verified", ignoreCase = true)
+        ) View.VISIBLE else View.GONE
     }
 
     private fun valueOrFallback(value: String?, fallback: String = "Not available"): String {
@@ -151,5 +164,9 @@ class TransactionDetailsActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    companion object {
+        const val EXTRA_TRANSACTION_ID = "TRANSACTION_ID"
     }
 }

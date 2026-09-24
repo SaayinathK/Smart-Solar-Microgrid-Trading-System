@@ -25,6 +25,14 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
     val errorMessage: LiveData<String?> = _errorMessage
 
     fun loadPendingTransactions() {
+        loadTransactions(includeAllStatuses = false)
+    }
+
+    fun loadTransactionHistory() {
+        loadTransactions(includeAllStatuses = true)
+    }
+
+    private fun loadTransactions(includeAllStatuses: Boolean) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
@@ -41,7 +49,12 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                     response.isSuccessful -> {
                         val body = response.body()
                         if (body?.success == true) {
-                            _transactions.value = body.data.orEmpty().filter(::isActionable)
+                            val transactions = body.data.orEmpty()
+                            _transactions.value = if (includeAllStatuses) {
+                                transactions
+                            } else {
+                                transactions.filter(::isActionable)
+                            }
                         } else {
                             _errorMessage.value = body?.message ?: "Unable to load transactions."
                         }

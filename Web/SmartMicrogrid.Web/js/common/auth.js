@@ -23,7 +23,7 @@ const AuthGuard = {
     if (requiredRole && SessionManager.getUserRole() !== requiredRole) {
       ApiClient.showToast('Access denied: You do not have permission to view this page.', 'error');
       setTimeout(() => {
-        window.location.href = '/dashboard.html';
+        window.location.href = getAuthAppUrl('dashboard.html');
       }, 1500);
       return false;
     }
@@ -33,7 +33,10 @@ const AuthGuard = {
 
   redirectIfAuthenticated() {
     if (SessionManager.isAuthenticated()) {
-      window.location.href = '/dashboard.html';
+      const landingPage = SessionManager.getUserRole() === 'TransactionVerifier'
+        ? 'pages/M3/dashboard.html'
+        : 'dashboard.html';
+      window.location.href = getAuthAppUrl(landingPage);
     }
   },
 

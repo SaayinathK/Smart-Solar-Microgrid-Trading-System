@@ -82,6 +82,14 @@
                     style="@style/TransactionDetailValue" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_confirm_energy_transfer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Confirm Energy Transfer"
+                    android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_scan_qr"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
