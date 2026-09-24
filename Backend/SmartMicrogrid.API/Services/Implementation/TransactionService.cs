@@ -174,7 +174,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             // System-level monitoring
             // --------------------------------------------------------
             else if (currentRole.Equals(
-                         "SystemAdministrator",
+                         "Admin",
                          StringComparison.OrdinalIgnoreCase))
             {
                 transactions =
@@ -244,7 +244,7 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             var isAdministrator =
                 currentRole.Equals(
-                    "SystemAdministrator",
+                    "Admin",
                     StringComparison.OrdinalIgnoreCase);
 
 
