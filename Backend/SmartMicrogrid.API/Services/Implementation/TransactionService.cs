@@ -738,6 +738,23 @@ namespace SmartMicrogrid.API.Services.Implementation
             var requestedStatus =
                 status.Trim();
 
+            var workflowControlledStatuses = new[]
+            {
+                "QRGenerated",
+                "VerificationPending",
+                "Verified",
+                "EnergyTransferInProgress",
+                "Completed"
+            };
+
+            if (workflowControlledStatuses.Contains(
+                    requestedStatus,
+                    StringComparer.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Status '{requestedStatus}' must be changed through the appropriate transaction workflow.");
+            }
+
 
             // --------------------------------------------------------
             // Validate status transition
