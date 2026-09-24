@@ -16,7 +16,9 @@ interface ApiService {
     ): Response<ApiResponse<List<Microgrid>>>
 
     @GET("microgrids/{id}")
-    suspend fun getMicrogridById(@Path("id") id: String): Response<ApiResponse<Microgrid>>
+    suspend fun getMicrogridById(
+        @Path("id") id: String
+    ): Response<ApiResponse<Microgrid>>
 
     @PATCH("microgrids/{id}/status")
     suspend fun updateMicrogridStatus(
@@ -44,7 +46,9 @@ interface ApiService {
     ): Response<ApiResponse<List<EnergySlot>>>
 
     @POST("energy-slots")
-    suspend fun createEnergySlot(@Body request: CreateEnergySlotRequest): Response<ApiResponse<EnergySlot>>
+    suspend fun createEnergySlot(
+        @Body request: CreateEnergySlotRequest
+    ): Response<ApiResponse<EnergySlot>>
 
     @PATCH("energy-slots/{id}/status")
     suspend fun updateSlotStatus(
@@ -59,16 +63,60 @@ interface ApiService {
         @Query("minimumEnergy") minimumEnergy: Double? = null
     ): Response<ApiResponse<List<EnergyAvailabilitySlot>>>
 
+    // ── M3 Transaction Endpoints ──
+
+    @GET("transactions")
+    suspend fun getTransactions(): Response<ApiResponse<List<Transaction>>>
+
+    @GET("transactions/{id}")
+    suspend fun getTransactionById(
+        @Path("id") id: String
+    ): Response<ApiResponse<Transaction>>
+
+    @POST("transactions")
+    suspend fun createTransaction(
+        @Body request: CreateTransactionRequest
+    ): Response<ApiResponse<Transaction>>
+
+    @POST("transactions/{id}/generate-qr")
+    suspend fun generateTransactionQr(
+        @Path("id") id: String
+    ): Response<ApiResponse<Transaction>>
+
+    @POST("transactions/{id}/verify")
+    suspend fun verifyTransaction(
+        @Path("id") id: String,
+        @Body request: VerifyTransactionRequest
+    ): Response<ApiResponse<Transaction>>
+
+    @POST("transactions/{id}/complete")
+    suspend fun completeTransaction(
+        @Path("id") id: String,
+        @Body request: CompleteTransactionRequest
+    ): Response<ApiResponse<Transaction>>
+
+    @PATCH("transactions/{id}/status")
+    suspend fun updateTransactionStatus(
+        @Path("id") id: String,
+        @Query("status") status: String
+    ): Response<ApiResponse<Transaction>>
+
     // ── Auth Endpoints ──
 
     @POST("auth/login")
-    suspend fun login(@Body request: LoginRequest): Response<ApiResponse<LoginResponse>>
+    suspend fun login(
+        @Body request: LoginRequest
+    ): Response<ApiResponse<LoginResponse>>
 
     @POST("auth/register")
-    suspend fun register(@Body request: RegisterRequest): Response<ApiResponse<User>>
+    suspend fun register(
+        @Body request: RegisterRequest
+    ): Response<ApiResponse<User>>
 
     @POST("auth/change-password")
-    suspend fun changePassword(@Body request: ChangePasswordRequest): Response<ApiResponse<Unit>>
+    suspend fun changePassword(
+        @Body request: ChangePasswordRequest
+    ): Response<ApiResponse<Unit>>
 
     // ── User Profile Endpoints ──
 
@@ -76,5 +124,7 @@ interface ApiService {
     suspend fun getCurrentUser(): Response<ApiResponse<User>>
 
     @PUT("users/me")
-    suspend fun updateCurrentUser(@Body request: UpdateProfileRequest): Response<ApiResponse<User>>
+    suspend fun updateCurrentUser(
+        @Body request: UpdateProfileRequest
+    ): Response<ApiResponse<User>>
 }
