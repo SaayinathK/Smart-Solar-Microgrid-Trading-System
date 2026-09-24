@@ -1,5 +1,6 @@
 package com.smartmicrogrid.M3
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -35,11 +36,10 @@ class PendingTransactionsFragment : Fragment() {
         binding.tvSubtitle.text = "Transactions ready for verifier action"
 
         adapter = TransactionAdapter(emptyList()) { transaction ->
-            Toast.makeText(
-                requireContext(),
-                "Selected ${transaction.transactionCode.ifBlank { transaction.id } }",
-                Toast.LENGTH_SHORT
-            ).show()
+            val intent = Intent(requireContext(), TransactionDetailsActivity::class.java).apply {
+                putExtra("TRANSACTION_ID", transaction.id)
+            }
+            startActivity(intent)
         }
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())

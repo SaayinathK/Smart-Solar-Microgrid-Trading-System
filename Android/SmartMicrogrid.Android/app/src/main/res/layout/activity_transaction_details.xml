@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_dark">
+
+    <ScrollView
+        android:id="@+id/details_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:visibility="gone">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/card_bg"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            app:strokeColor="@color/card_stroke_dark"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Transaction Details"
+                    android:textColor="@color/text_dark_primary"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_transaction_code"
+                    style="@style/TransactionDetailValue"
+                    android:layout_marginTop="16dp" />
+
+                <TextView
+                    android:id="@+id/tv_reservation_id"
+                    style="@style/TransactionDetailValue" />
+
+                <TextView
+                    android:id="@+id/tv_prosumer_id"
+                    style="@style/TransactionDetailValue" />
+
+                <TextView
+                    android:id="@+id/tv_microgrid_node_id"
+                    style="@style/TransactionDetailValue" />
+
+                <TextView
+                    android:id="@+id/tv_energy_slot_id"
+                    style="@style/TransactionDetailValue" />
+
+                <TextView
+                    android:id="@+id/tv_energy_amount"
+                    style="@style/TransactionDetailValue" />
+
+                <TextView
+                    android:id="@+id/tv_status"
+                    style="@style/TransactionDetailValue"
+                    android:textColor="@color/success" />
+
+                <TextView
+                    android:id="@+id/tv_created_at"
+                    style="@style/TransactionDetailValue" />
+
+                <TextView
+                    android:id="@+id/tv_updated_at"
+                    style="@style/TransactionDetailValue" />
+
+                <TextView
+                    android:id="@+id/tv_verification_time"
+                    style="@style/TransactionDetailValue" />
+
+                <TextView
+                    android:id="@+id/tv_energy_transfer_time"
+                    style="@style/TransactionDetailValue" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/error_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tv_error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/text_dark_primary"
+            android:textSize="16sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_retry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Retry" />
+    </LinearLayout>
+</FrameLayout>
