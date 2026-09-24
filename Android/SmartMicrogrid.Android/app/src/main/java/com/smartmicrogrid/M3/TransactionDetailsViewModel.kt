@@ -24,6 +24,15 @@ class TransactionDetailsViewModel(application: Application) : AndroidViewModel(a
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
+    private val _isVerifying = MutableLiveData<Boolean>()
+    val isVerifying: LiveData<Boolean> = _isVerifying
+
+    private val _verificationResult = MutableLiveData<Transaction?>()
+    val verificationResult: LiveData<Transaction?> = _verificationResult
+
+    private val _verificationError = MutableLiveData<String?>()
+    val verificationError: LiveData<String?> = _verificationError
+
     fun loadTransaction(transactionId: String) {
         if (transactionId.isBlank()) {
             _errorMessage.value = "Transaction ID is required."
@@ -64,6 +73,49 @@ class TransactionDetailsViewModel(application: Application) : AndroidViewModel(a
                 _errorMessage.value = exception.message ?: "Unable to load transaction."
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun verifyTransaction(transactionId: String, qrCodeData: String) {
+        viewModelScope.launch {
+            _isVerifying.value = true
+            _verificationError.value = null
+            _verificationResult.value = null
+
+            try {
+                val response = repository.verifyTransaction(transactionId, qrCodeData)
+                when {
+                    response.code() == 401 -> {
+                        _verificationError.value = "Your session has expired. Please log in again."
+                    }
+                    response.code() == 403 -> {
+                        _verificationError.value = "You are not authorized to verify this transaction."
+                    }
+                    response.code() == 404 -> {
+                        _verificationError.value = "Transaction was not found."
+                    }
+                    response.isSuccessful -> {
+                        val body = response.body()
+                        if (body?.success == true && body.data != null) {
+                            _transaction.value = body.data
+                            _verificationResult.value = body.data
+                        } else {
+                            _verificationError.value = body?.message
+                                ?: "Transaction verification was rejected."
+                        }
+                    }
+                    else -> {
+                        _verificationError.value = "Unable to verify transaction (${response.code()})."
+                    }
+                }
+            } catch (_: IOException) {
+                _verificationError.value = "Unable to connect to the transaction service."
+            } catch (exception: Exception) {
+                _verificationError.value = exception.message
+                    ?: "Unable to verify transaction."
+            } finally {
+                _isVerifying.value = false
             }
         }
     }

@@ -13,6 +13,8 @@ class TransactionDetailsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTransactionDetailsBinding
     private val viewModel: TransactionDetailsViewModel by viewModels()
+    private var displayedTransactionId = ""
+    private var scannedQrData: String? = null
     private val scannerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -24,6 +26,16 @@ class TransactionDetailsActivity : AppCompatActivity() {
 
             binding.tvScanResult.text = "Scanned transaction: $transactionId\nCode: $transactionCode\nPayload: $qrData"
             binding.tvScanResult.visibility = View.VISIBLE
+
+            scannedQrData = if (transactionId == displayedTransactionId) qrData else null
+            if (transactionId == displayedTransactionId && !qrData.isNullOrBlank()) {
+                binding.verificationControls.visibility = View.VISIBLE
+                binding.tvVerificationMessage.text = "QR matches this transaction. Confirm verification to continue."
+            } else {
+                binding.verificationControls.visibility = View.GONE
+                binding.tvVerificationMessage.text = "Warning: the scanned QR belongs to a different transaction."
+                binding.tvVerificationMessage.visibility = View.VISIBLE
+            }
         } else {
             val message = result.data?.getStringExtra(QRScannerActivity.EXTRA_ERROR)
                 ?: "QR scan cancelled."
@@ -40,9 +52,26 @@ class TransactionDetailsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val transactionId = intent.getStringExtra("TRANSACTION_ID") ?: ""
+        displayedTransactionId = transactionId
 
         binding.btnScanQr.setOnClickListener {
             scannerLauncher.launch(Intent(this, QRScannerActivity::class.java))
+        }
+
+        binding.btnCancelVerification.setOnClickListener {
+            scannedQrData = null
+            binding.verificationControls.visibility = View.GONE
+            binding.tvVerificationMessage.visibility = View.GONE
+        }
+
+        binding.btnVerifyTransaction.setOnClickListener {
+            val qrData = scannedQrData
+            if (qrData.isNullOrBlank()) {
+                binding.tvVerificationMessage.text = "Scan a matching transaction QR code first."
+                binding.tvVerificationMessage.visibility = View.VISIBLE
+            } else {
+                viewModel.verifyTransaction(displayedTransactionId, qrData)
+            }
         }
 
         binding.btnRetry.setOnClickListener {
@@ -68,6 +97,29 @@ class TransactionDetailsActivity : AppCompatActivity() {
             binding.errorContent.visibility = View.VISIBLE
             binding.tvError.text = error
             Toast.makeText(this, error, Toast.LENGTH_LONG).show()
+        }
+
+        viewModel.isVerifying.observe(this) { verifying ->
+            binding.verificationProgress.visibility = if (verifying) View.VISIBLE else View.GONE
+            binding.btnVerifyTransaction.isEnabled = !verifying
+            binding.btnCancelVerification.isEnabled = !verifying
+        }
+
+        viewModel.verificationResult.observe(this) { transaction ->
+            transaction?.let {
+                binding.verificationControls.visibility = View.GONE
+                binding.tvVerificationMessage.text = "Transaction verified successfully. Status: ${it.status}"
+                binding.tvVerificationMessage.visibility = View.VISIBLE
+                scannedQrData = null
+            }
+        }
+
+        viewModel.verificationError.observe(this) { error ->
+            error?.let {
+                binding.tvVerificationMessage.text = it
+                binding.tvVerificationMessage.visibility = View.VISIBLE
+                Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+            }
         }
 
         viewModel.loadTransaction(transactionId)
