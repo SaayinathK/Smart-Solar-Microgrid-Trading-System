@@ -3,6 +3,7 @@ package com.smartmicrogrid.data.repository
 import com.smartmicrogrid.data.remote.ApiService
 import com.smartmicrogrid.models.CompleteTransactionRequest
 import com.smartmicrogrid.models.CreateTransactionRequest
+import com.smartmicrogrid.models.GenerateQrResponse
 import com.smartmicrogrid.models.Transaction
 import com.smartmicrogrid.models.VerifyTransactionRequest
 import retrofit2.Response
@@ -33,7 +34,7 @@ class TransactionRepository(
 
     suspend fun generateTransactionQr(
         transactionId: String
-    ): Response<com.smartmicrogrid.models.ApiResponse<Transaction>> {
+    ): Response<com.smartmicrogrid.models.ApiResponse<GenerateQrResponse>> {
         return apiService.generateTransactionQr(transactionId)
     }
 
