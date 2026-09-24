@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.smartmicrogrid.R
 import com.smartmicrogrid.auth.LoginActivity
-import com.smartmicrogrid.ui.PlaceholderFragment
 import com.smartmicrogrid.utils.SessionManager
 
 class VerifierMainActivity : AppCompatActivity() {
@@ -32,7 +31,7 @@ class VerifierMainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> loadFragment(com.smartmicrogrid.ui.HomeFragment())
                 R.id.nav_scan -> loadFragment(com.smartmicrogrid.M1.microgrid.VerifierMicrogridFragment())
-                R.id.nav_pending -> loadFragment(PlaceholderFragment.newInstance("Pending Tasks"))
+                R.id.nav_pending -> loadFragment(PendingTransactionsFragment())
                 R.id.nav_profile -> loadFragment(com.smartmicrogrid.ui.ProfileFragment())
                 else -> false
             }

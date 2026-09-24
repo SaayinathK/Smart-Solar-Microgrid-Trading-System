@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using SmartMicrogrid.API.Models.Common;
 using SmartMicrogrid.API.Models.M1;
+using SmartMicrogrid.API.Models.Transactions;
 
 namespace SmartMicrogrid.API.Data
 {
@@ -38,6 +39,18 @@ namespace SmartMicrogrid.API.Data
                     Builders<EnergySlot>.IndexKeys.Ascending(s => s.Status)));
                 EnergySlots.Indexes.CreateOne(new CreateIndexModel<EnergySlot>(
                     Builders<EnergySlot>.IndexKeys.Ascending(s => s.StartTime).Ascending(s => s.EndTime)));
+
+                // Indexes for Transactions collection
+                Transactions.Indexes.CreateOne(new CreateIndexModel<Transaction>(
+                    Builders<Transaction>.IndexKeys.Ascending(t => t.ReservationId)));
+                Transactions.Indexes.CreateOne(new CreateIndexModel<Transaction>(
+                    Builders<Transaction>.IndexKeys.Ascending(t => t.ProsumerId)));
+                Transactions.Indexes.CreateOne(new CreateIndexModel<Transaction>(
+                    Builders<Transaction>.IndexKeys.Ascending(t => t.QrCodeData)));
+                Transactions.Indexes.CreateOne(new CreateIndexModel<Transaction>(
+                    Builders<Transaction>.IndexKeys.Ascending(t => t.VerifiedBy)));
+                Transactions.Indexes.CreateOne(new CreateIndexModel<Transaction>(
+                    Builders<Transaction>.IndexKeys.Descending(t => t.CreatedAt)));
             }
             catch
             {
@@ -48,5 +61,6 @@ namespace SmartMicrogrid.API.Data
         public IMongoCollection<User> Users => _database.GetCollection<User>(MongoCollections.Users);
         public IMongoCollection<MicrogridNode> Microgrids => _database.GetCollection<MicrogridNode>(MongoCollections.Microgrids);
         public IMongoCollection<EnergySlot> EnergySlots => _database.GetCollection<EnergySlot>(MongoCollections.EnergySlots);
+        public IMongoCollection<Transaction> Transactions => _database.GetCollection<Transaction>(MongoCollections.Transactions);
     }
 }
