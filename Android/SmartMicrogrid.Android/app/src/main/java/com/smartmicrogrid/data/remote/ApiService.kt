@@ -81,7 +81,7 @@ interface ApiService {
     @POST("transactions/{id}/generate-qr")
     suspend fun generateTransactionQr(
         @Path("id") id: String
-    ): Response<ApiResponse<Transaction>>
+    ): Response<ApiResponse<GenerateQrResponse>>
 
     @POST("transactions/{id}/verify")
     suspend fun verifyTransaction(
