@@ -17,6 +17,8 @@ namespace SmartMicrogrid.API.Data
 
             try
             {
+                EnsureUniqueReservationIndex();
+
                 // Ensure unique index on Email field for Users collection
                 var userEmailIndexKeys = Builders<User>.IndexKeys.Ascending(u => u.Email);
                 var indexOptions = new CreateIndexOptions { Unique = true };
@@ -42,8 +44,6 @@ namespace SmartMicrogrid.API.Data
 
                 // Indexes for Transactions collection
                 Transactions.Indexes.CreateOne(new CreateIndexModel<Transaction>(
-                    Builders<Transaction>.IndexKeys.Ascending(t => t.ReservationId)));
-                Transactions.Indexes.CreateOne(new CreateIndexModel<Transaction>(
                     Builders<Transaction>.IndexKeys.Ascending(t => t.ProsumerId)));
                 Transactions.Indexes.CreateOne(new CreateIndexModel<Transaction>(
                     Builders<Transaction>.IndexKeys.Ascending(t => t.QrCodeData)));
@@ -52,10 +52,48 @@ namespace SmartMicrogrid.API.Data
                 Transactions.Indexes.CreateOne(new CreateIndexModel<Transaction>(
                     Builders<Transaction>.IndexKeys.Descending(t => t.CreatedAt)));
             }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
             catch
             {
                 // Ignore index creation errors if MongoDB is offline during initial build setup
             }
+        }
+
+        private void EnsureUniqueReservationIndex()
+        {
+            var duplicates = Transactions.Aggregate()
+                .Group(t => t.ReservationId, group => new
+                {
+                    ReservationId = group.Key,
+                    Count = group.Count()
+                })
+                .Match(group => group.Count > 1)
+                .ToList();
+
+            if (duplicates.Count > 0)
+            {
+                var reservationIds = string.Join(", ", duplicates.Select(x => x.ReservationId));
+                throw new InvalidOperationException(
+                    $"Cannot create the unique transaction ReservationId index. Duplicate ReservationIds: {reservationIds}");
+            }
+
+            var indexKeys = Builders<Transaction>.IndexKeys.Ascending(t => t.ReservationId);
+            const string indexName = "ReservationId_1";
+            var existing = Transactions.Indexes.List()
+                .ToList()
+                .FirstOrDefault(index => index.GetValue("name", "").AsString == indexName);
+
+            if (existing != null && !existing.GetValue("unique", false).ToBoolean())
+            {
+                Transactions.Indexes.DropOne(indexName);
+            }
+
+            Transactions.Indexes.CreateOne(new CreateIndexModel<Transaction>(
+                indexKeys,
+                new CreateIndexOptions { Unique = true, Name = indexName }));
         }
 
         public IMongoCollection<User> Users => _database.GetCollection<User>(MongoCollections.Users);

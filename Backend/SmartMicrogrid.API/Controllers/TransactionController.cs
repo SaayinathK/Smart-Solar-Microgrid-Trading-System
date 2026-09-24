@@ -6,6 +6,7 @@ using MongoDB.Driver;
 using SmartMicrogrid.API.DTOs.Transactions;
 using SmartMicrogrid.API.Models.Common;
 using SmartMicrogrid.API.Services.Interfaces;
+using SmartMicrogrid.API.Services;
 using System.Security.Claims;
 
 namespace SmartMicrogrid.API.Controllers
@@ -327,6 +328,13 @@ namespace SmartMicrogrid.API.Controllers
             {
                 if (exception is MongoWriteException mongoException &&
                     mongoException.WriteError?.Code == 11000)
+                {
+                    return (
+                        (int)HttpStatusCode.Conflict,
+                        "A transaction already exists for this reservation.");
+                }
+
+                if (exception is TransactionConflictException)
                 {
                     return (
                         (int)HttpStatusCode.Conflict,

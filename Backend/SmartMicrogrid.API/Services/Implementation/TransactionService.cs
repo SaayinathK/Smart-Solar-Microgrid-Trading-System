@@ -4,6 +4,7 @@ using SmartMicrogrid.API.DTOs.Transactions;
 using SmartMicrogrid.API.Models.Transactions;
 using SmartMicrogrid.API.Repositories.Interfaces;
 using SmartMicrogrid.API.Services.Interfaces;
+using SmartMicrogrid.API.Services;
 
 namespace SmartMicrogrid.API.Services.Implementation
 {
@@ -78,7 +79,8 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             if (existing != null)
             {
-                return Map(existing);
+                throw new TransactionConflictException(
+                    "A transaction already exists for this reservation.");
             }
 
 

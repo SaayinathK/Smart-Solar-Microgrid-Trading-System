@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using SmartMicrogrid.API.Data;
 using SmartMicrogrid.API.Models.Transactions;
@@ -10,32 +9,9 @@ namespace SmartMicrogrid.API.Repositories.Implementation
     {
         private readonly IMongoCollection<Transaction> _transactions;
 
-        public TransactionRepository(IConfiguration configuration)
+        public TransactionRepository(MongoDbContext mongoDbContext)
         {
-            var connectionString =
-                configuration["MongoDB:ConnectionString"];
-
-            var databaseName =
-                configuration["MongoDB:DatabaseName"];
-
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new InvalidOperationException(
-                    "MongoDB connection string is not configured.");
-            }
-
-            if (string.IsNullOrWhiteSpace(databaseName))
-            {
-                throw new InvalidOperationException(
-                    "MongoDB database name is not configured.");
-            }
-
-            var client = new MongoClient(connectionString);
-            var database = client.GetDatabase(databaseName);
-
-            _transactions =
-                database.GetCollection<Transaction>(
-                    MongoCollections.Transactions);
+            _transactions = mongoDbContext.Transactions;
         }
 
         public async Task<Transaction?> GetByIdAsync(string id)
