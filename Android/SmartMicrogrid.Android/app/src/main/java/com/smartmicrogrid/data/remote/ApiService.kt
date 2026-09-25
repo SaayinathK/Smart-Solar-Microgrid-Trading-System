@@ -59,6 +59,57 @@ interface ApiService {
         @Query("minimumEnergy") minimumEnergy: Double? = null
     ): Response<ApiResponse<List<EnergyAvailabilitySlot>>>
 
+    // ── Component 2 (M2) Reservation Endpoints ──
+    @GET("reservations")
+    suspend fun getReservations(
+        @Query("status") status: String? = null,
+        @Query("nodeId") nodeId: String? = null,
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 50
+    ): Response<ApiResponse<List<Reservation>>>
+
+    @GET("reservations/summary")
+    suspend fun getReservationSummary(
+        @Query("nic") nic: String? = null
+    ): Response<ApiResponse<ReservationSummary>>
+
+    @GET("reservations/{id}")
+    suspend fun getReservationById(
+        @Path("id") id: String
+    ): Response<ApiResponse<Reservation>>
+
+    @POST("reservations")
+    suspend fun createReservation(
+        @Body request: CreateReservationRequest
+    ): Response<ApiResponse<Reservation>>
+
+    @PUT("reservations/{id}")
+    suspend fun updateReservation(
+        @Path("id") id: String,
+        @Body request: CreateReservationRequest
+    ): Response<ApiResponse<Reservation>>
+
+    @PATCH("reservations/{id}/cancel")
+    suspend fun cancelReservation(
+        @Path("id") id: String
+    ): Response<ApiResponse<Reservation>>
+
+    @PATCH("reservations/{id}/approve")
+    suspend fun approveReservation(
+        @Path("id") id: String
+    ): Response<ApiResponse<Reservation>>
+
+    @PATCH("reservations/{id}/reject")
+    suspend fun rejectReservation(
+        @Path("id") id: String,
+        @Body body: Map<String, String>
+    ): Response<ApiResponse<Reservation>>
+
+    @PATCH("reservations/{id}/complete")
+    suspend fun completeReservation(
+        @Path("id") id: String
+    ): Response<ApiResponse<Reservation>>
+
     // ── Auth Endpoints ──
 
     @POST("auth/login")
