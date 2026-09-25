@@ -129,8 +129,8 @@ cd Backend\SmartMicrogrid.API
 dotnet run
 ```
 The Web API will launch at:
-- **HTTP**: `http://localhost:5000`
-- **Swagger Documentation**: `http://localhost:5000/swagger`
+- **HTTP**: `http://localhost:5050`
+- **Swagger Documentation**: `http://localhost:5050/swagger`
 
 ### Step 3: Run Web Application
 You can open `Web\SmartMicrogrid.Web\index.html` directly in any standard browser or use a lightweight local HTTP server (such as VS Code Live Server or `python -m http.server 8080`).
@@ -145,7 +145,7 @@ To run over Wi-Fi / local network for multi-device testing:
 2. Update `Web/SmartMicrogrid.Web/js/config/api-config.js`:
    ```javascript
    const API_CONFIG = {
-     BASE_URL: 'http://192.168.1.50:5000/api'
+     BASE_URL: 'http://192.168.1.50:5050/api'
    };
    ```
 3. Update Android app API base URL similarly.

@@ -1,9 +1,9 @@
 # Component 1 — REST API Documentation
 
 ## Base URL
-- Local Development: `http://localhost:5000/api`
-- LAN Deployment: `http://192.168.x.x:5000/api`
-- Swagger UI: `http://localhost:5000/swagger`
+- Local Development: `http://localhost:5050/api`
+- LAN Deployment: `http://192.168.x.x:5050/api`
+- Swagger UI: `http://localhost:5050/swagger`
 
 ---
 
