@@ -58,7 +58,7 @@ Web/
 Do not hardcode API URLs in individual JavaScript files. Change the API base URL in `api-config.js`:
 ```javascript
 const API_CONFIG = {
-  BASE_URL: 'http://localhost:5000/api', // Update to LAN IP for Wi-Fi deployment (e.g., http://192.168.1.50:5000/api)
+  BASE_URL: 'http://localhost:5050/api', // Update to LAN IP for Wi-Fi deployment (e.g., http://192.168.1.50:5050/api)
   TOKEN_KEY: 'smart_microgrid_token',
   USER_KEY: 'smart_microgrid_user'
 };
