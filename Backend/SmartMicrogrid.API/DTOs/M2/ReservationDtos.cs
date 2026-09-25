@@ -23,6 +23,11 @@ public class ReservationResponseDto
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public string Status { get; set; } = string.Empty;
+    public string? ProsumerName { get; set; }
+    public string? MicrogridName { get; set; }
+    public double PricePerUnit { get; set; }
+    public double TotalEstimatedCost { get; set; }
+    public string VerificationCode { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<ReservationStatusEvent> StatusHistory { get; set; } = new();

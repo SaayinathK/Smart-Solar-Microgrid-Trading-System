@@ -11,5 +11,6 @@ namespace SmartMicrogrid.API.Repositories.Interfaces
         Task<bool> UpdateAsync(User user);
         Task<bool> DeleteAsync(string id);
         Task<bool> ExistsByEmailAsync(string email, string? excludeUserId = null);
+        Task<User?> GetByNicAsync(string nic);
     }
 }

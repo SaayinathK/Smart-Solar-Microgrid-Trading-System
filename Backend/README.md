@@ -106,8 +106,8 @@ cd Backend\SmartMicrogrid.API
 dotnet run
 ```
 
-- **Base URL**: `http://localhost:5000/api`
-- **Swagger Documentation UI**: `http://localhost:5000/swagger`
+- **Base URL**: `http://localhost:5050/api`
+- **Swagger Documentation UI**: `http://localhost:5050/swagger`
 
 ---
 
