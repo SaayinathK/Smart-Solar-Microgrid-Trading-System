@@ -44,9 +44,9 @@ Create payload:
 }
 ```
 
-Staff creation also accepts `prosumerId`, which is the prosumer's NIC. NIC is stored on the shared user document with a unique sparse MongoDB index and returned in profile responses. Reservations reference that NIC, while the existing MongoDB ObjectId remains the users collection's internal `_id` to preserve M1 references. Existing accounts need their NIC populated by Backoffice before they can make reservations.
+Staff creation also accepts `prosumerId`, which is the prosumer's NIC. NIC is stored on the shared user document with a unique sparse MongoDB index and returned in profile responses. Reservations reference that NIC, while the existing MongoDB ObjectId remains the users collection's internal `_id` to preserve M1 references. Existing accounts need their NIC populated by an Admin before they can make reservations.
 
-Public account responses use the assignment-facing names `Backoffice`, `GridOperator`, and `Prosumer`, while TransactionVerifier remains distinct for the M3 scanning flow. New staff account forms accept assignment-facing names and store their legacy equivalents (`Admin` and `MicrogridOperator`) so existing M1 authorization and stored accounts remain compatible. Reservation services and the expiry worker are registered through backend dependency injection.
+The four system roles are `Admin`, `MicrogridOperator`, `Prosumer`, and `TransactionVerifier`. JWTs carry the role claim used by all endpoints for authorization.
 
 ## Rules and reliability
 
