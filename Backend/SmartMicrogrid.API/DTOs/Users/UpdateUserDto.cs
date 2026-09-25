@@ -16,6 +16,8 @@ namespace SmartMicrogrid.API.DTOs.Users
         [Phone(ErrorMessage = "Invalid phone format.")]
         public string PhoneNumber { get; set; } = string.Empty;
 
+        public string? Nic { get; set; }
+
         public Role? Role { get; set; }
         public bool? IsActive { get; set; }
     }
