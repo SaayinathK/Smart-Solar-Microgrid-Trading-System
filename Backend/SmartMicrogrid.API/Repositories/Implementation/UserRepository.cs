@@ -116,5 +116,6 @@ namespace SmartMicrogrid.API.Repositories.Implementation
 
             return await _context.Users.Find(filter).AnyAsync();
         }
+
     }
 }
