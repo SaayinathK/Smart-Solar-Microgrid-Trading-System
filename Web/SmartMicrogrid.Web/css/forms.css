@@ -246,3 +246,69 @@
   display: block;
 }
 
+/* ==========================================================================
+   Role Tab Selector (Theme Aware)
+   ========================================================================== */
+.role-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  background: var(--bg-tertiary);
+  padding: 0.35rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  transition: background var(--transition-smooth), border-color var(--transition-smooth);
+}
+
+.role-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.65rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.role-tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
+.role-tab-btn.active {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%);
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+
+.role-tab-btn.active .role-icon {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.role-tab-btn .role-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.role-hint-pill {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--accent-primary);
+  background: var(--accent-light);
+  border: 1px solid var(--border-glow);
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+

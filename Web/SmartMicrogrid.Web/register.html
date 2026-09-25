@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register - Smart Microgrid Platform</title>
+  <title>Register - Smart Microgrid</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/forms.css">
 </head>
@@ -12,39 +12,61 @@
 
   <div class="auth-wrapper">
     <div class="auth-container">
-      <!-- Solar Visual Hero Side -->
+      <!-- Visual Side -->
       <div class="auth-visual-side">
         <div class="auth-visual-brand">
           <div class="logo-icon">☀️</div>
-          <h1>Join Smart Microgrid</h1>
+          <h1>Smart Microgrid</h1>
         </div>
         <div class="auth-visual-content">
-          <h2>Start Microgrid Prosumer Trading</h2>
-          <p>Produce, store, and trade solar power directly with your local community microgrid network.</p>
+          <h2 id="hero-title">Account Registration</h2>
+          <p id="hero-desc">Access localized clean energy management and trading services.</p>
           <div class="auth-feature-list">
             <div class="auth-feature-item">
-              <span>🔋</span> Integrated Battery Storage Management
+              <span>☀️</span> <strong>Prosumer:</strong> Solar energy trading with NIC verification
             </div>
             <div class="auth-feature-item">
-              <span>📊</span> Live Capacity & Consumption Analytics
+              <span>⚡</span> <strong>Operator:</strong> Grid node & capacity management
             </div>
             <div class="auth-feature-item">
-              <span>🌱</span> Zero Carbon Solar Energy Grid
+              <span>🔍</span> <strong>Verifier:</strong> Transaction & settlement verification
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Form Card Side -->
+      <!-- Form Side -->
       <div class="auth-card">
         <div class="auth-header">
           <h2>Create Account</h2>
-          <p>Join the local solar microgrid energy network</p>
+          <p>Select your role to continue</p>
+        </div>
+
+        <!-- Role Tabs -->
+        <div class="role-selector-grid">
+          <button type="button" class="role-tab-btn active" data-role="Prosumer" id="tab-prosumer">
+            <span class="role-icon">☀️</span>
+            <span>Prosumer</span>
+          </button>
+          <button type="button" class="role-tab-btn" data-role="MicrogridOperator" id="tab-operator">
+            <span class="role-icon">⚡</span>
+            <span>Operator</span>
+          </button>
+          <button type="button" class="role-tab-btn" data-role="TransactionVerifier" id="tab-verifier">
+            <span class="role-icon">🔍</span>
+            <span>Verifier</span>
+          </button>
+        </div>
+
+        <div id="role-hint" class="role-hint-pill">
+          <span>ℹ️</span> <span id="role-hint-text">National Identity Card (NIC) required for Prosumer role.</span>
         </div>
 
         <div id="alert-box" class="alert alert-danger"></div>
 
         <form id="register-form">
+          <input type="hidden" id="selectedRole" value="Prosumer">
+
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="firstName">First Name</label>
@@ -56,33 +78,38 @@
             </div>
           </div>
 
+          <div class="form-group" id="nic-group">
+            <label class="form-label" for="nic">National Identity Card (NIC) *</label>
+            <input type="text" id="nic" class="form-control" placeholder="e.g. 199012345678" required pattern="[A-Za-z0-9]{9,12}">
+          </div>
+
           <div class="form-group">
             <label class="form-label" for="email">Email Address</label>
-            <input type="email" id="email" class="form-control" placeholder="john.doe@domain.com" required>
+            <input type="email" id="email" class="form-control" placeholder="name@domain.com" required>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="phoneNumber">Phone Number</label>
-            <input type="tel" id="phoneNumber" class="form-control" placeholder="+1234567890">
+            <input type="tel" id="phoneNumber" class="form-control" placeholder="+94771234567">
           </div>
 
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="password">Password</label>
-              <input type="password" id="password" class="form-control" placeholder="Min 6 chars" required minlength="6">
+              <input type="password" id="password" class="form-control" placeholder="Min 6 characters" required minlength="6">
             </div>
             <div class="form-group">
               <label class="form-label" for="confirmPassword">Confirm Password</label>
-              <input type="password" id="confirmPassword" class="form-control" placeholder="Re-type" required minlength="6">
+              <input type="password" id="confirmPassword" class="form-control" placeholder="Re-enter password" required minlength="6">
             </div>
           </div>
 
-          <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem; padding: 0.85rem;">
+          <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem; padding: 0.8rem;">
             Register Account
           </button>
         </form>
 
-        <div class="auth-footer">
+        <div class="auth-footer" style="margin-top: 1rem;">
           Already have an account? <a href="login.html">Sign In</a>
         </div>
       </div>
@@ -109,17 +136,62 @@
     const registerForm = document.getElementById('register-form');
     const alertBox = document.getElementById('alert-box');
     const btnSubmit = document.getElementById('btn-submit');
+    const selectedRoleInput = document.getElementById('selectedRole');
+    const nicGroup = document.getElementById('nic-group');
+    const nicInput = document.getElementById('nic');
+    const roleHintText = document.getElementById('role-hint-text');
+    const roleTabBtns = document.querySelectorAll('.role-tab-btn');
+
+    roleTabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const role = btn.getAttribute('data-role');
+        selectedRoleInput.value = role;
+
+        roleTabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        updateRoleUI(role);
+      });
+    });
+
+    function updateRoleUI(role) {
+      alertBox.classList.remove('active');
+
+      if (role === 'Prosumer') {
+        roleHintText.textContent = 'National Identity Card (NIC) required for Prosumer role.';
+        nicGroup.style.display = 'block';
+        nicInput.required = true;
+        btnSubmit.textContent = 'Register Prosumer';
+      } else if (role === 'MicrogridOperator') {
+        roleHintText.textContent = 'Operator portal account for grid node management.';
+        nicGroup.style.display = 'block';
+        nicInput.required = false;
+        btnSubmit.textContent = 'Register Operator';
+      } else if (role === 'TransactionVerifier') {
+        roleHintText.textContent = 'Field officer account for transaction verification.';
+        nicGroup.style.display = 'block';
+        nicInput.required = false;
+        btnSubmit.textContent = 'Register Verifier';
+      }
+    }
 
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       alertBox.classList.remove('active');
 
+      const role = selectedRoleInput.value;
       const firstName = document.getElementById('firstName').value.trim();
       const lastName = document.getElementById('lastName').value.trim();
+      const nic = document.getElementById('nic').value.trim().toUpperCase();
       const email = document.getElementById('email').value.trim();
       const phoneNumber = document.getElementById('phoneNumber').value.trim();
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (role === 'Prosumer' && !nic) {
+        showError('National Identity Card (NIC) is required.');
+        return;
+      }
 
       if (password !== confirmPassword) {
         showError('Passwords do not match.');
@@ -127,31 +199,31 @@
       }
 
       btnSubmit.disabled = true;
-      btnSubmit.textContent = 'Creating Account...';
+      btnSubmit.textContent = 'Submitting...';
 
       try {
         const response = await AuthApi.register({
           firstName,
           lastName,
+          nic,
           email,
           phoneNumber,
+          role,
           password,
           confirmPassword
         });
 
         if (response.success) {
-          ApiClient.showToast('Registration successful! Please sign in with your email.', 'success');
-          setTimeout(() => {
-            window.location.href = 'login.html';
-          }, 1500);
+          ApiClient.showToast('Registration successful! Please sign in.', 'success');
+          setTimeout(() => { window.location.href = 'login.html'; }, 1200);
         } else {
           showError(response.message || 'Registration failed.');
         }
       } catch (err) {
-        showError(err.message || 'Error communicating with server.');
+        showError(err.message || 'Connection error.');
       } finally {
         btnSubmit.disabled = false;
-        btnSubmit.textContent = 'Register Account';
+        updateRoleUI(role);
       }
     });
 
