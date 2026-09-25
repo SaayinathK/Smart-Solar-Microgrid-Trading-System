@@ -184,26 +184,30 @@
                 android:visibility="gone"
                 android:layout_marginTop="16dp" />
 
-            <!-- Register Link -->
+            <!-- Register Links -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="24dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Don't have an account? "
-                    android:textColor="#94A3B8"
-                    android:textSize="14sp" />
+                android:gravity="center_horizontal"
+                android:layout_marginTop="20dp">
 
                 <TextView
                     android:id="@+id/tv_register_link"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Register Prosumer"
-                    android:textColor="#3B82F6"
+                    android:textColor="#10B981"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="16dp" />
+
+                <TextView
+                    android:id="@+id/tv_register_verifier_link"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Register Verifier"
+                    android:textColor="#A855F7"
                     android:textSize="14sp"
                     android:textStyle="bold" />
             </LinearLayout>

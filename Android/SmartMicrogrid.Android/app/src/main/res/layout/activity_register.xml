@@ -64,7 +64,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Register as a Local Solar Prosumer"
+                android:text="Prosumer Registration"
                 android:textSize="14sp"
                 android:textColor="#94A3B8"
                 android:layout_marginBottom="24dp" />
@@ -199,6 +199,30 @@
                         android:textColorHint="#64748B"
                         android:hint="+94771234567"
                         android:inputType="phone"
+                        android:padding="14dp"
+                        android:textSize="15sp"
+                        android:layout_marginBottom="14dp" />
+
+                    <!-- National Identity Card (NIC) -->
+                    <TextView
+                        android:id="@+id/tv_nic_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="National Identity Card (NIC) *"
+                        android:textColor="#CBD5E1"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <EditText
+                        android:id="@+id/et_nic"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_glass_input"
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#64748B"
+                        android:hint="199012345678 or 901234567V"
+                        android:inputType="textCapCharacters"
                         android:padding="14dp"
                         android:textSize="15sp"
                         android:layout_marginBottom="14dp" />

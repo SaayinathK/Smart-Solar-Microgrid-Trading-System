@@ -28,12 +28,17 @@ class RegisterActivity : AppCompatActivity() {
             val lastName = binding.etLastName.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
             val phone = binding.etPhone.text.toString().trim()
+            val nic = binding.etNic.text.toString().trim().uppercase()
             val password = binding.etPassword.text.toString()
             val confirmPassword = binding.etConfirmPassword.text.toString()
 
             // Validation
             if (firstName.isEmpty() || lastName.isEmpty()) {
                 showError("First name and last name are required.")
+                return@setOnClickListener
+            }
+            if (nic.isEmpty()) {
+                showError("National Identity Card (NIC) is required for Prosumer registration.")
                 return@setOnClickListener
             }
             if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
@@ -56,6 +61,8 @@ class RegisterActivity : AppCompatActivity() {
                     lastName = lastName,
                     email = email,
                     phoneNumber = phone,
+                    nic = nic,
+                    role = "Prosumer",
                     password = password,
                     confirmPassword = confirmPassword
                 )
