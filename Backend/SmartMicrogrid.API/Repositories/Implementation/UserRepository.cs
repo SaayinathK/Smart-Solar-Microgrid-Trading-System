@@ -26,7 +26,8 @@ namespace SmartMicrogrid.API.Repositories.Implementation
                 var nameOrEmailFilter = filterBuilder.Or(
                     filterBuilder.Regex(u => u.FirstName, regex),
                     filterBuilder.Regex(u => u.LastName, regex),
-                    filterBuilder.Regex(u => u.Email, regex)
+                    filterBuilder.Regex(u => u.Email, regex),
+                    filterBuilder.Regex(u => u.Nic, regex)
                 );
                 filter &= nameOrEmailFilter;
             }
@@ -91,6 +92,22 @@ namespace SmartMicrogrid.API.Repositories.Implementation
 
             var normalizedEmail = email.Trim().ToLower();
             var filter = Builders<User>.Filter.Eq(u => u.Email, normalizedEmail);
+
+            if (!string.IsNullOrEmpty(excludeUserId) && ObjectId.TryParse(excludeUserId, out _))
+            {
+                filter &= Builders<User>.Filter.Ne(u => u.Id, excludeUserId);
+            }
+
+            return await _context.Users.Find(filter).AnyAsync();
+        }
+
+        public async Task<bool> ExistsByNicAsync(string nic, string? excludeUserId = null)
+        {
+            if (string.IsNullOrWhiteSpace(nic))
+                return false;
+
+            var normalizedNic = nic.Trim().ToUpper();
+            var filter = Builders<User>.Filter.Eq(u => u.Nic, normalizedNic);
 
             if (!string.IsNullOrEmpty(excludeUserId) && ObjectId.TryParse(excludeUserId, out _))
             {

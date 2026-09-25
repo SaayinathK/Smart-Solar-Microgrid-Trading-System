@@ -21,6 +21,10 @@ namespace SmartMicrogrid.API.Data
                 var indexOptions = new CreateIndexOptions { Unique = true };
                 Users.Indexes.CreateOne(new CreateIndexModel<User>(userEmailIndexKeys, indexOptions));
 
+                // Index on Nic for Users collection
+                var userNicIndexKeys = Builders<User>.IndexKeys.Ascending(u => u.Nic);
+                Users.Indexes.CreateOne(new CreateIndexModel<User>(userNicIndexKeys));
+
                 // Indexes for Microgrids collection
                 Microgrids.Indexes.CreateOne(new CreateIndexModel<MicrogridNode>(
                     Builders<MicrogridNode>.IndexKeys.Ascending(m => m.Status)));
