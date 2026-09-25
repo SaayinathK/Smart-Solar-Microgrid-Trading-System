@@ -40,6 +40,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, EnergySlotActivity::class.java))
         }
 
+        binding.btnReservations.setOnClickListener {
+            startActivity(Intent(this, com.smartmicrogrid.M2.ReservationsActivity::class.java))
+        }
+
 
     }
 }

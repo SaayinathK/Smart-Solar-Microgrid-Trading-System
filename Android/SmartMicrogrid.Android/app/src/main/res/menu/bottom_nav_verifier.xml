@@ -1,19 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <item
         android:id="@+id/nav_home"
-        android:icon="@android:drawable/ic_menu_compass"
-        android:title="Home" />
+        android:icon="@drawable/ic_nav_home"
+        android:title="Home"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/nav_scan"
-        android:icon="@android:drawable/ic_menu_camera"
-        android:title="Scan QR" />
+        android:icon="@drawable/ic_nav_scan"
+        android:title="Scan"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/nav_pending"
-        android:icon="@android:drawable/ic_menu_recent_history"
-        android:title="Pending" />
+        android:icon="@drawable/ic_nav_pending"
+        android:title="Pending"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/nav_profile"
-        android:icon="@android:drawable/ic_menu_myplaces"
-        android:title="Profile" />
+        android:icon="@drawable/ic_nav_profile"
+        android:title="Profile"
+        app:showAsAction="always" />
+
 </menu>

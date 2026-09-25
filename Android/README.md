@@ -60,7 +60,7 @@ SQLite is used strictly for **Android local persistence**:
 3. Configure your base API URL to point to the server laptop's LAN IP address:
    ```kotlin
    object ApiConfig {
-       const val BASE_URL = "http://192.168.1.50:5000/api/"
+       const val BASE_URL = "http://192.168.1.50:5050/api/"
    }
    ```
 4. Attach JWT Bearer tokens in Retrofit Interceptors for protected endpoints:
