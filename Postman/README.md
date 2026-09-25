@@ -14,7 +14,7 @@ The `Postman/` folder contains the official importable **Postman Collection (v2.
 ## 2. Included Request Endpoints
 
 ### A. Authentication
-- `POST /api/auth/register` (Public Prosumer registration)
+- `POST /api/auth/register` (Multi-role registration: Prosumer with NIC primary key, Microgrid Operator, Transaction Verifier; Admin role self-registration restricted)
 - `POST /api/auth/login` (Returns JWT token & auto-stores into `{{authToken}}`)
 - `POST /api/auth/change-password` (Authenticated password change)
 
