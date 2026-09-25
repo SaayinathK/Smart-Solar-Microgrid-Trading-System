@@ -68,6 +68,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
 
         <div class="detail-item">
+          <div class="detail-label">National Identity Card (NIC)</div>
+          <div class="detail-value" style="font-family: monospace; color: var(--accent-amber, #f59e0b);">${user.nic || 'Not Provided'}</div>
+        </div>
+
+        <div class="detail-item">
           <div class="detail-label">Phone Number</div>
           <div class="detail-value">${user.phoneNumber || 'Not Provided'}</div>
         </div>
