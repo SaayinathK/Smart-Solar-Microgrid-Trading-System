@@ -68,7 +68,7 @@ The complete system is split into four distinct component responsibilities:
 - **Repository Architecture**: Clean 4-member shared structure (`Backend/`, `Web/`, `Android/`, `Database/`, `Documentation/`, `Deployment/`).
 - **MongoDB Integration**: `MongoDbContext`, `MongoDbSettings`, indexing for `users` collection.
 - **Authentication**: Registration (Prosumer default), Login with JWT token issuance, Password hashing with BCrypt.
-- **Role Enforcement**: `Admin`, `MicrogridOperator`, `Prosumer`, `TransactionVerifier` backend authorization rules.
+- **Role Enforcement**: `Admin`, `MicrogridOperator`, and `Prosumer` backend authorization rules. Grid Operators also verify transaction QR/pass data and finalize transfers.
 - **User Profile Management**: View profile (`/api/users/me`), update profile, change password.
 - **Admin User Management**: View all users, search/filter, create user, update details, activate/deactivate account, change role, delete user.
 - **Web Frontend Application**: Responsive, high-aesthetic glassmorphism web UI connecting to REST API endpoints.

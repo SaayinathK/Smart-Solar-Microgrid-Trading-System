@@ -13,7 +13,6 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
   let roleClass = 'role-prosumer';
   if (role === 'Admin') roleClass = 'role-admin';
   else if (role === 'MicrogridOperator') roleClass = 'role-operator';
-  else if (role === 'TransactionVerifier') roleClass = 'role-verifier';
 
   const userInitial = user && user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U';
 
@@ -163,7 +162,7 @@ function getMenuItemsForRole(role, activePage) {
   // M2 Energy Search & Reservations Section (All Roles)
   const reservationLabel = role === 'Admin' ? 'All Reservations Monitor' :
                            role === 'MicrogridOperator' ? 'Microgrid Reservations' :
-                           role === 'TransactionVerifier' ? 'Approved Reservations' :
+                           role === 'MicrogridOperator' ? 'Reservations & Verification' :
                            'My Reservations & Claims';
 
   sections += `

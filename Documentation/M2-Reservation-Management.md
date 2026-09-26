@@ -20,7 +20,7 @@ All routes require a bearer JWT.
 | PATCH | `/api/reservations/{id}/approve` | Admin, MicrogridOperator | Approve a pending request |
 | PATCH | `/api/reservations/{id}/reject` | Admin, MicrogridOperator | Reject a pending request; optional `{ "reason": "..." }` |
 | PATCH | `/api/reservations/{id}/cancel` | Owner or staff | Cancel an eligible pending/approved request |
-| PATCH | `/api/reservations/{id}/complete` | Admin, MicrogridOperator, TransactionVerifier | M3 marks delivery complete |
+| PATCH | `/api/reservations/{id}/complete` | Admin, MicrogridOperator | Grid Operator verifies the QR/pass data and marks delivery complete |
 | GET | `/api/reservations/nodes/{nodeId}/has-active` | Admin, MicrogridOperator | M1 integration check before node deactivation |
 
 Create payload:
@@ -34,7 +34,7 @@ Create payload:
 
 Staff creation also accepts `prosumerId`, which is the prosumer's NIC. NIC is stored on the shared user document with a unique sparse MongoDB index and returned in profile responses. Reservations reference that NIC, while the existing MongoDB ObjectId remains the users collection's internal `_id` to preserve M1 references. Existing accounts need their NIC populated by an Admin before they can make reservations.
 
-The four system roles are `Admin`, `MicrogridOperator`, `Prosumer`, and `TransactionVerifier`. JWTs carry the role claim used by all endpoints for authorization.
+The three system roles are `Admin`, `MicrogridOperator`, and `Prosumer`. JWTs carry the role claim used by all endpoints for authorization. Grid Operators own transaction verification and transfer completion.
 
 ## Rules and reliability
 

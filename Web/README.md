@@ -74,7 +74,7 @@ Displays custom navigation options based on the authenticated user's assigned ro
 - **`Admin`**: Dashboard, User Management, Operational Reports.
 - **`MicrogridOperator`**: Dashboard, Solar Nodes, Battery Storage.
 - **`Prosumer`**: Dashboard, Browse Energy Slots, My Reservations.
-- **`TransactionVerifier`**: Dashboard, QR Code Verifier.
+- **`MicrogridOperator`**: Dashboard, reservation management, QR/pass verification, and transfer completion.
 
 ---
 

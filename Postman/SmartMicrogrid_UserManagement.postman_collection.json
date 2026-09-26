@@ -410,7 +410,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"role\": \"TransactionVerifier\"\n}"
+							"raw": "{\n  \"role\": \"MicrogridOperator\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/users/{{createdUserId}}/role",
