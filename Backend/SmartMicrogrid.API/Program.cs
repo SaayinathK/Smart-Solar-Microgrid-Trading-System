@@ -13,6 +13,12 @@ using SmartMicrogrid.API.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Optional machine-local settings are ignored by Git. Environment/CLI values still win.
+builder.Configuration
+    .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables()
+    .AddCommandLine(args);
+
 // Add Controllers with JSON Enum string converter
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -34,6 +40,13 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMicrogridRepository, MicrogridRepository>();
 builder.Services.AddScoped<IEnergySlotRepository, EnergySlotRepository>();
 builder.Services.AddScoped<IMicrogridService, MicrogridService>();
+builder.Services.AddHttpClient("OpenStreetMapGeocoding", client =>
+    client.Timeout = TimeSpan.FromSeconds(8))
+    // Addresses need not appear in HTTP request logs.
+    .RemoveAllLoggers();
+builder.Services.AddSingleton<IGeocodingService>(services => new OpenStreetMapGeocodingService(
+    services.GetRequiredService<IHttpClientFactory>().CreateClient("OpenStreetMapGeocoding"),
+    services.GetRequiredService<IConfiguration>()));
 builder.Services.AddScoped<IEnergyCapacityService, EnergyCapacityService>();
 builder.Services.AddScoped<IBatteryService, BatteryService>();
 builder.Services.AddScoped<IEnergySlotService, EnergySlotService>();

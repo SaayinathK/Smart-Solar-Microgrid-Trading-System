@@ -115,6 +115,8 @@ namespace SmartMicrogrid.API.Repositories.Implementation
             }
 
             return await _context.Users.Find(filter).AnyAsync();
+        }
+
         public async Task<User?> GetByNicAsync(string nic)
         {
             if (string.IsNullOrWhiteSpace(nic))
