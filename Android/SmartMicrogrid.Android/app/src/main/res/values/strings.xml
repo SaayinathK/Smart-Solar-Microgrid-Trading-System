@@ -1,3 +1,36 @@
 <resources>
     <string name="app_name">Smart Microgrid</string>
+    <string name="solar_brand">SMARTMICROGRID</string>
+    <string name="solar_welcome">Welcome back</string>
+    <string name="solar_greeting">Hello, %1$s</string>
+    <string name="solar_hero_label">SOLAR · STORAGE · COMMUNITY</string>
+    <string name="solar_home_headline">Good energy.\nCloser to home.</string>
+    <string name="solar_home_caption">Your local network for a brighter tomorrow.</string>
+    <string name="solar_booking_overview">Your energy at a glance</string>
+    <string name="solar_pending">Pending</string>
+    <string name="solar_active">Active bookings</string>
+    <string name="solar_awaiting_approval">Awaiting approval</string>
+    <string name="solar_upcoming_energy">Upcoming energy</string>
+    <string name="solar_loading_bookings">Loading your bookings…</string>
+    <string name="solar_view_bookings">View reservations</string>
+    <string name="solar_nearby_grids">Explore your network</string>
+    <string name="solar_choose_grid">Swipe to browse · Tap a microgrid to see its location</string>
+    <string name="solar_reservations_title">Your energy, planned.</string>
+    <string name="solar_reservations_caption">Track bookings from request to delivery.</string>
+    <string name="solar_profile_caption">Connected to a cleaner future</string>
+    <string name="grid_map_loading">Loading locations...</string>
+    <string name="grid_map_select">Select microgrid</string>
+    <string name="grid_map_hint">Select a microgrid to view its location.</string>
+    <string name="grid_map_empty">No active microgrids to display.</string>
+    <string name="grid_map_unavailable">This microgrid does not have a saved map location yet.</string>
+    <string name="grid_map_error">Unable to load microgrid locations.</string>
+    <string name="grid_map_missing_location">Location unavailable</string>
+    <string name="grid_map_node_count">%1$d active grid nodes</string>
+    <string name="grid_map_selection">%1$s · %2$s</string>
+    <string name="grid_map_retry">Retry</string>
+    <string name="solar_microgrid_details">Microgrid details</string>
+    <string name="solar_back">Back</string>
+    <string name="solar_generation">Energy capacity</string>
+    <string name="solar_storage">Battery storage</string>
+    <string name="solar_site_information">Site information</string>
 </resources>

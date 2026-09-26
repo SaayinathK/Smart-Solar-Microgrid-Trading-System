@@ -1,21 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
-    app:cardBackgroundColor="#CC111827"
-    app:strokeColor="#332563EB"
+    app:cardBackgroundColor="?attr/colorSurface"
+    app:strokeColor="@color/surface_outline"
     app:strokeWidth="1dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="6dp">
+    app:cardCornerRadius="20dp"
+    app:cardElevation="1dp"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Solar Farm Banner Image -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="120dp">
@@ -24,7 +26,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
-                android:src="@drawable/img_solar_farm" />
+                android:src="@drawable/img_solar_farm"
+                android:importantForAccessibility="no" />
 
             <View
                 android:layout_width="match_parent"
@@ -65,7 +68,7 @@
                 android:id="@+id/tv_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#94A3B8"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="13sp" />
 
             <View
@@ -73,7 +76,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="12dp"
-                android:background="#1AFFFFFF" />
+                android:background="@color/surface_outline" />
 
             <LinearLayout
                 android:id="@+id/layout_stats"
@@ -92,7 +95,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Available Capacity"
-                        android:textColor="#94A3B8"
+                        android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
 
                     <TextView
@@ -100,8 +103,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:textColor="#F8FAFC"
-                        android:textSize="16sp"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
@@ -115,7 +118,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Battery Level"
-                        android:textColor="#94A3B8"
+                        android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
 
                     <TextView
@@ -124,7 +127,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
                         android:textColor="#10B981"
-                        android:textSize="16sp"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>

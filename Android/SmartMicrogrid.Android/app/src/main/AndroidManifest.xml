@@ -38,8 +38,6 @@
 
         <activity android:name=".M1.microgrid.MicrogridListActivity" />
         <activity android:name=".M1.microgrid.MicrogridDetailsActivity" />
-        <activity android:name=".M1.capacity.CapacityActivity" />
-        <activity android:name=".M1.battery.BatteryActivity" />
         <activity android:name=".M1.availability.EnergyAvailabilityActivity" />
         <activity android:name=".M1.slots.EnergySlotActivity" />
 

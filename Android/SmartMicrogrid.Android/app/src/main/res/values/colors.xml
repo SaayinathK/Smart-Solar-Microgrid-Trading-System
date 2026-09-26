@@ -16,8 +16,13 @@
     <color name="text_dark_secondary">#94A3B8</color>
     
     <!-- Glassmorphism Card Backgrounds -->
-    <color name="glass_light">#CCFFFFFF</color> <!-- 80% opacity white -->
-    <color name="glass_dark">#991E293B</color> <!-- 60% opacity dark blue/gray -->
+    <color name="glass_light">#FFFFFF</color>
+    <color name="glass_dark">#19283C</color>
+    <color name="surface_soft">#EDF3FA</color>
+    <color name="surface_outline">#DFE7F0</color>
+    <color name="solar_ink">#925C08</color>
+    <color name="solar_soft">#FFF3D6</color>
+    <color name="brand_navy">#102B46</color>
     
     <color name="card_stroke_light">#332563EB</color>
     <color name="card_stroke_dark">#4D3B82F6</color>
