@@ -14,8 +14,7 @@ class ReservationsActivity : AppCompatActivity() {
         val role = SessionManager.getUserRole()
         val title = when (role) {
             "Admin" -> "All Energy Reservations"
-            "MicrogridOperator", "GridOperator" -> "Hub Energy Reservations"
-            "TransactionVerifier" -> "Approved Reservations"
+            "MicrogridOperator", "GridOperator" -> "Hub Energy Reservations & Transfer Verification"
             else -> "My Energy Reservations"
         }
 
