@@ -2,6 +2,41 @@
    Smart Microgrid Energy System - Dashboard Layouts & Metrics
    ========================================================================== */
 
+.grid-map-card {
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+.grid-map-heading h2 { font-size: 1.25rem; margin: 0 0 .25rem; }
+.grid-map-heading p, .grid-map-selection { color: var(--text-secondary); font-size: .85rem; }
+.grid-map-heading { margin-bottom: 1.25rem; }
+.grid-map-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); gap: 1.25rem; }
+.grid-map-canvas { position: relative; height: 420px; overflow: hidden; border-radius: 12px; background: var(--bg-primary); border: 1px solid var(--border-color); }
+.grid-map-canvas [data-map-frame] { width: 100%; height: 100%; border: 0; z-index: 0; }
+.grid-map-message { position: absolute; inset: 0; margin: 0; padding: 2rem; display: grid; place-content: center; text-align: center; color: var(--text-secondary); }
+.grid-map-canvas [hidden] { display: none; }
+.grid-map-panel { min-width: 0; height: 420px; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+.grid-map-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: 1rem; border-bottom: 1px solid var(--border-color); font-size: .85rem; }
+.grid-map-panel-heading span { color: var(--text-secondary); font-size: .75rem; white-space: nowrap; }
+.grid-map-list { overflow-y: auto; padding: .65rem; display: flex; flex-direction: column; gap: .5rem; }
+.grid-map-node { display: flex; gap: .65rem; width: 100%; flex-shrink: 0; padding: .85rem; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-card); color: var(--text-primary); text-align: left; cursor: pointer; font: inherit; }
+.grid-map-node:hover { background: var(--bg-card-hover); }
+.grid-map-node:focus-visible { outline: 3px solid var(--accent-primary); outline-offset: 2px; }
+.grid-map-node strong { display: block; font-size: .85rem; overflow-wrap: anywhere; }
+.grid-map-node small { display: block; margin-top: .25rem; font-size: .75rem; color: var(--text-secondary); overflow-wrap: anywhere; }
+.grid-map-pin { font-size: 1.25rem; line-height: 1.2; }
+.grid-map-node[aria-pressed="true"] { background: #1e293b; border-color: #1e293b; color: #fff; }
+.grid-map-node[aria-pressed="true"] small { color: #cbd5e1; }
+.grid-map-selection { margin: .75rem 0 0; }
+@media (max-width: 700px) {
+  .grid-map-card { padding: 1rem; }
+  .grid-map-layout { grid-template-columns: minmax(0, 1fr); }
+  .grid-map-canvas { height: 320px; }
+  .grid-map-panel { height: 260px; }
+}
+
 .dashboard-welcome {
   display: flex;
   align-items: center;

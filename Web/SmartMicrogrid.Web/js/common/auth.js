@@ -20,6 +20,19 @@ const AuthGuard = {
     return true;
   },
 
+  requireRole(requiredRoles) {
+    const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
+    if (!this.requireAuth()) return false;
+    if (!roles.includes(SessionManager.getUserRole())) {
+      ApiClient.showToast('Access denied: You do not have permission to view this page.', 'error');
+      setTimeout(() => {
+        window.location.href = '/dashboard.html';
+      }, 1500);
+      return false;
+    }
+    return true;
+  },
+
   redirectIfAuthenticated() {
     if (SessionManager.isAuthenticated()) {
       window.location.href = '/dashboard.html';

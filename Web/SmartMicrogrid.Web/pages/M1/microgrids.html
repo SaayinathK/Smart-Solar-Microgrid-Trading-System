@@ -48,6 +48,7 @@
               <th>Microgrid Name</th>
               <th>Location</th>
               <th>Capacity</th>
+              <th>Battery Slots</th>
               <th>Battery Level</th>
               <th>Status</th>
               <th>Actions</th>
@@ -108,10 +109,14 @@
                 <div style="font-weight: 600;">${m.name}</div>
                 <div style="font-size: 0.8rem; color: var(--text-secondary);">${m.description || 'Solar Node'}</div>
               </td>
-              <td>${m.location}</td>
+              <td>${m.location}<br><small>GPS ${Number(m.latitude).toFixed(4)}, ${Number(m.longitude).toFixed(4)}</small></td>
               <td>
-                <div>${m.capacity} kWh</div>
-                <div style="font-size: 0.75rem; color: var(--accent-primary);">Available: ${m.availableCapacity} kWh</div>
+                <div>${m.capacity} kW</div>
+                <div style="font-size: 0.75rem; color: var(--accent-primary);">Available: ${m.availableCapacity} kW</div>
+              </td>
+              <td>
+                <strong>${m.batteryStorageSlots || 0}</strong> slots
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">${m.batteryCapacity} kWh storage</div>
               </td>
               <td>
                 <div>${m.currentBatteryLevel} / ${m.batteryCapacity} kWh</div>
@@ -120,10 +125,10 @@
               <td><span class="status-badge ${statusBadgeClass}">${m.status}</span></td>
               <td>
                 <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                  <a href="microgrid-details.html?id=${m.id}" class="btn btn-secondary btn-sm">Details</a>
+                  <a href="microgrid-details?id=${m.id}" class="btn btn-secondary btn-sm">Details</a>
                   ${canEdit ? `
-                    <a href="edit-microgrid.html?id=${m.id}" class="btn btn-secondary btn-sm">Edit</a>
-                    <button onclick="toggleStatus('${m.id}', '${m.status}')" class="btn btn-warning btn-sm">Toggle Status</button>
+                    <a href="edit-microgrid?id=${m.id}" class="btn btn-secondary btn-sm">Edit</a>
+                      <button onclick="toggleStatus('${m.id}', '${m.status}')" class="btn btn-warning btn-sm">${m.status === 'Active' ? 'Deactivate' : 'Activate'}</button>
                   ` : ''}
                 </div>
               </td>
@@ -136,7 +141,7 @@
     }
 
     async function toggleStatus(id, currentStatus) {
-      const nextStatus = currentStatus === 'Active' ? 'Maintenance' : 'Active';
+      const nextStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
       if (!confirm(`Are you sure you want to change status from ${currentStatus} to ${nextStatus}?`)) return;
 
       try {

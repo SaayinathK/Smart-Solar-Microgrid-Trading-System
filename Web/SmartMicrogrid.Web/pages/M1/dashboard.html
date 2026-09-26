@@ -5,6 +5,7 @@
   <title>Infrastructure Dashboard - Smart Microgrid Platform</title>
   <link rel="stylesheet" href="../../css/style.css"><link rel="stylesheet" href="../../css/sidebar.css"><link rel="stylesheet" href="../../css/dashboard.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../../vendor/leaflet/leaflet.css">
 </head>
 <body>
   <div id="app-layout-wrapper">
@@ -24,13 +25,17 @@
       <div class="insight-card battery-insight"><div class="insight-heading"><span>Battery resilience</span><strong id="battery-readiness">0%</strong></div><div class="insight-meter"><span id="battery-meter"></span></div><p id="battery-guidance">Loading storage signals...</p></div>
       <div class="insight-card slots-insight"><div class="insight-heading"><span>Market-ready energy</span><strong id="slot-energy">0 kWh</strong></div><p id="slot-guidance">Available energy is being calculated...</p><a href="energy-availability.html">Explore available supply &rarr;</a></div>
     </section>
+    <section class="grid-map-card" data-microgrid-map aria-label="Microgrid locations"></section>
     <div class="operations-grid">
       <section class="card chart-card"><div class="card-title-row"><div><h3>Operational status</h3><p>Fleet condition by microgrid node</p></div></div><div class="chart-canvas"><canvas id="statusChart"></canvas></div></section>
       <section class="card chart-card"><div class="card-title-row"><div><h3>Capacity distribution</h3><p>Available, reserved, used and total energy</p></div></div><div class="chart-canvas"><canvas id="capacityChart"></canvas></div></section>
       <section class="card alerts-card"><div class="card-title-row"><div><h3>Attention queue</h3><p>Priority signals derived from live infrastructure data</p></div><span id="alert-count" class="alert-count">0</span></div><div id="operations-alerts" class="operations-alerts"><div class="empty-alert">Checking operational signals...</div></div></section>
     </div>
   </div>
-  <script src="../../js/config/api-config.js"></script><script src="../../js/common/theme.js"></script><script src="../../js/common/session.js"></script><script src="../../js/api/api-client.js"></script><script src="../../js/api/microgrid-api.js"></script><script src="../../js/common/auth.js"></script><script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../vendor/leaflet/leaflet.js"></script>
+  <script src="../../js/common/openstreet-map.js"></script><script src="../../js/common/theme.js"></script><script src="../../js/common/session.js"></script><script src="../../js/api/api-client.js"></script><script src="../../js/api/microgrid-api.js"></script><script src="../../js/common/auth.js"></script><script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/common/microgrid-map.js"></script>
   <script>
     AuthGuard.requireAuth(); renderAppLayout('m1-dashboard', 'Infrastructure Dashboard');
     let statusChartInstance = null, capacityChartInstance = null;
