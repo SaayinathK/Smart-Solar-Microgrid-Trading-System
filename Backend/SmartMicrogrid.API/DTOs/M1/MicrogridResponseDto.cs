@@ -15,6 +15,7 @@ namespace SmartMicrogrid.API.DTOs.M1
         public double ReservedCapacity { get; set; }
         public double UsedCapacity { get; set; }
         public double BatteryCapacity { get; set; }
+        public int BatteryStorageSlots { get; set; }
         public double CurrentBatteryLevel { get; set; }
         public double BatteryPercentage { get; set; }
         public string Status { get; set; } = string.Empty;

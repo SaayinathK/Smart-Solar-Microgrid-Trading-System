@@ -66,6 +66,10 @@ namespace SmartMicrogrid.API.Controllers
             {
                 return BadRequest(ApiResponse<object>.FailureResponse(ex.Message));
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ApiResponse<object>.FailureResponse(ex.Message));
+            }
         }
 
         /// <summary>
@@ -92,6 +96,10 @@ namespace SmartMicrogrid.API.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(ApiResponse<object>.FailureResponse(ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ApiResponse<object>.FailureResponse(ex.Message));
             }
         }
 
