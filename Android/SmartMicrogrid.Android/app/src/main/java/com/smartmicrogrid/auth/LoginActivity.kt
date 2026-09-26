@@ -25,7 +25,7 @@ class LoginActivity : AppCompatActivity() {
             val role = SessionManager.getUserRole()
             when (role) {
                 "Prosumer" -> startActivity(Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java))
-                "TransactionVerifier" -> startActivity(Intent(this, com.smartmicrogrid.M3.VerifierMainActivity::class.java))
+                "MicrogridOperator" -> startActivity(Intent(this, com.smartmicrogrid.M3.MicrogridOperatorMainActivity::class.java))
                 else -> startActivity(Intent(this, MainActivity::class.java))
             }
             finish()
@@ -84,8 +84,8 @@ class LoginActivity : AppCompatActivity() {
                             startActivity(Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java))
                             finish()
                         }
-                        "TransactionVerifier" -> {
-                            startActivity(Intent(this, com.smartmicrogrid.M3.VerifierMainActivity::class.java))
+                        "MicrogridOperator" -> {
+                            startActivity(Intent(this, com.smartmicrogrid.M3.MicrogridOperatorMainActivity::class.java))
                             finish()
                         }
                         else -> {

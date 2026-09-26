@@ -46,7 +46,7 @@ class ReservationAdapter(
         val item = items[position]
         val role = SessionManager.getUserRole()
         val isStaff = role in listOf("MicrogridOperator", "Admin")
-        val isVerifier = role == "TransactionVerifier" || role == "Admin"
+        val canVerifyTransfer = role == "MicrogridOperator" || role == "Admin"
         val isProsumer = role == "Prosumer" || role == "Admin"
 
         val vCode = item.verificationCode?.ifBlank { null }
@@ -94,8 +94,8 @@ class ReservationAdapter(
             holder.reject.visibility = View.GONE
         }
 
-        // Verifier verify & complete
-        if (isVerifier && item.status == "Approved") {
+        // Grid operator verifies the QR/pass data and completes the transfer.
+        if (canVerifyTransfer && item.status == "Approved") {
             holder.complete.visibility = View.VISIBLE
             holder.complete.setOnClickListener { onComplete?.invoke(item) }
         } else {

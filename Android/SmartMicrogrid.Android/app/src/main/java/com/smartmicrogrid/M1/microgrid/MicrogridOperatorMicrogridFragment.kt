@@ -11,11 +11,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.smartmicrogrid.databinding.FragmentSearchEnergyBinding
 
-class VerifierMicrogridFragment : Fragment() {
+class MicrogridOperatorMicrogridFragment : Fragment() {
 
     private var _binding: FragmentSearchEnergyBinding? = null
     private val binding get() = _binding!!
-
     private lateinit var viewModel: MicrogridViewModel
     private lateinit var adapter: MicrogridAdapter
 
@@ -26,42 +25,31 @@ class VerifierMicrogridFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
         viewModel = ViewModelProvider(this)[MicrogridViewModel::class.java]
-        
-        binding.tvTitle.text = "Infrastructure Verification"
-        binding.tvSubtitle.text = "View microgrid capacities and battery levels for transaction validation"
+
+        binding.tvTitle.text = "Microgrid Operations"
+        binding.tvSubtitle.text = "Review microgrid capacities and battery levels before verifying energy transfers"
 
         adapter = MicrogridAdapter(emptyList()) { microgrid ->
-            // View slots or just details
-            val intent = Intent(requireContext(), com.smartmicrogrid.M1.slots.EnergySlotActivity::class.java).apply {
+            startActivity(Intent(requireContext(), com.smartmicrogrid.M1.slots.EnergySlotActivity::class.java).apply {
                 putExtra("MICROGRID_ID", microgrid.id)
-            }
-            startActivity(intent)
+            })
         }
-
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
-
-        binding.swipeRefresh.setOnRefreshListener {
-            viewModel.loadMicrogrids()
-        }
+        binding.swipeRefresh.setOnRefreshListener { viewModel.loadMicrogrids() }
 
         viewModel.microgrids.observe(viewLifecycleOwner) { list ->
-            // Verifier needs to see everything
             adapter.updateData(list)
             binding.tvEmpty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
         }
-
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading && !binding.swipeRefresh.isRefreshing) View.VISIBLE else View.GONE
             if (!loading) binding.swipeRefresh.isRefreshing = false
         }
-
-        viewModel.errorMessage.observe(viewLifecycleOwner) { err ->
-            err?.let { Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show() }
+        viewModel.errorMessage.observe(viewLifecycleOwner) { error ->
+            error?.let { Toast.makeText(requireContext(), it, Toast.LENGTH_LONG).show() }
         }
-
         viewModel.loadMicrogrids()
     }
 
