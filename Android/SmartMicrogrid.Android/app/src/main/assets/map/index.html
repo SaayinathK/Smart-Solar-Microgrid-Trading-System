@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Microgrid location — OpenStreetMap</title>
+  <link rel="stylesheet" href="leaflet/leaflet.css">
+  <style>
+    html, body, #map { height: 100%; width: 100%; margin: 0; }
+    #status { position: absolute; top: 8px; left: 50px; right: 8px; z-index: 1000; padding: 8px; border-radius: 8px; background: white; color: #102b46; font: 12px sans-serif; }
+    #status[hidden] { display: none; }
+    #retry { min-height: 36px; margin-left: 8px; }
+  </style>
+</head>
+<body>
+  <div id="map" aria-label="Microgrid location on OpenStreetMap"></div>
+  <div id="status" role="status" hidden>Map tiles could not load. Check your connection.<button id="retry" type="button">Retry</button></div>
+  <script src="leaflet/leaflet.js"></script>
+  <script src="map.js"></script>
+</body>
+</html>
