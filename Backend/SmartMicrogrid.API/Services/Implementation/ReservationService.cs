@@ -235,11 +235,18 @@ public class ReservationExpiryService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         using var timer = new PeriodicTimer(TimeSpan.FromMinutes(3));
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        try
         {
-            try { using var scope = _scopeFactory.CreateScope(); await scope.ServiceProvider.GetRequiredService<IReservationService>().ExpireOverdueAsync(stoppingToken); }
-            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
-            catch (Exception ex) { _logger.LogError(ex, "Reservation expiry sweep failed"); }
+            while (await timer.WaitForNextTickAsync(stoppingToken))
+            {
+                try { using var scope = _scopeFactory.CreateScope(); await scope.ServiceProvider.GetRequiredService<IReservationService>().ExpireOverdueAsync(stoppingToken); }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
+                catch (Exception ex) { _logger.LogError(ex, "Reservation expiry sweep failed"); }
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            // A canceled timer is normal during shutdown or failed API startup.
         }
     }
 }
