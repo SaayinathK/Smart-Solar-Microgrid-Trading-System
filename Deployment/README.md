@@ -21,7 +21,7 @@ dotnet publish -c Release -o ./publish
 
 ### 2. Windows Firewall Rule for LAN / Wi-Fi Access (Run PowerShell as Admin)
 ```powershell
-New-NetFirewallRule -DisplayName "SmartMicrogrid API Port 5000" -Direction Inbound -LocalPort 5000 -Protocol TCP -Action Allow
+New-NetFirewallRule -DisplayName "SmartMicrogrid API Port 5050" -Direction Inbound -LocalPort 5050 -Protocol TCP -Action Allow
 ```
 
 ### 3. Restart IIS Services

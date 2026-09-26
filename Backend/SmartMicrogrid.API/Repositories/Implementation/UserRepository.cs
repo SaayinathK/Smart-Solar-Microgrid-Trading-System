@@ -115,6 +115,13 @@ namespace SmartMicrogrid.API.Repositories.Implementation
             }
 
             return await _context.Users.Find(filter).AnyAsync();
+        public async Task<User?> GetByNicAsync(string nic)
+        {
+            if (string.IsNullOrWhiteSpace(nic))
+                return null;
+
+            var normalized = nic.Trim().ToUpperInvariant();
+            return await _context.Users.Find(u => u.Nic == normalized).FirstOrDefaultAsync();
         }
     }
 }

@@ -23,10 +23,10 @@ class LoginActivity : AppCompatActivity() {
         // If already logged in, skip to correct main
         if (SessionManager.isLoggedIn()) {
             val role = SessionManager.getUserRole()
-            if (role == "Prosumer") {
-                startActivity(Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java))
-            } else if (role == "TransactionVerifier") {
-                startActivity(Intent(this, com.smartmicrogrid.M3.VerifierMainActivity::class.java))
+            when (role) {
+                "Prosumer" -> startActivity(Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java))
+                "MicrogridOperator" -> startActivity(Intent(this, com.smartmicrogrid.M3.MicrogridOperatorMainActivity::class.java))
+                else -> startActivity(Intent(this, MainActivity::class.java))
             }
             finish()
             return
@@ -88,13 +88,13 @@ class LoginActivity : AppCompatActivity() {
                             startActivity(Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java))
                             finish()
                         }
-                        "TransactionVerifier" -> {
-                            startActivity(Intent(this, com.smartmicrogrid.M3.VerifierMainActivity::class.java))
+                        "MicrogridOperator" -> {
+                            startActivity(Intent(this, com.smartmicrogrid.M3.MicrogridOperatorMainActivity::class.java))
                             finish()
                         }
                         else -> {
-                            SessionManager.logout() // Reject web roles
-                            showError("Please use the Web Portal for administration.")
+                            startActivity(Intent(this, MainActivity::class.java))
+                            finish()
                         }
                     }
                 } else {

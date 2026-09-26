@@ -8,7 +8,7 @@
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:5000/api",
+			"value": "http://localhost:5050/api",
 			"type": "string"
 		},
 		{
@@ -31,7 +31,10 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
 						],
 						"body": {
 							"mode": "raw",
@@ -39,8 +42,13 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/register",
-							"host": ["{{baseUrl}}"],
-							"path": ["auth", "register"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
 						}
 					}
 				},
@@ -64,7 +72,10 @@
 					"request": {
 						"method": "POST",
 						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
 						],
 						"body": {
 							"mode": "raw",
@@ -72,8 +83,13 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/login",
-							"host": ["{{baseUrl}}"],
-							"path": ["auth", "login"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
 						}
 					}
 				},
@@ -82,11 +98,20 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "POST",
 						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
 						],
 						"body": {
 							"mode": "raw",
@@ -94,8 +119,13 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/auth/change-password",
-							"host": ["{{baseUrl}}"],
-							"path": ["auth", "change-password"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"change-password"
+							]
 						}
 					}
 				}
@@ -109,13 +139,24 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"url": {
 							"raw": "{{baseUrl}}/users/me",
-							"host": ["{{baseUrl}}"],
-							"path": ["users", "me"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"me"
+							]
 						}
 					}
 				},
@@ -124,11 +165,20 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "PUT",
 						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
 						],
 						"body": {
 							"mode": "raw",
@@ -136,8 +186,13 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/users/me",
-							"host": ["{{baseUrl}}"],
-							"path": ["users", "me"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"me"
+							]
 						}
 					}
 				}
@@ -151,17 +206,36 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"url": {
 							"raw": "{{baseUrl}}/users?search=&role=&activeOnly=",
-							"host": ["{{baseUrl}}"],
-							"path": ["users"],
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
 							"query": [
-								{ "key": "search", "value": "" },
-								{ "key": "role", "value": "" },
-								{ "key": "activeOnly", "value": "" }
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "role",
+									"value": ""
+								},
+								{
+									"key": "activeOnly",
+									"value": ""
+								}
 							]
 						}
 					}
@@ -185,11 +259,20 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "POST",
 						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
 						],
 						"body": {
 							"mode": "raw",
@@ -197,8 +280,12 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/users",
-							"host": ["{{baseUrl}}"],
-							"path": ["users"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							]
 						}
 					}
 				},
@@ -207,13 +294,24 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "GET",
 						"url": {
 							"raw": "{{baseUrl}}/users/{{createdUserId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["users", "{{createdUserId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{createdUserId}}"
+							]
 						}
 					}
 				},
@@ -222,11 +320,20 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "PUT",
 						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
 						],
 						"body": {
 							"mode": "raw",
@@ -234,8 +341,13 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/users/{{createdUserId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["users", "{{createdUserId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{createdUserId}}"
+							]
 						}
 					}
 				},
@@ -244,11 +356,20 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "PATCH",
 						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
 						],
 						"body": {
 							"mode": "raw",
@@ -256,8 +377,14 @@
 						},
 						"url": {
 							"raw": "{{baseUrl}}/users/{{createdUserId}}/status",
-							"host": ["{{baseUrl}}"],
-							"path": ["users", "{{createdUserId}}", "status"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{createdUserId}}",
+								"status"
+							]
 						}
 					}
 				},
@@ -266,20 +393,35 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "PATCH",
 						"header": [
-							{ "key": "Content-Type", "value": "application/json" }
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"role\": \"TransactionVerifier\"\n}"
+							"raw": "{\n  \"role\": \"MicrogridOperator\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/users/{{createdUserId}}/role",
-							"host": ["{{baseUrl}}"],
-							"path": ["users", "{{createdUserId}}", "role"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{createdUserId}}",
+								"role"
+							]
 						}
 					}
 				},
@@ -288,13 +430,24 @@
 					"request": {
 						"auth": {
 							"type": "bearer",
-							"bearer": [{ "key": "token", "value": "{{authToken}}", "type": "string" }]
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
 						},
 						"method": "DELETE",
 						"url": {
 							"raw": "{{baseUrl}}/users/{{createdUserId}}",
-							"host": ["{{baseUrl}}"],
-							"path": ["users", "{{createdUserId}}"]
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"{{createdUserId}}"
+							]
 						}
 					}
 				}

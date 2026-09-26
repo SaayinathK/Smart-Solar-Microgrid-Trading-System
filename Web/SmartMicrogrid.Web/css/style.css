@@ -188,7 +188,6 @@ a:hover {
 .role-admin { background: rgba(225, 29, 72, 0.12); color: var(--accent-rose); border: 1px solid rgba(225, 29, 72, 0.25); }
 .role-operator { background: rgba(217, 119, 6, 0.12); color: var(--accent-amber); border: 1px solid rgba(217, 119, 6, 0.25); }
 .role-prosumer { background: rgba(37, 99, 235, 0.12); color: var(--accent-primary); border: 1px solid rgba(37, 99, 235, 0.25); }
-.role-verifier { background: rgba(2, 132, 199, 0.12); color: var(--accent-cyan); border: 1px solid rgba(2, 132, 199, 0.25); }
 
 /* Buttons */
 .btn {
@@ -356,6 +355,65 @@ a:hover {
 
 .navbar-brand:hover svg {
   transform: scale(1.1) rotate(5deg);
+}
+
+/* Compact shared surfaces */
+.container { padding-left: 1.25rem; padding-right: 1.25rem; }
+.main-content { padding-top: 1.35rem; padding-bottom: 1.35rem; }
+.btn { padding: 0.55rem 1.05rem; }
+.card { padding: 1.35rem; border-radius: var(--radius-md); }
+.card:hover { transform: none; box-shadow: var(--shadow-md); }
+.footer { padding: 0.9rem 0; }
+
+@media (max-width: 600px) {
+  .container { padding-left: 0.85rem; padding-right: 0.85rem; }
+  .main-content { padding-top: 0.9rem; padding-bottom: 0.9rem; }
+  .card { padding: 1rem; }
+}
+
+/* Shared dashboard-style page rhythm */
+.main-content > .container > * { min-width: 0; }
+.main-content > .container > .card,
+.main-content > .container > .table-container,
+.main-content > .container > .page-header,
+.main-content > .container > .reservation-hero,
+.main-content > .container > .operations-hero,
+.main-content > .container > .availability-hero,
+.main-content > .container > .dashboard-welcome { margin-bottom: 1rem; }
+
+.main-content > .container > .card:first-child:not(.reservation-toolbar):not(.reservation-table-card),
+.main-content > .container > .page-header {
+  border-color: var(--border-color);
+  background-image: linear-gradient(100deg, color-mix(in srgb, var(--bg-card) 94%, transparent), color-mix(in srgb, var(--bg-card) 76%, transparent)), url('../assets/images/bg_web_dashboard.png');
+  background-size: cover;
+  background-position: center 42%;
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .main-content > .container > .card:first-child:not(.reservation-toolbar):not(.reservation-table-card),
+[data-theme="dark"] .main-content > .container > .page-header {
+  background-image: linear-gradient(100deg, rgba(10, 14, 23, 0.94), rgba(10, 14, 23, 0.76)), url('../assets/images/bg_web_dashboard.png');
+}
+
+.main-content > .container > .card:first-child:not(.reservation-toolbar):not(.reservation-table-card) h2,
+.main-content > .container > .page-header h1 {
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.main-content > .container > .card:first-child:not(.reservation-toolbar):not(.reservation-table-card) > div:first-child,
+.main-content > .container > .page-header {
+  gap: 0.8rem;
+}
+
+.main-content > .container > .card + .card,
+.main-content > .container > .table-toolbar + .table-container {
+  margin-top: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  .main-content > .container > .card:first-child:not(.reservation-toolbar):not(.reservation-table-card),
+  .main-content > .container > .page-header { margin-bottom: 0.8rem; }
 }
 
 .navbar-nav {

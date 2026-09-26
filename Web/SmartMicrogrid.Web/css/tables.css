@@ -142,3 +142,21 @@
   align-items: center;
   gap: 0.4rem;
 }
+
+/* Compact table surfaces */
+.page-header { margin-bottom: 1.15rem; padding: 1.1rem 1.25rem; border-radius: var(--radius-md); }
+.table-toolbar { gap: 0.7rem; margin-bottom: 1rem; }
+.table-container { border-radius: var(--radius-md); }
+.data-table th { padding: 0.8rem 1rem; }
+.data-table td { padding: 0.8rem 1rem; }
+.data-table,
+.data-table tbody,
+.data-table tbody tr,
+.data-table tbody td {
+  background-color: var(--bg-card) !important;
+  color: var(--text-primary);
+}
+.data-table tbody tr:hover,
+.data-table tbody tr:hover td {
+  background-color: var(--bg-card-hover) !important;
+}

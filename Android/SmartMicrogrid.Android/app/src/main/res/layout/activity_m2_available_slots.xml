@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="16dp">
+        <Button android:id="@+id/m2_slots_refresh" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Refresh available slots"/>
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/m2_slots_list" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:clipToPadding="false" android:paddingTop="12dp"/>
+    </LinearLayout>
+    <ProgressBar android:id="@+id/m2_slots_loading" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center"/>
+    <TextView android:id="@+id/m2_slots_empty" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center" android:text="No available energy slots" android:visibility="gone"/>
+</FrameLayout>

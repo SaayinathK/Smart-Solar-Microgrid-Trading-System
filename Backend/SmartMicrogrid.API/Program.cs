@@ -38,7 +38,10 @@ builder.Services.AddScoped<IEnergyCapacityService, EnergyCapacityService>();
 builder.Services.AddScoped<IBatteryService, BatteryService>();
 builder.Services.AddScoped<IEnergySlotService, EnergySlotService>();
 builder.Services.AddScoped<IMicrogridDashboardService, MicrogridDashboardService>();
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddHostedService<EnergySlotCleanupService>();
+builder.Services.AddHostedService<ReservationExpiryService>();
 builder.Services.AddSingleton<JwtHelper>();
 
 // Configure JWT Authentication
@@ -119,10 +122,23 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Seed Default Users for all 4 System Roles if database is empty
+// Migrate legacy verifier accounts before typed User queries deserialize roles.
 using (var scope = app.Services.CreateScope())
 {
     var mongoContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+    await DbSeeder.MigrateLegacyRolesAsync(mongoContext);
+
+    // Drop and reseed if --reseed flag is passed
+    if (args.Contains("--reseed"))
+    {
+        Console.WriteLine("🔄 --reseed flag detected. Dropping SmartMicrogridDB...");
+        var client = new MongoDB.Driver.MongoClient(
+            builder.Configuration.GetSection("MongoDB")["ConnectionString"] ?? "mongodb://localhost:27017");
+        client.DropDatabase(
+            builder.Configuration.GetSection("MongoDB")["DatabaseName"] ?? "SmartMicrogridDB");
+        Console.WriteLine("✅ Database dropped. Re-seeding...");
+    }
+
     await DbSeeder.SeedDefaultUsersAsync(mongoContext);
 }
 

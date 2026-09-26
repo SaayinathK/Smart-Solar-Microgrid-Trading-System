@@ -13,7 +13,6 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
   let roleClass = 'role-prosumer';
   if (role === 'Admin') roleClass = 'role-admin';
   else if (role === 'MicrogridOperator') roleClass = 'role-operator';
-  else if (role === 'TransactionVerifier') roleClass = 'role-verifier';
 
   const userInitial = user && user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U';
 
@@ -35,7 +34,10 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
         </div>
 
         <div class="sidebar-user-card">
-          <div class="sidebar-user-avatar">${userInitial}</div>
+          <div class="sidebar-user-avatar-wrapper">
+            <div class="sidebar-user-avatar">${userInitial}</div>
+            <span class="status-dot"></span>
+          </div>
           <div class="sidebar-user-info">
             <div class="sidebar-user-name">${user ? `${user.firstName} ${user.lastName}` : 'User'}</div>
             <span class="role-pill ${roleClass}">${role}</span>
@@ -47,7 +49,7 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
         </nav>
 
         <div class="sidebar-footer">
-          <button id="theme-toggle-btn" onclick="ThemeManager.toggleTheme()" class="theme-toggle-btn" style="width: 100%; justify-content: center;">
+          <button id="theme-toggle-btn" onclick="ThemeManager.toggleTheme()" class="theme-toggle-btn">
             ${currentTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </button>
           <button onclick="AuthGuard.logout()" class="btn btn-secondary btn-sm" style="width: 100%;">
@@ -157,6 +159,31 @@ function getMenuItemsForRole(role, activePage) {
     </div>
   `;
 
+  // M2 Energy Search & Reservations Section (All Roles)
+  const reservationLabel = role === 'Admin' ? 'All Reservations Monitor' :
+                           role === 'MicrogridOperator' ? 'Microgrid Reservations' :
+                           role === 'MicrogridOperator' ? 'Reservations & Verification' :
+                           'My Reservations & Claims';
+
+  sections += `
+    <div>
+      <div class="sidebar-section-title">Energy Trading & Reservations</div>
+      <ul class="sidebar-menu">
+        <li>
+          <a href="/pages/reservations/reservations.html" class="sidebar-link ${activePage === 'reservations' ? 'active' : ''}">
+            ${icons.trading} <span>${reservationLabel}</span>
+          </a>
+        </li>
+        ${role === 'Prosumer' ? `
+        <li>
+          <a href="/pages/M1/energy-availability.html" class="sidebar-link ${activePage === 'availability' ? 'active' : ''}">
+            ${icons.grid} <span>Browse Available Energy</span>
+          </a>
+        </li>` : ''}
+      </ul>
+    </div>
+  `;
+
   // Admin section
   if (role === 'Admin') {
     sections += `
@@ -182,3 +209,15 @@ function toggleSidebar() {
     sidebar.classList.toggle('open');
   }
 }
+
+// Optional: Close sidebar on mobile when a link is clicked
+document.addEventListener('click', function(event) {
+  const sidebar = document.getElementById('sidebar');
+  const toggleBtn = document.querySelector('.mobile-toggle-btn');
+  
+  if (window.innerWidth <= 992 && sidebar && sidebar.classList.contains('open')) {
+    if (!sidebar.contains(event.target) && (!toggleBtn || !toggleBtn.contains(event.target))) {
+      sidebar.classList.remove('open');
+    }
+  }
+});

@@ -16,7 +16,7 @@ dotnet publish -c Release -o C:\inetpub\SmartMicrogridAPI
 1. Open **IIS Manager** (`inetmgr`).
 2. Add a new Web Site named `SmartMicrogridAPI`.
 3. Set Physical Path to `C:\inetpub\SmartMicrogridAPI`.
-4. Set Binding to Port `5000` (or host name / IP).
+4. Set Binding to Port `5050` (or host name / IP).
 5. Ensure Application Pool is set to `.NET CLR Version: No Managed Code`.
 
 ### 3. Environment Variables Override
@@ -36,7 +36,7 @@ Configure system environment variables or `web.config` for LAN deployment:
 ```
 
 ### 4. Firewall Rule
-Allow inbound connections on TCP Port 5000 in Windows Defender Firewall:
+Allow inbound connections on TCP Port 5050 in Windows Defender Firewall:
 ```powershell
-New-NetFirewallRule -DisplayName "SmartMicrogrid API Port 5000" -Direction Inbound -LocalPort 5000 -Protocol TCP -Action Allow
+New-NetFirewallRule -DisplayName "SmartMicrogrid API Port 5050" -Direction Inbound -LocalPort 5050 -Protocol TCP -Action Allow
 ```

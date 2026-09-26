@@ -22,7 +22,7 @@ namespace SmartMicrogrid.API.Models.Common
         public string PhoneNumber { get; set; } = string.Empty;
 
         [BsonElement("nic")]
-        public string Nic { get; set; } = string.Empty;
+        public string? Nic { get; set; }
 
         [BsonElement("passwordHash")]
         public string PasswordHash { get; set; } = string.Empty;

@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.smartmicrogrid.R
 import com.smartmicrogrid.auth.LoginActivity
-import com.smartmicrogrid.ui.PlaceholderFragment
 import com.smartmicrogrid.utils.SessionManager
 
 class ProsumerMainActivity : AppCompatActivity() {
@@ -32,7 +31,7 @@ class ProsumerMainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.nav_home -> loadFragment(com.smartmicrogrid.ui.HomeFragment())
                 R.id.nav_search -> loadFragment(com.smartmicrogrid.M1.microgrid.SearchEnergyFragment())
-                R.id.nav_reservations -> loadFragment(PlaceholderFragment.newInstance("My Reservations"))
+                R.id.nav_reservations -> loadFragment(MyReservationsFragment())
                 R.id.nav_profile -> loadFragment(com.smartmicrogrid.ui.ProfileFragment())
                 else -> false
             }
