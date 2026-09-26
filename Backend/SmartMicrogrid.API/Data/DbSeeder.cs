@@ -11,10 +11,18 @@ namespace SmartMicrogrid.API.Data
 {
     public static class DbSeeder
     {
+        public static async Task MigrateLegacyRolesAsync(MongoDbContext context)
+        {
+            var users = context.GetRawUsersCollection();
+            await users.UpdateManyAsync(
+                new MongoDB.Bson.BsonDocument("role", "TransactionVerifier"),
+                new MongoDB.Bson.BsonDocument("$set", new MongoDB.Bson.BsonDocument("role", "MicrogridOperator")));
+        }
+
         public static async Task SeedDefaultUsersAsync(MongoDbContext context)
         {
             // ──────────────────────────────────────────────
-            //  1. USERS  (12 records – at least 10 required)
+            //  1. USERS  (10 records – at least 10 required)
             // ──────────────────────────────────────────────
             var userCount = await context.Users.CountDocumentsAsync(Builders<User>.Filter.Empty);
             if (userCount == 0)
@@ -117,26 +125,6 @@ namespace SmartMicrogrid.API.Data
                         Role = Role.Prosumer, IsActive = true,
                         CreatedAt = now, UpdatedAt = now
                     },
-
-                    // ── Transaction Verifiers ──
-                    new User
-                    {
-                        FirstName = "Valerie", LastName = "Cooray",
-                        Email = "verifier@microgrid.com", PhoneNumber = "+94770000004",
-                        Nic = "199412345688",
-                        PasswordHash = PasswordHelper.HashPassword("Verifier123!"),
-                        Role = Role.TransactionVerifier, IsActive = true,
-                        CreatedAt = now, UpdatedAt = now
-                    },
-                    new User
-                    {
-                        FirstName = "Ishara", LastName = "Gunasekara",
-                        Email = "ishara.verifier@microgrid.com", PhoneNumber = "+94770000018",
-                        Nic = "199312345689",
-                        PasswordHash = PasswordHelper.HashPassword("Verifier123!"),
-                        Role = Role.TransactionVerifier, IsActive = true,
-                        CreatedAt = now, UpdatedAt = now
-                    }
                 };
 
                 await context.Users.InsertManyAsync(defaultUsers);

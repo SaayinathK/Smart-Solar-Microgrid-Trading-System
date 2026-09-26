@@ -122,10 +122,11 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Seed Default Users for all 4 System Roles if database is empty
+// Migrate legacy verifier accounts before typed User queries deserialize roles.
 using (var scope = app.Services.CreateScope())
 {
     var mongoContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+    await DbSeeder.MigrateLegacyRolesAsync(mongoContext);
 
     // Drop and reseed if --reseed flag is passed
     if (args.Contains("--reseed"))

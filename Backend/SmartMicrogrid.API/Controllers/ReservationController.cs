@@ -17,7 +17,6 @@ public class ReservationController : ControllerBase
     private string ActorId => User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(ClaimTypes.Name) ?? User.FindFirstValue("sub") ?? string.Empty;
     private bool IsAdmin => User.IsInRole("Admin");
     private bool IsOperator => User.IsInRole("MicrogridOperator");
-    private bool IsVerifier => User.IsInRole("TransactionVerifier");
     private bool IsStaff => IsAdmin || IsOperator;
     private async Task<string?> CurrentNicAsync() => (await _users.GetByIdAsync(ActorId))?.Nic;
 
@@ -33,12 +32,6 @@ public class ReservationController : ControllerBase
         {
             var rows = await _service.GetAsync(null, status, nodeId, Math.Max(1, page), Math.Clamp(pageSize, 1, 100), ActorId);
             return Ok(ApiResponse<object>.SuccessResponse(rows, "Microgrid reservations retrieved."));
-        }
-        if (IsVerifier)
-        {
-            var targetStatus = string.IsNullOrWhiteSpace(status) ? "Approved" : status;
-            var rows = await _service.GetAsync(null, targetStatus, nodeId, Math.Max(1, page), Math.Clamp(pageSize, 1, 100), null);
-            return Ok(ApiResponse<object>.SuccessResponse(rows, "Reservations retrieved for transaction verification."));
         }
         var nic = await CurrentNicAsync();
         if (string.IsNullOrWhiteSpace(nic)) return Unauthorized(ApiResponse<object>.FailureResponse("The prosumer profile has no NIC. Contact an Admin to complete the profile."));
@@ -56,10 +49,6 @@ public class ReservationController : ControllerBase
         {
             return Ok(ApiResponse<object>.SuccessResponse(await _service.SummaryAsync(null, ActorId)));
         }
-        if (IsVerifier)
-        {
-            return Ok(ApiResponse<object>.SuccessResponse(await _service.SummaryAsync(null, null)));
-        }
         var targetNic = await CurrentNicAsync();
         if (string.IsNullOrWhiteSpace(targetNic)) return Unauthorized(ApiResponse<object>.FailureResponse("The prosumer profile has no NIC."));
         return Ok(ApiResponse<object>.SuccessResponse(await _service.SummaryAsync(targetNic.Trim().ToUpperInvariant(), null)));
@@ -69,7 +58,7 @@ public class ReservationController : ControllerBase
     {
         var row = await _service.GetByIdAsync(id, IsOperator ? ActorId : null);
         if (row == null) return NotFound(ApiResponse<object>.FailureResponse("Reservation not found."));
-        if (!IsAdmin && !IsOperator && !IsVerifier && row.ProsumerId != await CurrentNicAsync()) return StatusCode(403, ApiResponse<object>.FailureResponse("You can only view your own reservations."));
+        if (!IsAdmin && !IsOperator && row.ProsumerId != await CurrentNicAsync()) return StatusCode(403, ApiResponse<object>.FailureResponse("You can only view your own reservations."));
         return Ok(ApiResponse<object>.SuccessResponse(row));
     }
     [HttpPost]
@@ -100,7 +89,7 @@ public class ReservationController : ControllerBase
         Task.FromResult<IActionResult>(BadRequest(ApiResponse<object>.FailureResponse("Status must be Approved or Rejected.")));
     [HttpPatch("{id}/cancel")]
     public Task<IActionResult> Cancel(string id) => Change(id, "cancel", null);
-    [HttpPatch("{id}/complete"), Authorize(Roles="Admin,MicrogridOperator,TransactionVerifier")]
+    [HttpPatch("{id}/complete"), Authorize(Roles="Admin,MicrogridOperator")]
     public async Task<IActionResult> Complete(string id)
     {
         try { return Ok(ApiResponse<object>.SuccessResponse(await _service.MarkCompletedAsync(id, ActorId, IsOperator ? ActorId : null), "Reservation completed.")); }
