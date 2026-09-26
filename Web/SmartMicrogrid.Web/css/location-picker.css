@@ -1,0 +1,17 @@
+.microgrid-node-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.microgrid-node-form-grid > * { min-width: 0; }
+.location-picker { grid-column: span 2; min-width: 0; }
+.location-picker-heading p, .location-picker-message { margin: .4rem 0 .75rem; color: var(--text-secondary); font-size: .85rem; }
+.location-picker-tools { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; margin-bottom: .75rem; }
+.location-picker-map { height: 350px; width: 100%; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-secondary); }
+.location-picker-message { min-height: 1.5em; }
+.location-address-status { display: block; margin-top: .4rem; color: var(--text-secondary); font-size: .8rem; }
+.location-picker [hidden] { display: none; }
+@media (max-width: 600px) {
+  .microgrid-node-form-grid > * { grid-column: span 2; }
+  .location-picker-map { height: 300px; }
+  .location-picker-tools .btn { width: 100%; }
+}
+
+.location-picker-map { z-index: 0; }
+.location-map-attribution { font-size: .75rem; color: var(--text-secondary); }
