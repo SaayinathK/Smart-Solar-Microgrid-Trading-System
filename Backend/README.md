@@ -53,7 +53,7 @@ Backend/
     │   └── ExceptionMiddleware.cs     # Uniform global exception handler
     ├── Models/ Common/
     │   ├── User.cs                    # MongoDB User document model
-    │   ├── Role.cs                    # Role Enum (Admin, MicrogridOperator, Prosumer, TransactionVerifier)
+    │   ├── Role.cs                    # Role Enum (Admin, MicrogridOperator, Prosumer)
     │   └── ApiResponse.cs             # Generic API JSON response wrapper
     ├── Repositories/
     │   ├── Interfaces/IUserRepository.cs

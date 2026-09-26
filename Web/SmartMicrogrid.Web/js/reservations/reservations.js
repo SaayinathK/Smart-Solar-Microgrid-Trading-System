@@ -26,14 +26,7 @@
     if (roleSubtitle) roleSubtitle.textContent = 'Review, approve, and manage energy reservation requests across your assigned solar hubs.';
     if (roleBadge) roleBadge.textContent = 'Microgrid Operator';
     if (toolbarHeading) toolbarHeading.textContent = 'Hub Reservation Requests';
-  } else if (role === 'TransactionVerifier') {
-    if (roleEyebrow) roleEyebrow.textContent = 'TRANSACTION VERIFICATION';
-    if (roleTitle) roleTitle.textContent = 'Approved Reservations for Verification';
-    if (roleSubtitle) roleSubtitle.textContent = 'Verify active energy transfers, scan passes, and mark completed delivery.';
-    if (roleBadge) roleBadge.textContent = 'Transaction Verifier';
-    if (toolbarHeading) toolbarHeading.textContent = 'Verification & Dispatch Queue';
     if (btnQuickVerify) btnQuickVerify.style.display = 'inline-block';
-    if (btnNewReservation) btnNewReservation.style.display = 'none';
   } else {
     // Prosumer
     if (roleEyebrow) roleEyebrow.textContent = 'PROSUMER ENERGY TRADING';
@@ -98,7 +91,6 @@
 
     const isOperator = role === 'MicrogridOperator';
     const isAdmin = role === 'Admin';
-    const isVerifier = role === 'TransactionVerifier';
     const isProsumer = role === 'Prosumer';
 
     body.innerHTML = filtered.map(r => {
@@ -118,8 +110,8 @@
         actionButtons.push(`<button class="btn btn-danger btn-sm" data-action="reject" data-id="${id}">Reject</button>`);
       }
 
-      // Verifier Actions (Complete delivery)
-      if ((isVerifier || isAdmin) && statusName === 'Approved') {
+      // Grid Operator Actions (verify and complete delivery)
+      if ((isOperator || isAdmin) && statusName === 'Approved') {
         actionButtons.push(`<button class="btn btn-success btn-sm" data-action="complete" data-id="${id}">Verify & Complete</button>`);
       }
 

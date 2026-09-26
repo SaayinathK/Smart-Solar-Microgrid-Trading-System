@@ -82,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
       let roleClass = 'role-prosumer';
       if (user.role === 'Admin') roleClass = 'role-admin';
       else if (user.role === 'MicrogridOperator') roleClass = 'role-operator';
-      else if (user.role === 'TransactionVerifier') roleClass = 'role-verifier';
 
       const statusBadge = user.isActive
         ? '<span class="status-badge status-active"><span class="status-dot"></span> Active</span>'

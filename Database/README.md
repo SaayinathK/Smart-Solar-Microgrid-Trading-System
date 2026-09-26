@@ -73,8 +73,6 @@ When the C# Web API starts up, `DbSeeder` checks if collections are empty. If em
 | Ruwan Bandara | `ruwan@microgrid.com` | `Prosumer123!` | `Prosumer` | ✅ |
 | Dilini Wickramasinghe | `dilini@microgrid.com` | `Prosumer123!` | `Prosumer` | ❌ |
 | Tharushi Kumari | `tharushi@microgrid.com` | `Prosumer123!` | `Prosumer` | ✅ |
-| Valerie Cooray | `verifier@microgrid.com` | `Verifier123!` | `TransactionVerifier` | ✅ |
-| Ishara Gunasekara | `ishara.verifier@microgrid.com` | `Verifier123!` | `TransactionVerifier` | ✅ |
 
 ### Microgrid Nodes (10)
 
