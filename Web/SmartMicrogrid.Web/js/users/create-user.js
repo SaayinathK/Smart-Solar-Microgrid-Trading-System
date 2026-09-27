@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lastName = document.getElementById('lastName').value.trim();
     const email = document.getElementById('email').value.trim();
     const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    const nic = document.getElementById('nic').value.trim().toUpperCase();
     const role = document.getElementById('role').value;
     const isActive = document.getElementById('isActive').value === 'true';
     const password = document.getElementById('password').value;
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastName,
         email,
         phoneNumber,
+        nic,
         role,
         isActive,
         password

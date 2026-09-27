@@ -22,9 +22,27 @@ namespace SmartMicrogrid.API.Services.Implementation
         {
             var normalizedEmail = dto.Email.Trim().ToLower();
 
+            // Admin self-registration is strictly disallowed
+            if (dto.Role == Role.Admin)
+            {
+                return ApiResponse<UserResponseDto>.FailureResponse("Self-registration is not allowed for Admin role. Admin accounts must be created by a Backoffice officer.");
+            }
+
+            // Prosumer role requires NIC as primary key/identifier
+            var nic = dto.Nic?.Trim().ToUpper() ?? string.Empty;
+            if (dto.Role == Role.Prosumer && string.IsNullOrWhiteSpace(nic))
+            {
+                return ApiResponse<UserResponseDto>.FailureResponse("National Identity Card (NIC) is required for Prosumer registration.");
+            }
+
             if (await _userRepository.ExistsByEmailAsync(normalizedEmail))
             {
                 return ApiResponse<UserResponseDto>.FailureResponse("An account with this email address already exists.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(nic) && await _userRepository.ExistsByNicAsync(nic))
+            {
+                return ApiResponse<UserResponseDto>.FailureResponse("An account with this National Identity Card (NIC) already exists.");
             }
 
             var user = new User
@@ -33,8 +51,9 @@ namespace SmartMicrogrid.API.Services.Implementation
                 LastName = dto.LastName.Trim(),
                 Email = normalizedEmail,
                 PhoneNumber = dto.PhoneNumber?.Trim() ?? string.Empty,
+                Nic = nic,
                 PasswordHash = PasswordHelper.HashPassword(dto.Password),
-                Role = Role.Prosumer, // Public registration is strictly forced to Prosumer
+                Role = dto.Role,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -43,7 +62,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             var createdUser = await _userRepository.CreateAsync(user);
 
             var userResponse = MapToUserResponseDto(createdUser);
-            return ApiResponse<UserResponseDto>.SuccessResponse(userResponse, "Registration successful.");
+            return ApiResponse<UserResponseDto>.SuccessResponse(userResponse, $"{user.Role} registration successful.");
         }
 
         public async Task<ApiResponse<LoginResponseDto>> LoginAsync(LoginDto dto)
@@ -58,7 +77,7 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             if (!user.IsActive)
             {
-                return ApiResponse<LoginResponseDto>.FailureResponse("Your account has been deactivated. Please contact an administrator.");
+                return ApiResponse<LoginResponseDto>.FailureResponse("Your account has been deactivated. Deactivated accounts can only be reactivated by a Backoffice officer.");
             }
 
             var (token, expiresAt) = _jwtHelper.GenerateJwtToken(user);
@@ -109,6 +128,7 @@ namespace SmartMicrogrid.API.Services.Implementation
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
+                Nic = user.Nic,
                 Role = user.Role.ToString(),
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt,

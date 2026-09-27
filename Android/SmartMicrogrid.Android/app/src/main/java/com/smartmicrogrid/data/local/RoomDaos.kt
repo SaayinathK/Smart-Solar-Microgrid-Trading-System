@@ -37,3 +37,11 @@ interface EnergySlotDao {
     @Query("DELETE FROM energy_slots")
     suspend fun clearAll()
 }
+
+@Dao
+interface ReservationDao {
+    @Query("SELECT * FROM reservations ORDER BY startTime ASC") suspend fun all(): List<ReservationEntity>
+    @Insert(onConflict = OnConflictStrategy.REPLACE) suspend fun insertAll(rows: List<ReservationEntity>)
+    @Query("DELETE FROM reservations") suspend fun clear()
+    @Transaction suspend fun replaceAll(rows: List<ReservationEntity>) { clear(); insertAll(rows) }
+}

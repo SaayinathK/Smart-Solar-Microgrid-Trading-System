@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadUsers() {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">
           Loading system users...
         </td>
       </tr>
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         tableBody.innerHTML = `
           <tr>
-            <td colspan="7" style="text-align: center; color: var(--accent-rose); padding: 2rem;">
+            <td colspan="8" style="text-align: center; color: var(--accent-rose); padding: 2rem;">
               ${response.message || 'Failed to load users.'}
             </td>
           </tr>
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align: center; color: var(--accent-rose); padding: 2rem;">
+          <td colspan="8" style="text-align: center; color: var(--accent-rose); padding: 2rem;">
             ${err.message || 'Error connecting to API.'}
           </td>
         </tr>
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!users || users.length === 0) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">
             No user accounts found matching criteria.
           </td>
         </tr>
@@ -82,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
       let roleClass = 'role-prosumer';
       if (user.role === 'Admin') roleClass = 'role-admin';
       else if (user.role === 'MicrogridOperator') roleClass = 'role-operator';
-      else if (user.role === 'TransactionVerifier') roleClass = 'role-verifier';
 
       const statusBadge = user.isActive
         ? '<span class="status-badge status-active"><span class="status-dot"></span> Active</span>'
@@ -99,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <td>
             <strong>${user.firstName} ${user.lastName}</strong>
           </td>
+          <td><code>${user.nic || '-'}</code></td>
           <td>${user.email}</td>
           <td>${user.phoneNumber || '-'}</td>
           <td><span class="role-pill ${roleClass}">${user.role}</span></td>

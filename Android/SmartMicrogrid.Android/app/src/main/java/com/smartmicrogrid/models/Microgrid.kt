@@ -14,6 +14,7 @@ data class Microgrid(
     @SerializedName("reservedCapacity") val reservedCapacity: Double = 0.0,
     @SerializedName("usedCapacity") val usedCapacity: Double = 0.0,
     @SerializedName("batteryCapacity") val batteryCapacity: Double = 0.0,
+    @SerializedName("batteryStorageSlots") val batteryStorageSlots: Int = 0,
     @SerializedName("currentBatteryLevel") val currentBatteryLevel: Double = 0.0,
     @SerializedName("batteryPercentage") val batteryPercentage: Double = 0.0,
     @SerializedName("status") val status: String = "Active",

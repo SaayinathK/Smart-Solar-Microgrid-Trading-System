@@ -3,6 +3,13 @@
    ========================================================================== */
 
 const MicrogridApi = {
+  async reverseGeocode(latitude, longitude) {
+    return ApiClient.get('/geocoding/reverse', { latitude, longitude });
+  },
+  async geocodeAddress(address) {
+    return ApiClient.get('/geocoding', { address });
+  },
+
   // Microgrid Node APIs
   async getMicrogrids(params = {}) {
     return ApiClient.get('/microgrids', params);

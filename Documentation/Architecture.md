@@ -28,7 +28,7 @@ The **Smart Microgrid Energy Management & Trading System** is designed as a modu
 1. **Admin**: User management, system monitoring, audit logs.
 2. **MicrogridOperator**: Infrastructure, nodes, capacity, battery status, slots.
 3. **Prosumer**: Energy search, slot reservation, reservation tracking.
-4. **TransactionVerifier**: Pending transactions, QR scanning, transfer verification.
+4. **Grid Operator transaction verification**: QR scanning, server-data verification, and transfer finalization are handled by the Grid Operator.
 
 ## Team Member Breakdown
 - **Member 1 (Current Lead)**: Project Foundation, User Management, Microgrid Nodes & Capacity.

@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/sidebar.css">
   <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
 </head>
 <body>
 
@@ -58,6 +59,8 @@
         </div>
       </div>
     </div>
+
+    <section class="grid-map-card" data-microgrid-map aria-label="Microgrid locations"></section>
 
     <!-- System Modules Status -->
     <h2 style="font-size: 1.35rem; margin-bottom: 1.25rem;">System Modules Breakdown</h2>
@@ -116,9 +119,13 @@
   </div>
 
   <script src="js/config/api-config.js"></script>
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="js/common/openstreet-map.js"></script>
   <script src="js/common/theme.js"></script>
   <script src="js/common/session.js"></script>
   <script src="js/api/api-client.js"></script>
+  <script src="js/api/microgrid-api.js"></script>
+  <script src="js/common/microgrid-map.js"></script>
   <script src="js/common/auth.js"></script>
   <script src="js/common/sidebar.js"></script>
   <script>

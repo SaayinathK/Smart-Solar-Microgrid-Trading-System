@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Energy Reservations - Smart Microgrid</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/forms.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/reservations.css">
+</head>
+<body>
+  <div id="app-layout-wrapper">
+    <section class="reservation-hero">
+      <div>
+        <span id="hero-role-eyebrow" class="reservation-eyebrow">COMPONENT 2 · ENERGY TRADING</span>
+        <h1 id="hero-title">Energy Reservations</h1>
+        <p id="hero-subtitle">Search, reserve, and manage clean energy allocations across the microgrid network.</p>
+      </div>
+      <div class="hero-status"><span class="live-dot"></span> <span id="hero-role-badge">Active Session</span></div>
+    </section>
+
+    <section class="reservation-stats" aria-label="Reservation summary">
+      <article class="reservation-stat"><span>Pending review</span><strong id="stat-pending">—</strong><small>Awaiting operator approval</small></article>
+      <article class="reservation-stat"><span>Approved upcoming</span><strong id="stat-approved">—</strong><small>Ready for delivery & verification</small></article>
+      <article class="reservation-stat"><span>Completed fulfilled</span><strong id="stat-completed">—</strong><small>Energy transferred</small></article>
+      <article class="reservation-stat"><span>Energy allocated</span><strong id="stat-energy">—</strong><small>Total reserved kWh</small></article>
+    </section>
+
+    <!-- Quick filter pills -->
+    <div class="filter-pills" id="status-pills">
+      <button class="filter-pill active" data-filter="">All Reservations</button>
+      <button class="filter-pill" data-filter="Pending">Pending Approval</button>
+      <button class="filter-pill" data-filter="Approved">Approved Active</button>
+      <button class="filter-pill" data-filter="Completed">Completed History</button>
+      <button class="filter-pill" data-filter="Cancelled">Cancelled / Rejected</button>
+    </div>
+
+    <section class="reservation-toolbar card">
+      <div class="reservation-toolbar-heading">
+        <div>
+          <h2 id="toolbar-heading">Reservation Queue</h2>
+          <p id="toolbar-subtitle">Filter, inspect, and track microgrid energy allocations.</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline-primary" id="btn-quick-verify" type="button" style="display: none;">✓ Verify by Code</button>
+          <button class="btn btn-primary" id="new-reservation" type="button">＋ Reserve Energy</button>
+        </div>
+      </div>
+      <div class="reservation-filters">
+        <label class="reservation-search">
+          <span>⌕</span>
+          <input id="reservation-search" class="form-control" type="search" placeholder="Search by name, NIC, node, or verification code">
+        </label>
+        <select id="reservation-status" class="form-select">
+          <option value="">All statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Completed">Completed</option>
+          <option value="Rejected">Rejected</option>
+          <option value="Cancelled">Cancelled</option>
+          <option value="Expired">Expired</option>
+        </select>
+        <input id="reservation-date" class="form-input form-control" type="date" aria-label="Filter by reservation date">
+        <button id="refresh-reservations" class="btn btn-secondary" type="button">Refresh</button>
+      </div>
+    </section>
+
+    <section class="reservation-table-card card">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle data-table reservation-table">
+          <thead>
+            <tr>
+              <th>Prosumer</th>
+              <th>Microgrid Hub</th>
+              <th>Energy & Cost</th>
+              <th>Delivery Schedule</th>
+              <th>Verification Token</th>
+              <th>Pass &amp; QR</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reservations-body">
+            <tr><td colspan="8" class="reservation-message">Loading reservations…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="reservation-foot">
+        <span id="reservation-count">0 reservations</span>
+        <span>All transactions enforced with 12-hr modification window & capacity lock.</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- Create / Reserve Energy Modal -->
+  <dialog id="reservation-dialog" class="reservation-dialog" style="width: min(580px, calc(100% - 24px));">
+    <form id="reservation-form" method="dialog">
+      <div class="dialog-heading">
+        <div>
+          <span class="reservation-eyebrow" id="dialog-eyebrow">ENERGY TRADING</span>
+          <h2 id="dialog-title">Reserve Clean Energy</h2>
+        </div>
+        <button class="dialog-close" value="cancel" aria-label="Close" type="button" onclick="document.getElementById('reservation-dialog').close()">×</button>
+      </div>
+
+      <div id="prosumer-nic-field">
+        <label>Prosumer NIC
+          <input class="form-input form-control" name="prosumerId" id="input-prosumer-nic" placeholder="Enter registered prosumer NIC">
+        </label>
+      </div>
+
+      <div>
+        <label>Available Energy Slots
+          <small style="font-weight: normal; color: var(--text-secondary); display: block;">Select an active slot or type slot ID below</small>
+        </label>
+        <div class="slot-picker-list" id="slot-picker-container">
+          <div style="padding: 12px; text-align: center; color: var(--text-secondary);">Loading available slots…</div>
+        </div>
+      </div>
+
+      <label>Energy Slot ID
+        <input class="form-input form-control" name="energySlotId" id="input-slot-id" required placeholder="Selected slot ID will appear here">
+      </label>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <label>Energy Amount (kWh)
+          <input class="form-input form-control" name="energyAmount" id="input-energy-amount" required type="number" min="0.1" step="0.1" placeholder="e.g. 10.0">
+        </label>
+        <label>Estimated Total
+          <input class="form-input form-control" id="input-estimated-cost" readonly value="$0.00" style="background: var(--bg-tertiary); font-weight: bold; color: var(--accent-primary);">
+        </label>
+      </div>
+
+      <div class="dialog-note">
+        ⚡ <strong>7-Day Booking Rule</strong>: Slots must begin within 7 days. Changes or cancellations require at least 12 hours notice prior to delivery start.
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" value="cancel" type="button" onclick="document.getElementById('reservation-dialog').close()">Cancel</button>
+        <button id="save-reservation" class="btn btn-primary" type="submit">Confirm Reservation</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Digital Pass & QR Code Modal -->
+  <dialog id="digital-pass-dialog" class="reservation-dialog" style="width: min(520px, calc(100% - 24px));">
+    <div class="dialog-heading">
+      <div>
+        <span class="reservation-eyebrow">OFFICIAL TRADING PASS</span>
+        <h2>Reservation Pass & QR</h2>
+      </div>
+      <button class="dialog-close" aria-label="Close" type="button" onclick="document.getElementById('digital-pass-dialog').close()">×</button>
+    </div>
+
+    <div class="digital-pass-card" id="digital-pass-content">
+      <div class="digital-pass-header">
+        <span class="digital-pass-title">Smart Solar Microgrid</span>
+        <span id="pass-status-badge" class="status-badge status-approved">Approved</span>
+      </div>
+
+      <!-- SVG QR Display -->
+      <div class="qr-container">
+        <div id="pass-qr-svg"></div>
+        <span class="qr-code-text" id="pass-verification-code">SMG-RES-000000</span>
+      </div>
+
+      <div class="pass-grid">
+        <div class="pass-field">
+          <span>Prosumer</span>
+          <strong id="pass-prosumer-name">—</strong>
+          <small id="pass-prosumer-nic" style="color: var(--text-secondary);"></small>
+        </div>
+        <div class="pass-field">
+          <span>Microgrid Hub</span>
+          <strong id="pass-node-name">—</strong>
+        </div>
+        <div class="pass-field">
+          <span>Energy Reserved</span>
+          <strong id="pass-energy-amount" style="color: var(--accent-primary);">— kWh</strong>
+        </div>
+        <div class="pass-field">
+          <span>Total Cost</span>
+          <strong id="pass-total-cost" style="color: #059669;">$—</strong>
+        </div>
+        <div class="pass-field" style="grid-column: 1 / -1;">
+          <span>Scheduled Window</span>
+          <strong id="pass-schedule-window">—</strong>
+        </div>
+      </div>
+
+      <!-- Lifecycle Progress Timeline -->
+      <div style="margin-top: 14px; border-top: 1px dashed var(--border-color); padding-top: 12px;">
+        <span style="font-size: 0.74rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Lifecycle Timeline</span>
+        <div class="timeline-track" id="pass-timeline">
+          <div class="timeline-step completed" id="step-1"><div class="dot">1</div><span>Requested</span></div>
+          <div class="timeline-step" id="step-2"><div class="dot">2</div><span>Review</span></div>
+          <div class="timeline-step" id="step-3"><div class="dot">3</div><span>Approved</span></div>
+          <div class="timeline-step" id="step-4"><div class="dot">4</div><span>Completed</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <button class="btn btn-secondary" type="button" onclick="window.print()">Print / Save Pass</button>
+      <button class="btn btn-primary" type="button" onclick="document.getElementById('digital-pass-dialog').close()">Done</button>
+    </div>
+  </dialog>
+
+  <!-- Quick Verify & Complete Modal (for Verifier & Admin) -->
+  <dialog id="quick-verify-dialog" class="reservation-dialog">
+    <form id="quick-verify-form" method="dialog">
+      <div class="dialog-heading">
+        <div>
+          <span class="reservation-eyebrow">VERIFICATION PORTAL</span>
+          <h2>Verify Energy Transfer</h2>
+        </div>
+        <button class="dialog-close" type="button" onclick="document.getElementById('quick-verify-dialog').close()">×</button>
+      </div>
+      <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 12px;">
+        Enter the Prosumer's Verification Token or Reservation ID to verify dispatch and mark fulfillment complete.
+      </p>
+      <label>Verification Token / Reservation ID
+        <input class="form-input form-control" id="input-verify-code" required placeholder="e.g. SMG-RES-87AB21 or ID">
+      </label>
+      <div id="verify-preview-box" style="display: none; padding: 12px; background: var(--bg-tertiary); border-radius: 8px; margin-top: 8px; font-size: 0.85rem;"></div>
+      <div class="dialog-actions" style="margin-top: 16px;">
+        <button class="btn btn-secondary" type="button" onclick="document.getElementById('quick-verify-dialog').close()">Cancel</button>
+        <button class="btn btn-primary" id="btn-submit-verify" type="submit">Confirm & Complete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/reservation-api.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    AuthGuard.requireAuth();
+    renderAppLayout('reservations', 'Energy Reservations & Trading');
+  </script>
+  <script src="../../js/reservations/reservations.js"></script>
+</body>
+</html>

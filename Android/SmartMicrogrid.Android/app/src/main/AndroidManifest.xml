@@ -28,6 +28,7 @@
 
         <activity android:name=".MainActivity" />
         <activity android:name=".auth.RegisterActivity" />
+        <activity android:name=".auth.RegisterVerifierActivity" />
         <activity android:name=".auth.EditProfileActivity" />
         <activity android:name=".auth.ChangePasswordActivity" />
 
@@ -39,11 +40,12 @@
         <activity android:name=".M3.ProsumerTransactionDetailsActivity" />
         <activity android:name=".M3.TransactionQrActivity" />
         <activity android:name=".M3.QRScannerActivity" />
+        <activity android:name=".M3.MicrogridOperatorMainActivity" />
+        <activity android:name=".M2.AvailableSlotsActivity" />
+        <activity android:name=".M2.ReservationsActivity" />
 
         <activity android:name=".M1.microgrid.MicrogridListActivity" />
         <activity android:name=".M1.microgrid.MicrogridDetailsActivity" />
-        <activity android:name=".M1.capacity.CapacityActivity" />
-        <activity android:name=".M1.battery.BatteryActivity" />
         <activity android:name=".M1.availability.EnergyAvailabilityActivity" />
         <activity android:name=".M1.slots.EnergySlotActivity" />
 

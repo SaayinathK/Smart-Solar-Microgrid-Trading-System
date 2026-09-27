@@ -14,7 +14,7 @@ The `Postman/` folder contains the official importable **Postman Collection (v2.
 ## 2. Included Request Endpoints
 
 ### A. Authentication
-- `POST /api/auth/register` (Public Prosumer registration)
+- `POST /api/auth/register` (Multi-role registration: Prosumer with NIC primary key, Microgrid Operator, Transaction Verifier; Admin role self-registration restricted)
 - `POST /api/auth/login` (Returns JWT token & auto-stores into `{{authToken}}`)
 - `POST /api/auth/change-password` (Authenticated password change)
 
@@ -37,7 +37,7 @@ The `Postman/` folder contains the official importable **Postman Collection (v2.
 
 1. Open **Postman**.
 2. Click **Import** → Select `SmartMicrogrid_UserManagement.postman_collection.json`.
-3. Set collection variable `baseUrl` (Default: `http://localhost:5000/api`).
+3. Set collection variable `baseUrl` (Default: `http://localhost:5050/api`).
 4. Run the **Login** request (`POST /api/auth/login`).
    *The test script automatically captures the returned JWT token into the `{{authToken}}` collection variable.*
 5. Run any protected endpoint request.

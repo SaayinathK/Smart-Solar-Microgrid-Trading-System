@@ -40,6 +40,9 @@ namespace SmartMicrogrid.API.Models.M1
         [BsonElement("batteryCapacity")]
         public double BatteryCapacity { get; set; }
 
+        [BsonElement("batteryStorageSlots")]
+        public int BatteryStorageSlots { get; set; }
+
         [BsonElement("currentBatteryLevel")]
         public double CurrentBatteryLevel { get; set; }
 

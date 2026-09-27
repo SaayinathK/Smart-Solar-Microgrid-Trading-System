@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="../../css/style.css">
   <link rel="stylesheet" href="../../css/sidebar.css">
   <link rel="stylesheet" href="../../css/forms.css">
+  <link rel="stylesheet" href="../../css/location-picker.css">
+  <link rel="stylesheet" href="../../vendor/leaflet/leaflet.css">
 </head>
 <body>
 
@@ -20,15 +22,18 @@
       </div>
 
       <form id="edit-microgrid-form" onsubmit="handleEdit(event)">
-        <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-grid microgrid-node-form-grid">
           <div class="form-group" style="grid-column: span 2;">
             <label class="form-label">Microgrid Node Name *</label>
             <input type="text" id="name" class="form-control" required>
           </div>
 
+          <div id="location-picker" class="location-picker"></div>
+
           <div class="form-group">
-            <label class="form-label">Location / City *</label>
-            <input type="text" id="location" class="form-control" required>
+            <label class="form-label" for="location">Location / address *</label>
+            <input type="text" id="location" class="form-control" placeholder="Street address, city, country" aria-describedby="location-status" required>
+            <small id="location-status" class="location-address-status" role="status">Type an address to automatically find its latitude and longitude.</small>
           </div>
 
           <div class="form-group">
@@ -42,18 +47,23 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">GPS Latitude (-90 to 90) *</label>
-            <input type="number" step="0.0001" id="latitude" class="form-control" required>
+            <label class="form-label" for="latitude">Latitude (-90 to 90) *</label>
+            <input type="number" step="any" min="-90" max="90" id="latitude" class="form-control" placeholder="e.g. 6.9271" required>
           </div>
 
           <div class="form-group">
-            <label class="form-label">GPS Longitude (-180 to 180) *</label>
-            <input type="number" step="0.0001" id="longitude" class="form-control" required>
+            <label class="form-label" for="longitude">Longitude (-180 to 180) *</label>
+            <input type="number" step="any" min="-180" max="180" id="longitude" class="form-control" placeholder="e.g. 79.8612" required>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Generation Capacity (kWh) *</label>
+            <label class="form-label">Generation Capacity (kW) *</label>
             <input type="number" step="0.1" id="capacity" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Available Battery Storage Slots *</label>
+            <input type="number" min="0" step="1" id="batteryStorageSlots" class="form-control" required>
           </div>
 
           <div class="form-group">
@@ -76,16 +86,20 @@
   </div>
 
   <script src="../../js/config/api-config.js"></script>
+  <script src="../../vendor/leaflet/leaflet.js"></script>
+  <script src="../../js/common/openstreet-map.js"></script>
   <script src="../../js/common/theme.js"></script>
   <script src="../../js/common/session.js"></script>
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/api/microgrid-api.js"></script>
   <script src="../../js/common/auth.js"></script>
   <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/common/location-picker.js"></script>
 
   <script>
     AuthGuard.requireRole(['MicrogridOperator', 'Admin']);
     renderAppLayout('microgrids', 'Edit Microgrid Node');
+    const locationPicker = new LocationPicker(document.getElementById('location-picker'));
 
     const urlParams = new URLSearchParams(window.location.search);
     const microgridId = urlParams.get('id');
@@ -102,11 +116,10 @@
         const m = res.data;
 
         document.getElementById('name').value = m.name;
-        document.getElementById('location').value = m.location;
+        locationPicker.setSavedLocation(m);
         document.getElementById('status').value = m.status;
-        document.getElementById('latitude').value = m.latitude;
-        document.getElementById('longitude').value = m.longitude;
         document.getElementById('capacity').value = m.capacity;
+        document.getElementById('batteryStorageSlots').value = m.batteryStorageSlots || 0;
         document.getElementById('batteryCapacity').value = m.batteryCapacity;
         document.getElementById('description').value = m.description || '';
       } catch (err) {
@@ -116,14 +129,15 @@
 
     async function handleEdit(e) {
       e.preventDefault();
+      const selectedLocation = locationPicker.getSelection();
+      if (!selectedLocation) return;
 
       const payload = {
         name: document.getElementById('name').value,
-        location: document.getElementById('location').value,
+        ...selectedLocation,
         status: document.getElementById('status').value,
-        latitude: parseFloat(document.getElementById('latitude').value),
-        longitude: parseFloat(document.getElementById('longitude').value),
         capacity: parseFloat(document.getElementById('capacity').value),
+        batteryStorageSlots: parseInt(document.getElementById('batteryStorageSlots').value, 10),
         batteryCapacity: parseFloat(document.getElementById('batteryCapacity').value),
         description: document.getElementById('description').value,
         isActive: document.getElementById('status').value === 'Active'
