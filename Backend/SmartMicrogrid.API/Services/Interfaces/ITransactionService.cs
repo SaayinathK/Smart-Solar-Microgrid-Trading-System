@@ -9,7 +9,8 @@ namespace SmartMicrogrid.API.Services.Interfaces
         // ============================================================
         Task<TransactionResponse> CreateAsync(
             CreateTransactionRequest request,
-            string currentUserId);
+            string currentUserId,
+            string? operatorId = null);
 
 
         // ============================================================
@@ -43,7 +44,8 @@ namespace SmartMicrogrid.API.Services.Interfaces
         Task<TransactionResponse?> VerifyAsync(
             string transactionId,
             VerifyTransactionRequest request,
-            string currentUserId);
+            string currentUserId,
+            string? operatorId = null);
 
 
         // ============================================================

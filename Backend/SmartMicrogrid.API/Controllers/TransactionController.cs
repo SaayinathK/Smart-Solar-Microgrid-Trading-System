@@ -87,7 +87,7 @@ namespace SmartMicrogrid.API.Controllers
         // Create a transaction from an approved reservation
         // ============================================================
         [HttpPost]
-        [Authorize(Roles = "TransactionVerifier")]
+        [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> Create(
             [FromBody] CreateTransactionRequest request)
         {
@@ -99,11 +99,13 @@ namespace SmartMicrogrid.API.Controllers
             }
 
             var userId = GetCurrentUserId();
+            var operatorId = User.IsInRole("MicrogridOperator") ? userId : null;
 
             var transaction =
                 await _transactionService.CreateAsync(
                     request,
-                    userId);
+                    userId,
+                    operatorId);
 
             if (transaction == null)
             {
@@ -122,7 +124,7 @@ namespace SmartMicrogrid.API.Controllers
         // Generate QR data for a transaction
         // ============================================================
         [HttpPost("{transactionId}/generate-qr")]
-        [Authorize(Roles = "TransactionVerifier")]
+        [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> GenerateQr(
             string transactionId)
         {
@@ -156,7 +158,7 @@ namespace SmartMicrogrid.API.Controllers
         // Verify QR and reservation information
         // ============================================================
         [HttpPost("{transactionId}/verify")]
-        [Authorize(Roles = "TransactionVerifier")]
+        [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> Verify(
             string transactionId,
             [FromBody] VerifyTransactionRequest request)
@@ -175,6 +177,7 @@ namespace SmartMicrogrid.API.Controllers
             }
 
             var userId = GetCurrentUserId();
+            var operatorId = User.IsInRole("MicrogridOperator") ? userId : null;
 
             // --------------------------------------------------------
             // The transaction ID from the URL is now passed directly
@@ -184,7 +187,8 @@ namespace SmartMicrogrid.API.Controllers
                 await _transactionService.VerifyAsync(
                     transactionId,
                     request,
-                    userId);
+                    userId,
+                    operatorId);
 
             if (transaction == null)
             {
@@ -203,7 +207,7 @@ namespace SmartMicrogrid.API.Controllers
         // Complete the energy transaction
         // ============================================================
         [HttpPost("{transactionId}/complete")]
-        [Authorize(Roles = "TransactionVerifier")]
+        [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> Complete(
             string transactionId,
             [FromBody] CompleteTransactionRequest request)
@@ -246,7 +250,7 @@ namespace SmartMicrogrid.API.Controllers
         // Update transaction status
         // ============================================================
         [HttpPatch("{transactionId}/status")]
-        [Authorize(Roles = "TransactionVerifier")]
+        [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> UpdateStatus(
             string transactionId,
             [FromQuery] string status)

@@ -1,5 +1,7 @@
 using Moq;
+using SmartMicrogrid.API.DTOs.M2;
 using SmartMicrogrid.API.DTOs.Transactions;
+using SmartMicrogrid.API.Models.Common;
 using SmartMicrogrid.API.Models.Transactions;
 using SmartMicrogrid.API.Repositories.Interfaces;
 using SmartMicrogrid.API.Services;
@@ -12,18 +14,23 @@ namespace SmartMicrogrid.API.Tests
     public class TransactionServiceTests
     {
         private readonly Mock<ITransactionRepository> _transactions = new();
-        private readonly Mock<IReservationApiClient> _reservations = new();
+        private readonly Mock<IReservationService> _reservations = new();
+        private readonly Mock<IUserRepository> _users = new();
         private readonly TransactionService _service;
 
         public TransactionServiceTests()
         {
-            _service = new TransactionService(_transactions.Object, _reservations.Object);
+            _users.Setup(x => x.GetByIdAsync(It.IsAny<string>()))
+                .ReturnsAsync((string id) => new User { Id = id, Role = Role.MicrogridOperator });
+            _reservations.Setup(x => x.GetAssignedMicrogridIdsAsync(It.IsAny<string>()))
+                .ReturnsAsync(new List<string> { "grid1" });
+            _service = new TransactionService(_transactions.Object, _reservations.Object, _users.Object);
         }
 
         [Fact]
         public async Task CreateAsync_ApprovedReservation_CreatesPendingTransaction()
         {
-            _reservations.Setup(x => x.GetReservationAsync("r1"))
+            _reservations.Setup(x => x.GetByIdAsync("r1", "operator1"))
                 .ReturnsAsync(Reservation("Approved"));
             _transactions.Setup(x => x.GetByReservationIdAsync("r1"))
                 .ReturnsAsync((Transaction?)null);
@@ -34,7 +41,7 @@ namespace SmartMicrogrid.API.Tests
                     return value;
                 });
 
-            var result = await _service.CreateAsync(new CreateTransactionRequest { ReservationId = "r1" }, "verifier");
+            var result = await _service.CreateAsync(new CreateTransactionRequest { ReservationId = "r1" }, "operator1", "operator1");
 
             Assert.Equal("Pending", result.Status);
             Assert.Equal("r1", result.ReservationId);
@@ -53,11 +60,11 @@ namespace SmartMicrogrid.API.Tests
         [InlineData("Completed")]
         public async Task CreateAsync_NonApprovedReservation_IsRejected(string status)
         {
-            _reservations.Setup(x => x.GetReservationAsync("r1"))
+            _reservations.Setup(x => x.GetByIdAsync("r1", "operator1"))
                 .ReturnsAsync(Reservation(status));
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _service.CreateAsync(new CreateTransactionRequest { ReservationId = "r1" }, "verifier"));
+                _service.CreateAsync(new CreateTransactionRequest { ReservationId = "r1" }, "operator1", "operator1"));
 
             _transactions.Verify(x => x.CreateAsync(It.IsAny<Transaction>()), Times.Never);
         }
@@ -65,13 +72,13 @@ namespace SmartMicrogrid.API.Tests
         [Fact]
         public async Task CreateAsync_ExistingTransaction_ReturnsConflict()
         {
-            _reservations.Setup(x => x.GetReservationAsync("r1"))
+            _reservations.Setup(x => x.GetByIdAsync("r1", "operator1"))
                 .ReturnsAsync(Reservation("Approved"));
             _transactions.Setup(x => x.GetByReservationIdAsync("r1"))
                 .ReturnsAsync(new Transaction { Id = "507f1f77bcf86cd799439011", ReservationId = "r1" });
 
             var error = await Assert.ThrowsAsync<TransactionConflictException>(() =>
-                _service.CreateAsync(new CreateTransactionRequest { ReservationId = "r1" }, "verifier"));
+                _service.CreateAsync(new CreateTransactionRequest { ReservationId = "r1" }, "operator1", "operator1"));
 
             Assert.Equal("A transaction already exists for this reservation.", error.Message);
         }
@@ -79,11 +86,11 @@ namespace SmartMicrogrid.API.Tests
         [Fact]
         public async Task CreateAsync_MissingReservation_IsNotFound()
         {
-            _reservations.Setup(x => x.GetReservationAsync("missing"))
-                .ReturnsAsync((ReservationDto?)null);
+            _reservations.Setup(x => x.GetByIdAsync("missing", "operator1"))
+                .ReturnsAsync((ReservationResponseDto?)null);
 
             await Assert.ThrowsAsync<KeyNotFoundException>(() =>
-                _service.CreateAsync(new CreateTransactionRequest { ReservationId = "missing" }, "verifier"));
+                _service.CreateAsync(new CreateTransactionRequest { ReservationId = "missing" }, "operator1", "operator1"));
         }
 
         [Theory]
@@ -93,7 +100,7 @@ namespace SmartMicrogrid.API.Tests
         public async Task CreateAsync_InvalidRequest_IsRejected(string? reservationId)
         {
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _service.CreateAsync(new CreateTransactionRequest { ReservationId = reservationId! }, "verifier"));
+                _service.CreateAsync(new CreateTransactionRequest { ReservationId = reservationId! }, "operator1", "operator1"));
         }
 
         [Fact]
@@ -103,12 +110,13 @@ namespace SmartMicrogrid.API.Tests
             {
                 Id = "507f1f77bcf86cd799439011",
                 ReservationId = "r1",
+                MicrogridNodeId = "grid1",
                 Status = "Pending"
             };
             _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
             _transactions.Setup(x => x.UpdateAsync(transaction)).ReturnsAsync(transaction);
 
-            var result = await _service.GenerateQrAsync(transaction.Id, "verifier");
+            var result = await _service.GenerateQrAsync(transaction.Id, "operator1");
 
             Assert.NotNull(result);
             Assert.Equal($"SMART-MICROGRID|TRANSACTION|{transaction.Id}|{result!.TransactionCode}", result.QrCodeData);
@@ -133,7 +141,7 @@ namespace SmartMicrogrid.API.Tests
             _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _service.GenerateQrAsync(transaction.Id, "verifier"));
+                _service.GenerateQrAsync(transaction.Id, "operator1"));
             _transactions.Verify(x => x.UpdateAsync(It.IsAny<Transaction>()), Times.Never);
         }
 
@@ -141,7 +149,7 @@ namespace SmartMicrogrid.API.Tests
         public async Task GenerateQrAsync_MissingTransaction_ReturnsNull()
         {
             _transactions.Setup(x => x.GetByIdAsync("missing")).ReturnsAsync((Transaction?)null);
-            Assert.Null(await _service.GenerateQrAsync("missing", "verifier"));
+            Assert.Null(await _service.GenerateQrAsync("missing", "operator1"));
         }
 
         [Theory]
@@ -149,7 +157,7 @@ namespace SmartMicrogrid.API.Tests
         [InlineData("")]
         public async Task GenerateQrAsync_InvalidId_IsRejected(string? id)
         {
-            await Assert.ThrowsAsync<ArgumentException>(() => _service.GenerateQrAsync(id!, "verifier"));
+            await Assert.ThrowsAsync<ArgumentException>(() => _service.GenerateQrAsync(id!, "operator1"));
         }
 
         [Fact]
@@ -159,10 +167,10 @@ namespace SmartMicrogrid.API.Tests
             transaction.QrCodeData = "SMART-MICROGRID|TRANSACTION|tx1|code1";
             _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
             _transactions.Setup(x => x.UpdateAsync(transaction)).ReturnsAsync(transaction);
-            _reservations.Setup(x => x.GetReservationAsync("r1")).ReturnsAsync(Reservation("Approved"));
+            _reservations.Setup(x => x.GetByIdAsync("r1", "verifier1")).ReturnsAsync(Reservation("Approved"));
 
             var result = await _service.VerifyAsync(transaction.Id,
-                new VerifyTransactionRequest { QrCodeData = transaction.QrCodeData }, "verifier1");
+                new VerifyTransactionRequest { QrCodeData = transaction.QrCodeData }, "verifier1", "verifier1");
 
             Assert.NotNull(result);
             Assert.Equal("Verified", result!.Status);
@@ -178,20 +186,20 @@ namespace SmartMicrogrid.API.Tests
             _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.VerifyAsync(transaction.Id,
-                new VerifyTransactionRequest { QrCodeData = "wrong-qr" }, "verifier1"));
+                new VerifyTransactionRequest { QrCodeData = "wrong-qr" }, "verifier1", "verifier1"));
         }
 
         [Fact]
         public async Task VerifyAsync_EmptyQr_IsRejected()
         {
             await Assert.ThrowsAsync<ArgumentException>(() => _service.VerifyAsync("tx1",
-                new VerifyTransactionRequest { QrCodeData = "" }, "verifier1"));
+                new VerifyTransactionRequest { QrCodeData = "" }, "verifier1", "verifier1"));
         }
 
         [Fact]
         public async Task VerifyAsync_NullRequest_IsRejected()
         {
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _service.VerifyAsync("tx1", null!, "verifier1"));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _service.VerifyAsync("tx1", null!, "verifier1", "verifier1"));
         }
 
         [Theory]
@@ -200,7 +208,7 @@ namespace SmartMicrogrid.API.Tests
         public async Task VerifyAsync_InvalidId_IsRejected(string? id)
         {
             await Assert.ThrowsAsync<ArgumentException>(() => _service.VerifyAsync(id!,
-                new VerifyTransactionRequest { QrCodeData = "qr" }, "verifier1"));
+                new VerifyTransactionRequest { QrCodeData = "qr" }, "verifier1", "verifier1"));
         }
 
         [Fact]
@@ -211,7 +219,7 @@ namespace SmartMicrogrid.API.Tests
             _transactions.Setup(x => x.GetByIdAsync("tx2")).ReturnsAsync(transaction);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.VerifyAsync("tx2",
-                new VerifyTransactionRequest { QrCodeData = "qr-for-tx2" }, "verifier1"));
+                new VerifyTransactionRequest { QrCodeData = "qr-for-tx2" }, "verifier1", "verifier1"));
         }
 
         [Fact]
@@ -221,7 +229,7 @@ namespace SmartMicrogrid.API.Tests
             _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.VerifyAsync(transaction.Id,
-                new VerifyTransactionRequest { QrCodeData = "some-qr" }, "verifier1"));
+                new VerifyTransactionRequest { QrCodeData = "some-qr" }, "verifier1", "verifier1"));
         }
 
         [Theory]
@@ -238,8 +246,8 @@ namespace SmartMicrogrid.API.Tests
             _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.VerifyAsync(transaction.Id,
-                new VerifyTransactionRequest { QrCodeData = "valid-qr" }, "verifier1"));
-            _reservations.Verify(x => x.GetReservationAsync(It.IsAny<string>()), Times.Never);
+                new VerifyTransactionRequest { QrCodeData = "valid-qr" }, "verifier1", "verifier1"));
+            _reservations.Verify(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
@@ -249,10 +257,10 @@ namespace SmartMicrogrid.API.Tests
             transaction.QrCodeData = "valid-qr";
             _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
             _transactions.Setup(x => x.UpdateAsync(transaction)).ReturnsAsync(transaction);
-            _reservations.Setup(x => x.GetReservationAsync("r1")).ReturnsAsync((ReservationDto?)null);
+            _reservations.Setup(x => x.GetByIdAsync("r1", "verifier1")).ReturnsAsync((ReservationResponseDto?)null);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.VerifyAsync(transaction.Id,
-                new VerifyTransactionRequest { QrCodeData = "valid-qr" }, "verifier1"));
+                new VerifyTransactionRequest { QrCodeData = "valid-qr" }, "verifier1", "verifier1"));
             Assert.Equal("Rejected", transaction.Status);
         }
 
@@ -268,11 +276,25 @@ namespace SmartMicrogrid.API.Tests
             transaction.QrCodeData = "valid-qr";
             _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
             _transactions.Setup(x => x.UpdateAsync(transaction)).ReturnsAsync(transaction);
-            _reservations.Setup(x => x.GetReservationAsync("r1")).ReturnsAsync(Reservation(status));
+            _reservations.Setup(x => x.GetByIdAsync("r1", "verifier1")).ReturnsAsync(Reservation(status));
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.VerifyAsync(transaction.Id,
-                new VerifyTransactionRequest { QrCodeData = "valid-qr" }, "verifier1"));
+                new VerifyTransactionRequest { QrCodeData = "valid-qr" }, "verifier1", "verifier1"));
             Assert.Equal("Rejected", transaction.Status);
+        }
+
+        [Fact]
+        public async Task VerifyAsync_ApprovedButExpiredReservation_IsRejected()
+        {
+            var transaction = Transaction(status: "QRGenerated");
+            transaction.QrCodeData = "valid-qr";
+            var reservation = Reservation("Approved");
+            reservation.EndTime = DateTime.UtcNow.AddSeconds(-1);
+            _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
+            _reservations.Setup(x => x.GetByIdAsync("r1", "verifier1")).ReturnsAsync(reservation);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.VerifyAsync(transaction.Id,
+                new VerifyTransactionRequest { QrCodeData = "valid-qr" }, "verifier1", "verifier1"));
         }
 
         [Theory]
@@ -294,10 +316,10 @@ namespace SmartMicrogrid.API.Tests
             transaction.QrCodeData = "valid-qr";
             _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
             _transactions.Setup(x => x.UpdateAsync(transaction)).ReturnsAsync(transaction);
-            _reservations.Setup(x => x.GetReservationAsync("r1")).ReturnsAsync(reservation);
+            _reservations.Setup(x => x.GetByIdAsync("r1", "verifier1")).ReturnsAsync(reservation);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.VerifyAsync(transaction.Id,
-                new VerifyTransactionRequest { QrCodeData = "valid-qr" }, "verifier1"));
+                new VerifyTransactionRequest { QrCodeData = "valid-qr" }, "verifier1", "verifier1"));
             Assert.Equal("Rejected", transaction.Status);
         }
 
@@ -306,7 +328,7 @@ namespace SmartMicrogrid.API.Tests
         {
             _transactions.Setup(x => x.GetByIdAsync("missing")).ReturnsAsync((Transaction?)null);
             await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.VerifyAsync("missing",
-                new VerifyTransactionRequest { QrCodeData = "qr" }, "verifier1"));
+                new VerifyTransactionRequest { QrCodeData = "qr" }, "verifier1", "verifier1"));
         }
 
         [Fact]
@@ -324,7 +346,7 @@ namespace SmartMicrogrid.API.Tests
             Assert.Equal("Completed", result!.Status);
             Assert.NotNull(result.EnergyTransferTime);
             _transactions.Verify(x => x.UpdateAsync(transaction), Times.Exactly(2));
-            _reservations.Verify(x => x.GetReservationAsync(It.IsAny<string>()), Times.Never);
+            _reservations.Verify(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Theory]
@@ -462,6 +484,8 @@ namespace SmartMicrogrid.API.Tests
             var transaction = Transaction(status: "Pending");
             transaction.ProsumerId = "owner";
             _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
+            _users.Setup(x => x.GetByIdAsync("other"))
+                .ReturnsAsync(new User { Id = "other", Role = Role.Prosumer, Nic = "different" });
 
             await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
                 _service.GetByIdAsync(transaction.Id, "other", "Prosumer"));
@@ -487,14 +511,16 @@ namespace SmartMicrogrid.API.Tests
                 _service.GetByIdAsync("tx1", "user", "Admin"));
         }
 
-        private static ReservationDto Reservation(string status) => new()
+        private static ReservationResponseDto Reservation(string status) => new()
         {
             Id = "r1",
             ProsumerId = "NIC123",
             MicrogridNodeId = "grid1",
             EnergySlotId = "slot1",
             EnergyAmount = 25,
-            Status = status
+            Status = status,
+            StartTime = DateTime.UtcNow.AddMinutes(5),
+            EndTime = DateTime.UtcNow.AddHours(1)
         };
 
         private static Transaction Transaction(string status) => new()

@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 
 using SmartMicrogrid.API.DTOs.Transactions;
+using SmartMicrogrid.API.Models.Common;
 using SmartMicrogrid.API.Models.Transactions;
 using SmartMicrogrid.API.Repositories.Interfaces;
 using SmartMicrogrid.API.Services.Interfaces;
@@ -11,14 +12,17 @@ namespace SmartMicrogrid.API.Services.Implementation
     public class TransactionService : ITransactionService
     {
         private readonly ITransactionRepository _transactionRepository;
-        private readonly IReservationApiClient _reservationApiClient;
+        private readonly IReservationService _reservationService;
+        private readonly IUserRepository _userRepository;
 
         public TransactionService(
             ITransactionRepository transactionRepository,
-            IReservationApiClient reservationApiClient)
+            IReservationService reservationService,
+            IUserRepository userRepository)
         {
             _transactionRepository = transactionRepository;
-            _reservationApiClient = reservationApiClient;
+            _reservationService = reservationService;
+            _userRepository = userRepository;
         }
 
 
@@ -27,8 +31,17 @@ namespace SmartMicrogrid.API.Services.Implementation
         // ============================================================
         public async Task<TransactionResponse> CreateAsync(
             CreateTransactionRequest request,
-            string currentUserId)
+            string currentUserId,
+            string? operatorId = null)
         {
+            if (string.IsNullOrWhiteSpace(operatorId))
+            {
+                throw new UnauthorizedAccessException(
+                    "A valid authenticated MicrogridOperator is required.");
+            }
+
+            await EnsureMicrogridOperatorIdentityAsync(currentUserId, operatorId);
+
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
@@ -45,9 +58,9 @@ namespace SmartMicrogrid.API.Services.Implementation
             // Get reservation from M2
             // --------------------------------------------------------
             var reservation =
-                await _reservationApiClient
-                    .GetReservationAsync(
-                        request.ReservationId);
+                await _reservationService.GetByIdAsync(
+                    request.ReservationId,
+                    operatorId);
 
             if (reservation == null)
             {
@@ -135,25 +148,12 @@ namespace SmartMicrogrid.API.Services.Implementation
                     "Prosumer",
                     StringComparison.OrdinalIgnoreCase))
             {
-                transactions =
-                    await _transactionRepository
-                        .GetByProsumerIdAsync(
-                            currentUserId);
-            }
+                var user = await _userRepository.GetByIdAsync(currentUserId);
+                var prosumerNic = user?.Nic;
 
-
-            // --------------------------------------------------------
-            // TRANSACTION VERIFIER
-            // Verifier needs access to transactions that require
-            // operational verification, including pending ones.
-            // --------------------------------------------------------
-            else if (currentRole.Equals(
-                         "TransactionVerifier",
-                         StringComparison.OrdinalIgnoreCase))
-            {
-                transactions =
-                    await _transactionRepository
-                        .GetAllAsync();
+                transactions = string.IsNullOrWhiteSpace(prosumerNic)
+                    ? new List<Transaction>()
+                    : await _transactionRepository.GetByProsumerIdAsync(prosumerNic);
             }
 
 
@@ -165,9 +165,14 @@ namespace SmartMicrogrid.API.Services.Implementation
                          "MicrogridOperator",
                          StringComparison.OrdinalIgnoreCase))
             {
-                transactions =
-                    await _transactionRepository
-                        .GetAllAsync();
+                var assignedMicrogridIds =
+                    await _reservationService.GetAssignedMicrogridIdsAsync(currentUserId);
+                var allTransactions =
+                    await _transactionRepository.GetAllAsync();
+
+                transactions = allTransactions
+                    .Where(transaction => assignedMicrogridIds.Contains(transaction.MicrogridNodeId))
+                    .ToList();
             }
 
 
@@ -225,55 +230,53 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return null;
             }
 
-
             // --------------------------------------------------------
             // Authorization
             // --------------------------------------------------------
-            var isProsumer =
-                currentRole.Equals(
-                    "Prosumer",
-                    StringComparison.OrdinalIgnoreCase);
-
-            var isVerifier =
-                currentRole.Equals(
-                    "TransactionVerifier",
-                    StringComparison.OrdinalIgnoreCase);
-
-            var isOperator =
-                currentRole.Equals(
-                    "MicrogridOperator",
-                    StringComparison.OrdinalIgnoreCase);
-
-            var isAdministrator =
-                currentRole.Equals(
+            if (currentRole.Equals(
                     "Admin",
-                    StringComparison.OrdinalIgnoreCase);
-
-
-            var isTransactionOwner =
-                transaction.ProsumerId == currentUserId;
-
-
-            // Prosumer can only see own transaction
-            if (isProsumer && !isTransactionOwner)
+                    StringComparison.OrdinalIgnoreCase))
             {
-                throw new UnauthorizedAccessException(
-                    "You are not allowed to view this transaction.");
+                return Map(transaction);
             }
 
-
-            // Other authorized operational roles can view
-            if (!isProsumer &&
-                !isVerifier &&
-                !isOperator &&
-                !isAdministrator)
+            if (currentRole.Equals(
+                    "MicrogridOperator",
+                    StringComparison.OrdinalIgnoreCase))
             {
-                throw new UnauthorizedAccessException(
-                    "You are not authorized to view this transaction.");
+                var assignedMicrogridIds =
+                    await _reservationService.GetAssignedMicrogridIdsAsync(currentUserId);
+
+                if (!assignedMicrogridIds.Contains(transaction.MicrogridNodeId))
+                {
+                    throw new UnauthorizedAccessException(
+                        "You are not authorized to view transactions for this microgrid.");
+                }
+
+                return Map(transaction);
             }
 
+            if (currentRole.Equals(
+                    "Prosumer",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                var user = await _userRepository.GetByIdAsync(currentUserId);
+                var prosumerNic = user?.Nic;
 
-            return Map(transaction);
+                if (string.IsNullOrWhiteSpace(prosumerNic) ||
+                    transaction.ProsumerId != prosumerNic)
+                {
+                    throw new UnauthorizedAccessException(
+                        "You are not allowed to view this transaction.");
+                }
+
+                return Map(transaction);
+            }
+
+            throw new UnauthorizedAccessException(
+                "You are not authorized to view this transaction.");
+
+
         }
 
 
@@ -299,6 +302,10 @@ namespace SmartMicrogrid.API.Services.Implementation
             {
                 return null;
             }
+
+            await EnsureMicrogridOperatorAccessAsync(
+                currentUserId,
+                transaction.MicrogridNodeId);
 
 
             // --------------------------------------------------------
@@ -359,7 +366,8 @@ namespace SmartMicrogrid.API.Services.Implementation
         public async Task<TransactionResponse?> VerifyAsync(
             string transactionId,
             VerifyTransactionRequest request,
-            string currentUserId)
+            string currentUserId,
+            string? operatorId = null)
         {
             if (string.IsNullOrWhiteSpace(transactionId))
             {
@@ -379,6 +387,14 @@ namespace SmartMicrogrid.API.Services.Implementation
                 throw new ArgumentException(
                     "QR code data is required.");
             }
+
+            if (string.IsNullOrWhiteSpace(operatorId))
+            {
+                throw new UnauthorizedAccessException(
+                    "A valid authenticated MicrogridOperator is required.");
+            }
+
+            await EnsureMicrogridOperatorIdentityAsync(currentUserId, operatorId);
 
 
             // --------------------------------------------------------
@@ -439,9 +455,9 @@ namespace SmartMicrogrid.API.Services.Implementation
             // Get reservation from M2
             // --------------------------------------------------------
             var reservation =
-                await _reservationApiClient
-                    .GetReservationAsync(
-                        transaction.ReservationId);
+                await _reservationService.GetByIdAsync(
+                    transaction.ReservationId,
+                    operatorId);
 
 
             if (reservation == null)
@@ -479,6 +495,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
                 throw new InvalidOperationException(
                     "The reservation is not approved for transaction processing.");
+            }
+
+
+            if (reservation.EndTime <= DateTime.UtcNow)
+            {
+                throw new InvalidOperationException(
+                    "The reservation has expired and cannot be verified.");
             }
 
 
@@ -631,6 +654,10 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return null;
             }
 
+            await EnsureMicrogridOperatorAccessAsync(
+                currentUserId,
+                transaction.MicrogridNodeId);
+
 
             // --------------------------------------------------------
             // Transaction must be verified first
@@ -658,7 +685,7 @@ namespace SmartMicrogrid.API.Services.Implementation
                 transaction.VerifiedBy != currentUserId)
             {
                 throw new UnauthorizedAccessException(
-                    "Only the verifying transaction verifier can complete this transaction.");
+                    "Only the MicrogridOperator who verified this transaction can complete it.");
             }
 
 
@@ -733,6 +760,10 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return null;
             }
 
+            await EnsureMicrogridOperatorAccessAsync(
+                currentUserId,
+                transaction.MicrogridNodeId);
+
 
             // --------------------------------------------------------
             // Normalize requested status
@@ -786,6 +817,43 @@ namespace SmartMicrogrid.API.Services.Implementation
 
 
             return Map(transaction);
+        }
+
+
+        private async Task EnsureMicrogridOperatorIdentityAsync(
+            string currentUserId,
+            string? operatorId = null)
+        {
+            if (string.IsNullOrWhiteSpace(currentUserId) ||
+                (!string.IsNullOrWhiteSpace(operatorId) &&
+                 !string.Equals(operatorId, currentUserId, StringComparison.Ordinal)))
+            {
+                throw new UnauthorizedAccessException(
+                    "A valid authenticated MicrogridOperator is required.");
+            }
+
+            var user = await _userRepository.GetByIdAsync(currentUserId);
+            if (user == null || user.Role != Role.MicrogridOperator)
+            {
+                throw new UnauthorizedAccessException(
+                    "A valid authenticated MicrogridOperator is required.");
+            }
+        }
+
+        private async Task EnsureMicrogridOperatorAccessAsync(
+            string currentUserId,
+            string microgridNodeId)
+        {
+            await EnsureMicrogridOperatorIdentityAsync(currentUserId);
+
+            var assignedMicrogridIds =
+                await _reservationService.GetAssignedMicrogridIdsAsync(currentUserId);
+
+            if (!assignedMicrogridIds.Contains(microgridNodeId))
+            {
+                throw new UnauthorizedAccessException(
+                    "You are not authorized to access transactions for this microgrid.");
+            }
         }
 
 
