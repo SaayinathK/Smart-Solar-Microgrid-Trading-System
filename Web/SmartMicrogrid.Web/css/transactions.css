@@ -280,6 +280,12 @@
   min-width: 1040px;
 }
 
+.transaction-table tbody td:nth-child(1),
+.transaction-table tbody td:nth-child(2) {
+  max-width: 12rem;
+  overflow-wrap: anywhere;
+}
+
 .transaction-status-pending,
 .transaction-status-qrgenerated,
 .transaction-status-verificationpending,

@@ -39,6 +39,19 @@
       </article>
     </section>
 
+    <section id="create-transaction-card" class="card transaction-list-card" hidden>
+      <h2>Create Transaction from Approved Reservation</h2>
+      <p>Enter an approved reservation ID to start its transaction workflow.</p>
+      <form id="create-transaction-form">
+        <label class="transaction-filter-label" for="reservation-id">
+          Reservation ID
+          <input id="reservation-id" class="form-control" type="text" required autocomplete="off">
+        </label>
+        <button id="create-transaction-button" type="submit" class="btn btn-primary">Create Transaction</button>
+      </form>
+      <div id="create-transaction-state" class="transactions-state" role="status" aria-live="polite" hidden></div>
+    </section>
+
     <section class="card transaction-list-card">
       <div class="transaction-list-toolbar">
         <div>

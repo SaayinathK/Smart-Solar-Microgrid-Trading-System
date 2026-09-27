@@ -7,7 +7,7 @@ let verificationQrData = '';
 let verificationInProgress = false;
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (!AuthGuard.requireAuth('TransactionVerifier')) return;
+  if (!AuthGuard.requireRole('MicrogridOperator')) return;
 
   renderAppLayout('transactions', 'Verify Transaction');
 
@@ -89,7 +89,7 @@ function prepareVerification(event) {
   clearVerificationResult();
 
   if (!qrCodeData) {
-    showVerificationResult('Enter the scanned QR code data before continuing.', 'error');
+    showVerificationResult('Enter the QR payload before continuing.', 'error');
     return;
   }
 

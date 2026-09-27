@@ -116,6 +116,7 @@ function getMenuItemsForRole(role, activePage) {
   };
 
   let sections = '';
+  const isM3User = ['Admin', 'MicrogridOperator'].includes(role);
 
   // Core Overview Navigation
   sections += `
@@ -123,7 +124,7 @@ function getMenuItemsForRole(role, activePage) {
       <div class="sidebar-section-title">Navigation</div>
       <ul class="sidebar-menu">
         <li>
-          <a href="${role === 'TransactionVerifier' ? getWebAppUrl('pages/M3/dashboard.html') : '/dashboard.html'}" class="sidebar-link ${(role === 'TransactionVerifier' ? activePage === 'm3-dashboard' : activePage === 'dashboard') ? 'active' : ''}">
+          <a href="${role === 'MicrogridOperator' ? getWebAppUrl('pages/M3/dashboard.html') : '/dashboard.html'}" class="sidebar-link ${(role === 'MicrogridOperator' ? activePage === 'm3-dashboard' : activePage === 'dashboard') ? 'active' : ''}">
             ${icons.dashboard} <span>Dashboard Overview</span>
           </a>
         </li>
@@ -131,19 +132,20 @@ function getMenuItemsForRole(role, activePage) {
     </div>
   `;
 
-  if (role === 'TransactionVerifier') {
+  if (isM3User) {
     sections += `
       <div>
         <div class="sidebar-section-title">M3 Transactions</div>
         <ul class="sidebar-menu">
+          ${role === 'MicrogridOperator' ? `
           <li>
             <a href="${getWebAppUrl('pages/M3/dashboard.html')}" class="sidebar-link ${activePage === 'm3-dashboard' ? 'active' : ''}">
-              ${icons.dashboard} <span>Verifier Dashboard</span>
+              ${icons.dashboard} <span>Transaction Operations</span>
             </a>
-          </li>
+          </li>` : ''}
           <li>
             <a href="${getWebAppUrl('pages/M3/transactions.html')}" class="sidebar-link ${activePage === 'transactions' ? 'active' : ''}">
-              ${icons.trading} <span>Transactions</span>
+              ${icons.trading} <span>${role === 'Admin' ? 'All Transactions' : 'Transactions'}</span>
             </a>
           </li>
           <li>

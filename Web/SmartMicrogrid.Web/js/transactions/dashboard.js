@@ -1,13 +1,13 @@
 /* ============================================================================
-   Smart Microgrid Energy System - Transaction Verifier Dashboard
+   Smart Microgrid Energy System - Microgrid Operator Transaction Dashboard
    ============================================================================ */
 
 let dashboardTransactions = [];
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (!AuthGuard.requireAuth('TransactionVerifier')) return;
+  if (!AuthGuard.requireRole('MicrogridOperator')) return;
 
-  renderAppLayout('m3-dashboard', 'Transaction Verifier Dashboard');
+  renderAppLayout('m3-dashboard', 'Microgrid Operator Transactions');
   document.getElementById('refresh-verifier-dashboard').addEventListener('click', loadDashboardTransactions);
   loadDashboardTransactions();
 });
@@ -57,7 +57,7 @@ function countDashboardStatuses(statuses) {
 }
 
 function renderAttentionTransactions() {
-  const attentionStatuses = ['QRGenerated', 'VerificationPending', 'Verified', 'EnergyTransferInProgress'];
+  const attentionStatuses = ['Pending', 'QRGenerated', 'VerificationPending', 'Verified', 'EnergyTransferInProgress'];
   const attentionTransactions = dashboardTransactions.filter(transaction => attentionStatuses.includes(transaction.status));
   const tbody = document.getElementById('dashboard-attention-body');
   tbody.replaceChildren();
@@ -92,10 +92,13 @@ function createAttentionRow(transaction) {
   actionCell.appendChild(createDashboardLink('View Details', 'btn btn-secondary btn-sm',
     `transaction-details.html?id=${encodeURIComponent(transaction.id || '')}`));
 
-  if (transaction.status === 'QRGenerated' || transaction.status === 'VerificationPending') {
+  if (transaction.status === 'Pending') {
+    actionCell.appendChild(createDashboardLink('Generate QR', 'btn btn-primary btn-sm',
+      `transaction-details.html?id=${encodeURIComponent(transaction.id || '')}`));
+  } else if (transaction.status === 'QRGenerated' || transaction.status === 'VerificationPending') {
     actionCell.appendChild(createDashboardLink('Verify', 'btn btn-primary btn-sm',
       `transaction-verify.html?id=${encodeURIComponent(transaction.id || '')}`));
-  } else {
+  } else if (transaction.status === 'Verified' || transaction.status === 'EnergyTransferInProgress') {
     actionCell.appendChild(createDashboardLink('Complete', 'btn btn-primary btn-sm',
       `transaction-complete.html?id=${encodeURIComponent(transaction.id || '')}`));
   }

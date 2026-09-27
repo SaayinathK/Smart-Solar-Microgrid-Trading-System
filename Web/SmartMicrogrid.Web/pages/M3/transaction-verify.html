@@ -15,7 +15,7 @@
     <section class="page-header transaction-page-header">
       <div class="page-title">
         <h1>Verify Transaction</h1>
-        <p>Review the transaction and submit the scanned QR data for backend verification.</p>
+        <p>Paste the QR payload shown in transaction details. This page does not use a camera scanner.</p>
       </div>
       <div class="transaction-detail-header-actions">
         <button type="button" id="refresh-verification-transaction" class="btn btn-secondary">Refresh</button>
@@ -52,11 +52,11 @@
       <section id="verification-unavailable" class="transactions-state" role="status" aria-live="polite" hidden></section>
 
       <section id="verification-form-card" class="card transaction-detail-card" hidden>
-        <h2>Scanned QR Code</h2>
-        <p class="transaction-help-text">Paste the QR data read by the verifier. Expected format: <code>SMART-MICROGRID|TRANSACTION|{transactionId}|{transactionCode}</code></p>
+        <h2>QR Payload</h2>
+        <p class="transaction-help-text">Enter the exact payload from the QR code. Expected format: <code>SMART-MICROGRID|TRANSACTION|{transactionId}|{transactionCode}</code></p>
         <form id="transaction-verification-form" novalidate>
-          <label class="transaction-qr-label" for="qr-code-data">Scanned QR Code Data</label>
-          <textarea id="qr-code-data" class="form-control transaction-qr-input" rows="4" placeholder="Paste the scanned QR code data here..."></textarea>
+          <label class="transaction-qr-label" for="qr-code-data">QR Code Payload / Data</label>
+          <textarea id="qr-code-data" class="form-control transaction-qr-input" rows="4" placeholder="Paste or type the QR payload here..."></textarea>
           <div class="transaction-verification-buttons">
             <button type="submit" id="verify-transaction-button" class="btn btn-primary">Verify Transaction</button>
             <a id="cancel-verification-link" href="transactions.html" class="btn btn-secondary">Cancel</a>

@@ -3,10 +3,15 @@
    ============================================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (!AuthGuard.requireAuth('TransactionVerifier')) return;
+  if (!AuthGuard.requireRole(['Admin', 'MicrogridOperator'])) return;
 
   const historyView = new URLSearchParams(window.location.search).get('view') === 'history';
   renderAppLayout(historyView ? 'history' : 'transactions', historyView ? 'Transaction History' : 'Energy Transactions');
+
+  const createTransactionCard = document.getElementById('create-transaction-card');
+  const isOperator = SessionManager.getUserRole() === 'MicrogridOperator';
+  createTransactionCard.hidden = !isOperator || historyView;
+  document.getElementById('create-transaction-form').addEventListener('submit', createTransactionFromReservation);
 
   const refreshButton = document.getElementById('refresh-transactions');
   const filterSelect = document.getElementById('transaction-filter');
@@ -30,6 +35,36 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let transactions = [];
+
+async function createTransactionFromReservation(event) {
+  event.preventDefault();
+  if (SessionManager.getUserRole() !== 'MicrogridOperator') return;
+
+  const reservationIdInput = document.getElementById('reservation-id');
+  const createButton = document.getElementById('create-transaction-button');
+  const state = document.getElementById('create-transaction-state');
+  const reservationId = reservationIdInput.value.trim();
+  if (!reservationId) return;
+
+  createButton.disabled = true;
+  state.textContent = 'Creating transaction...';
+  state.hidden = false;
+
+  try {
+    const response = await TransactionApi.createTransaction(reservationId);
+    if (response?.success !== true || !response.data) {
+      throw new Error(response?.message || 'Transaction could not be created. Confirm the reservation is approved.');
+    }
+
+    state.textContent = `Transaction created: ${response.data.id || 'ID unavailable'}. Generate its QR code from transaction details.`;
+    reservationIdInput.value = '';
+    await loadTransactions();
+  } catch (error) {
+    state.textContent = error?.message || 'Unable to create transaction. Confirm the reservation is approved.';
+  } finally {
+    createButton.disabled = false;
+  }
+}
 
 async function loadTransactions() {
   const refreshButton = document.getElementById('refresh-transactions');
@@ -122,9 +157,13 @@ function createTransactionRow(transaction) {
   detailsLink.textContent = 'View Details';
   actionCell.appendChild(detailsLink);
 
-  if (transaction.status === 'QRGenerated' || transaction.status === 'VerificationPending') {
+  const isOperator = SessionManager.getUserRole() === 'MicrogridOperator';
+  if (isOperator && transaction.status === 'Pending') {
+    actionCell.appendChild(createRowAction('Generate QR', `transaction-details.html?id=${encodeURIComponent(transaction.id || '')}`));
+  } else if (isOperator && (transaction.status === 'QRGenerated' || transaction.status === 'VerificationPending')) {
     actionCell.appendChild(createRowAction('Verify', `transaction-verify.html?id=${encodeURIComponent(transaction.id || '')}`));
-  } else if (transaction.status === 'Verified' || transaction.status === 'EnergyTransferInProgress') {
+  } else if (SessionManager.getUserRole() === 'MicrogridOperator' &&
+      (transaction.status === 'Verified' || transaction.status === 'EnergyTransferInProgress')) {
     actionCell.appendChild(createRowAction('Complete', `transaction-complete.html?id=${encodeURIComponent(transaction.id || '')}`));
   }
 

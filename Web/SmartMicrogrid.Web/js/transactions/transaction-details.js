@@ -3,7 +3,7 @@
    ============================================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (!AuthGuard.requireAuth('TransactionVerifier')) return;
+  if (!AuthGuard.requireRole(['Admin', 'MicrogridOperator'])) return;
 
   renderAppLayout('transactions', 'Transaction Details');
 
@@ -79,8 +79,19 @@ function renderTransactionAction(status, transactionId) {
   const action = document.getElementById('transaction-action');
   action.replaceChildren();
   action.classList.remove('transaction-action-terminal');
+  const isOperator = SessionManager.getUserRole() === 'MicrogridOperator';
+
+  if (status === 'Pending') {
+    if (isOperator) {
+      action.appendChild(createActionButton('Generate QR', () => generateTransactionQr(transactionId)));
+    } else {
+      action.textContent = 'Waiting for the Microgrid Operator to generate a QR code.';
+    }
+    return;
+  }
 
   if (status === 'QRGenerated' || status === 'VerificationPending') {
+    if (!isOperator) return;
     action.appendChild(createActionLink(
       'Verify Transaction',
       `transaction-verify.html?id=${encodeURIComponent(transactionId || '')}`
@@ -89,6 +100,7 @@ function renderTransactionAction(status, transactionId) {
   }
 
   if (status === 'Verified' || status === 'EnergyTransferInProgress') {
+    if (!isOperator) return;
     action.appendChild(createActionLink(
       status === 'Verified' ? 'Confirm Energy Transfer' : 'Continue to Completion',
       `transaction-complete.html?id=${encodeURIComponent(transactionId || '')}`
@@ -108,8 +120,30 @@ function renderTransactionAction(status, transactionId) {
     return;
   }
 
-  if (status === 'Pending') {
-    action.textContent = 'QR generation is required before verification.';
+}
+
+async function generateTransactionQr(transactionId) {
+  const action = document.getElementById('transaction-action');
+  const button = action.querySelector('button');
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'Generating QR...';
+  }
+
+  try {
+    const response = await TransactionApi.generateQr(transactionId);
+    if (response?.success !== true || !response.data?.qrCodeData) {
+      throw new Error(response?.message || 'QR code could not be generated.');
+    }
+
+    await loadTransaction(transactionId);
+    ApiClient.showToast('QR code generated. The Prosumer can now view its payload in transaction details.', 'success');
+  } catch (error) {
+    if (button) {
+      button.disabled = false;
+      button.textContent = 'Generate QR';
+    }
+    ApiClient.showToast(error?.message || 'Unable to generate QR code.', 'error');
   }
 }
 
@@ -119,6 +153,15 @@ function createActionLink(label, href) {
   link.href = href;
   link.textContent = label;
   return link;
+}
+
+function createActionButton(label, onClick) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'btn btn-primary';
+  button.textContent = label;
+  button.addEventListener('click', onClick);
+  return button;
 }
 
 function setDetailValue(elementId, value) {

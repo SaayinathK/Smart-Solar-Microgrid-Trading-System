@@ -6,7 +6,7 @@ let completionTransactionId = '';
 let completionInProgress = false;
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (!AuthGuard.requireAuth('TransactionVerifier')) return;
+  if (!AuthGuard.requireRole('MicrogridOperator')) return;
 
   renderAppLayout('transactions', 'Energy Transfer Confirmation');
   completionTransactionId = new URLSearchParams(window.location.search).get('id')?.trim() || '';
