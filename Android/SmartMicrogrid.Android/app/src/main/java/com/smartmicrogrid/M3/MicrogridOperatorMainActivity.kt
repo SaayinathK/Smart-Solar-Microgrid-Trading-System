@@ -45,6 +45,9 @@ class MicrogridOperatorMainActivity : AppCompatActivity() {
                         com.smartmicrogrid.M1.microgrid.MicrogridOperatorMicrogridFragment()
                     )
 
+                R.id.nav_transactions ->
+                    loadFragment(PendingTransactionsFragment())
+
                 R.id.nav_pending ->
                     loadFragment(
                         com.smartmicrogrid.M2.MyReservationsFragment()
@@ -60,7 +63,12 @@ class MicrogridOperatorMainActivity : AppCompatActivity() {
         }
 
         if (savedInstanceState == null) {
-            bottomNav.selectedItemId = R.id.nav_home
+            if (intent.getBooleanExtra(EXTRA_OPEN_HISTORY, false)) {
+                bottomNav.selectedItemId = R.id.nav_transactions
+                loadFragment(TransactionHistoryFragment())
+            } else {
+                bottomNav.selectedItemId = R.id.nav_home
+            }
         }
     }
 
@@ -70,5 +78,9 @@ class MicrogridOperatorMainActivity : AppCompatActivity() {
             .commit()
 
         return true
+    }
+
+    companion object {
+        const val EXTRA_OPEN_HISTORY = "OPEN_TRANSACTION_HISTORY"
     }
 }

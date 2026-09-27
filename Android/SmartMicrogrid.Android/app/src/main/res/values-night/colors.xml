@@ -3,4 +3,16 @@
     <color name="surface_outline">#34465B</color>
     <color name="solar_ink">#FFD27C</color>
     <color name="solar_soft">#3D3221</color>
+    <color name="m3_text_primary">#F8FAFC</color>
+    <color name="m3_text_secondary">#B6C2D0</color>
+    <color name="m3_success">#34D399</color>
+    <color name="m3_error">#FCA5A5</color>
+    <color name="m3_status_success_background">#243B30</color>
+    <color name="m3_status_success_foreground">#86EFAC</color>
+    <color name="m3_status_warning_background">#45351A</color>
+    <color name="m3_status_warning_foreground">#FCD34D</color>
+    <color name="m3_status_info_background">#123449</color>
+    <color name="m3_status_info_foreground">#67E8F9</color>
+    <color name="m3_status_error_background">#482426</color>
+    <color name="m3_status_error_foreground">#FCA5A5</color>
 </resources>

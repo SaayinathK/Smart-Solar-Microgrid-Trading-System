@@ -62,11 +62,11 @@ class ProsumerTransactionDetailsActivity : AppCompatActivity() {
             R.string.energy_amount_kwh,
             transaction.energyAmount.toString()
         )
-        binding.tvStatus.text = valueOrFallback(transaction.status)
-        binding.tvCreatedAt.text = valueOrFallback(transaction.createdAt)
-        binding.tvUpdatedAt.text = valueOrFallback(transaction.updatedAt)
-        binding.tvVerificationTime.text = valueOrFallback(transaction.verificationTime)
-        binding.tvEnergyTransferTime.text = valueOrFallback(transaction.energyTransferTime)
+        binding.tvStatus.text = TransactionUiFormatters.statusLabel(transaction.status)
+        binding.tvCreatedAt.text = TransactionUiFormatters.dateTime(transaction.createdAt)
+        binding.tvUpdatedAt.text = TransactionUiFormatters.dateTime(transaction.updatedAt)
+        binding.tvVerificationTime.text = TransactionUiFormatters.dateTime(transaction.verificationTime)
+        binding.tvEnergyTransferTime.text = TransactionUiFormatters.dateTime(transaction.energyTransferTime)
 
         val hasQrData = transaction.qrCodeData.isNotBlank()
         binding.btnQrAction.visibility = if (hasQrData) View.VISIBLE else View.GONE

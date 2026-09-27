@@ -34,6 +34,7 @@ class TransactionQrActivity : AppCompatActivity() {
         )
         binding.tvStatus.text = intent.getStringExtra(EXTRA_STATUS)
             .orEmpty().ifBlank { getString(R.string.not_available) }
+            .let(TransactionUiFormatters::statusLabel)
 
         val qrCodeData = intent.getStringExtra(EXTRA_QR_CODE_DATA).orEmpty()
         if (qrCodeData.isBlank()) {
@@ -71,6 +72,10 @@ class TransactionQrActivity : AppCompatActivity() {
                 Bitmap.createBitmap(pixels, QR_SIZE, QR_SIZE, Bitmap.Config.ARGB_8888)
             )
             binding.qrImage.visibility = View.VISIBLE
+            binding.qrImage.alpha = 0f
+            binding.qrImage.scaleX = 0.97f
+            binding.qrImage.scaleY = 0.97f
+            binding.qrImage.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(180L).start()
         } catch (_: Exception) {
             showQrError(getString(R.string.qr_render_failed))
         } finally {

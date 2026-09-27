@@ -31,15 +31,17 @@
                 android:layout_weight="1"
                 android:textColor="?android:attr/textColorPrimary"
                 android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:breakStrategy="simple" />
 
-            <TextView
+            <com.google.android.material.chip.Chip
                 android:id="@+id/tv_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#10B981"
-                android:textSize="12sp"
-                android:textStyle="bold" />
+                android:checkable="false"
+                android:clickable="false"
+                android:textColor="@color/m3_success"
+                app:chipBackgroundColor="@color/m3_status_success_background" />
         </LinearLayout>
 
         <TextView
@@ -56,7 +58,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp" />
+            android:textSize="13sp"
+            android:breakStrategy="simple" />
 
         <TextView
             android:id="@+id/tv_created_at"
@@ -64,6 +67,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:breakStrategy="simple" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

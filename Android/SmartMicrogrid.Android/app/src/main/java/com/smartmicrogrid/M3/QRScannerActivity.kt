@@ -54,7 +54,7 @@ class QRScannerActivity : AppCompatActivity() {
             if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
                 startScanner()
             } else {
-                finishWithError("Camera permission is required to scan a QR code.")
+                finishWithError("Camera permission is required to scan transaction QR codes.")
             }
         }
     }
@@ -80,7 +80,7 @@ class QRScannerActivity : AppCompatActivity() {
         val contents = result.contents
         val payload = parseTransactionPayload(contents)
         if (payload == null) {
-            finishWithError("Invalid Smart Microgrid transaction QR code.")
+            finishWithError("Invalid Smart Microgrid transaction QR.")
             return
         }
 

@@ -41,6 +41,11 @@ class TransactionHistoryFragment : Fragment() {
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = adapter
+        binding.btnActionRequired.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(com.smartmicrogrid.R.id.fragment_container, PendingTransactionsFragment())
+                .commit()
+        }
         binding.swipeRefresh.setOnRefreshListener { viewModel.loadTransactionHistory() }
 
         viewModel.transactions.observe(viewLifecycleOwner) { transactions ->

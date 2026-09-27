@@ -55,3 +55,8 @@ captures/
 ## OS / IDE Temporary Files
 Thumbs.db
 .DS_Store
+
+*.key
+
+.env
+secrets.json

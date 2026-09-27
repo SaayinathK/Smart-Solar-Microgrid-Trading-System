@@ -33,7 +33,17 @@ class PendingTransactionsFragment : Fragment() {
         viewModel = ViewModelProvider(this)[TransactionViewModel::class.java]
 
         binding.tvTitle.text = "Pending Transactions"
-        binding.tvSubtitle.text = "Transactions ready for verifier action"
+        binding.tvSubtitle.text = "Action Required"
+        binding.btnApprovedReservations.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(com.smartmicrogrid.R.id.fragment_container, ApprovedReservationsFragment())
+                .commit()
+        }
+        binding.btnTransactionHistory.setOnClickListener {
+            parentFragmentManager.beginTransaction()
+                .replace(com.smartmicrogrid.R.id.fragment_container, TransactionHistoryFragment())
+                .commit()
+        }
 
         adapter = TransactionAdapter(emptyList()) { transaction ->
             val intent = Intent(requireContext(), TransactionDetailsActivity::class.java).apply {

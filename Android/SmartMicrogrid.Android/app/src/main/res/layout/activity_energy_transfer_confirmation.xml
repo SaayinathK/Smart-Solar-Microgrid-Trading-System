@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_dark">
+    android:background="?android:attr/colorBackground">
 
     <ScrollView
         android:id="@+id/confirmation_content"
@@ -15,10 +15,10 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/card_bg"
+            app:cardBackgroundColor="?attr/colorSurface"
             app:cardCornerRadius="16dp"
             app:cardElevation="6dp"
-            app:strokeColor="@color/card_stroke_dark"
+            app:strokeColor="?attr/colorOutline"
             app:strokeWidth="1dp">
 
             <LinearLayout
@@ -31,7 +31,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/confirm_energy_transfer"
-                    android:textColor="@color/text_dark_primary"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="22sp"
                     android:textStyle="bold" />
 
@@ -40,7 +40,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/confirm_that_the_physical_energy_transfer_for_this_verified_transaction_is_complete"
-                    android:textColor="@color/text_dark_secondary"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:textSize="14sp" />
 
                 <TextView
@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:text="@string/transaction_id"
-                    android:textColor="@color/text_dark_secondary"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:textSize="13sp" />
 
                 <TextView
@@ -59,8 +59,32 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
+                    android:text="@string/reservation_id"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tv_reservation_id"
+                    style="@style/TransactionDetailValue" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/prosumer"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tv_prosumer"
+                    style="@style/TransactionDetailValue" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:text="@string/energy_amount"
-                    android:textColor="@color/text_dark_secondary"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:textSize="13sp" />
 
                 <TextView
@@ -72,7 +96,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:text="Microgrid"
-                    android:textColor="@color/text_dark_secondary"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:textSize="13sp" />
 
                 <TextView
@@ -84,7 +108,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:text="Current Status"
-                    android:textColor="@color/text_dark_secondary"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:textSize="13sp" />
 
                 <TextView
@@ -92,11 +116,32 @@
                     style="@style/TransactionDetailValue" />
 
                 <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/scheduled_transfer"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tv_scheduled_transfer"
+                    style="@style/TransactionDetailValue" />
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/checkbox_transfer_complete"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:checked="false"
+                    android:text="@string/transfer_confirmation_checkbox"
+                    android:textColor="?attr/colorOnSurface" />
+
+                <TextView
                     android:id="@+id/tv_confirmation_message"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:textColor="@color/text_dark_secondary"
+                    android:textColor="?android:attr/textColorSecondary"
                     android:textSize="14sp"
                     android:visibility="gone" />
 
@@ -113,7 +158,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:text="Confirm Energy Transfer" />
+                    android:enabled="false"
+                    android:text="@string/complete_transaction" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_transaction_history"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/transaction_history"
+                    android:visibility="gone" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </ScrollView>
@@ -140,7 +195,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textColor="@color/text_dark_primary"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="16sp" />
 
         <com.google.android.material.button.MaterialButton

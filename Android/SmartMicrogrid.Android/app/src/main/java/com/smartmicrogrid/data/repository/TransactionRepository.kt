@@ -4,6 +4,7 @@ import com.smartmicrogrid.data.remote.ApiService
 import com.smartmicrogrid.models.CompleteTransactionRequest
 import com.smartmicrogrid.models.CreateTransactionRequest
 import com.smartmicrogrid.models.GenerateQrResponse
+import com.smartmicrogrid.models.Reservation
 import com.smartmicrogrid.models.Transaction
 import com.smartmicrogrid.models.VerifyTransactionRequest
 import retrofit2.Response
@@ -11,6 +12,18 @@ import retrofit2.Response
 class TransactionRepository(
     private val apiService: ApiService
 ) {
+
+    suspend fun getReservations(
+        status: String,
+        page: Int,
+        pageSize: Int
+    ): Response<com.smartmicrogrid.models.ApiResponse<List<Reservation>>> {
+        return apiService.getReservations(
+            status = status,
+            page = page,
+            pageSize = pageSize
+        )
+    }
 
     suspend fun getTransactions(): Response<com.smartmicrogrid.models.ApiResponse<List<Transaction>>> {
         return apiService.getTransactions()
@@ -20,6 +33,12 @@ class TransactionRepository(
         id: String
     ): Response<com.smartmicrogrid.models.ApiResponse<Transaction>> {
         return apiService.getTransactionById(id)
+    }
+
+    suspend fun getReservationById(
+        id: String
+    ): Response<com.smartmicrogrid.models.ApiResponse<Reservation>> {
+        return apiService.getReservationById(id)
     }
 
     suspend fun createTransaction(
