@@ -1,7 +1,7 @@
 # Postman API Collection & Testing
 
 ## Overview
-The `Postman/` folder contains the official importable **Postman Collection (v2.1)** for testing all REST API endpoints of the **Smart Microgrid Energy Management & Trading System**.
+The `Postman/` folder contains importable **Postman Collections (v2.1)** for the endpoints included in each collection. The User Management collection covers authentication and user endpoints; it does not include M3 transaction requests.
 
 ---
 
@@ -14,7 +14,7 @@ The `Postman/` folder contains the official importable **Postman Collection (v2.
 ## 2. Included Request Endpoints
 
 ### A. Authentication
-- `POST /api/auth/register` (Multi-role registration: Prosumer with NIC primary key, Microgrid Operator, Transaction Verifier; Admin role self-registration restricted)
+- `POST /api/auth/register` (Registration supports Prosumer and MicrogridOperator accounts; Admin role self-registration is restricted)
 - `POST /api/auth/login` (Returns JWT token & auto-stores into `{{authToken}}`)
 - `POST /api/auth/change-password` (Authenticated password change)
 

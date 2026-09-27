@@ -31,7 +31,7 @@ namespace SmartMicrogrid.API.Middleware
         private static Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = (int)GetStatusCode(exception);
 
             var response = ApiResponse<object>.FailureResponse(
                 "An internal server error occurred while processing your request.",
@@ -45,6 +45,19 @@ namespace SmartMicrogrid.API.Middleware
 
             var json = JsonSerializer.Serialize(response, options);
             return context.Response.WriteAsync(json);
+        }
+
+        private static HttpStatusCode GetStatusCode(Exception exception)
+        {
+            return exception switch
+            {
+                ArgumentException => HttpStatusCode.BadRequest,
+                KeyNotFoundException => HttpStatusCode.NotFound,
+                UnauthorizedAccessException => HttpStatusCode.Forbidden,
+                HttpRequestException => HttpStatusCode.BadGateway,
+                InvalidOperationException => HttpStatusCode.BadRequest,
+                _ => HttpStatusCode.InternalServerError
+            };
         }
     }
 }

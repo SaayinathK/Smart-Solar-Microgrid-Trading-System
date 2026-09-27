@@ -27,7 +27,7 @@
     <color name="card_stroke_light">#332563EB</color>
     <color name="card_stroke_dark">#4D3B82F6</color>
 
-    <color name="ic_launcher_background">#0F172A</color>
+    <color name="ic_launcher_background">#F8FAFC</color>
     <color name="ic_launcher_foreground">#2563EB</color>
     
     <!-- Extra status colors -->
@@ -51,4 +51,18 @@
     <color name="white">#FFFFFF</color>
     <color name="neon_green">#10B981</color>
     <color name="neon_cyan">#06B6D4</color>
+
+    <!-- M3 status colors, tuned for light surfaces. -->
+    <color name="m3_text_primary">#102B46</color>
+    <color name="m3_text_secondary">#475569</color>
+    <color name="m3_success">#087F5B</color>
+    <color name="m3_error">#B42318</color>
+    <color name="m3_status_success_background">#DCFCE7</color>
+    <color name="m3_status_success_foreground">#166534</color>
+    <color name="m3_status_warning_background">#FEF3C7</color>
+    <color name="m3_status_warning_foreground">#854D0E</color>
+    <color name="m3_status_info_background">#DBEAFE</color>
+    <color name="m3_status_info_foreground">#1D4ED8</color>
+    <color name="m3_status_error_background">#FEE2E2</color>
+    <color name="m3_status_error_foreground">#B91C1C</color>
 </resources>
