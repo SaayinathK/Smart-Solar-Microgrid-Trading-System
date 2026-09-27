@@ -45,8 +45,8 @@ Stores energy slot browsing locks, prosumer reservations, and reservation modifi
 
 ---
 
-### D. `transactions` Collection (Member 3 - Future)
-Stores energy transfer transaction orders, QR code verification hashes, and completion confirmations.
+### D. `transactions` Collection (Member 3 - Implemented)
+Stores M3 transaction records created from approved M2 reservations, including transaction QR data, verification, energy-transfer confirmation, completion, and history. Each transaction references its source reservation by `ReservationId`. MongoDB enforces a unique index on `ReservationId` to prevent more than one transaction per reservation; additional indexes support queries by `ProsumerId`, `QrCodeData`, `VerifiedBy`, and descending `CreatedAt`.
 
 ---
 
