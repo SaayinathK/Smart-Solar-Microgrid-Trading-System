@@ -3,6 +3,14 @@
 ## Overview
 The `Android/` folder is designated for the **Native Android Application** built using **Kotlin**, **XML Layouts**, **Android Studio**, **Retrofit**, and **SQLite**.
 
+## Dashboard map
+
+The dashboard uses **Leaflet 1.9.4 and OpenStreetMap** in a local WebView. Selecting a microgrid centers its saved coordinates and marker; selection survives tab/view recreation. No map API key or Play Services Maps dependency is needed.
+
+The map page, library, marker images and BSD license are bundled in `SmartMicrogrid.Android/app/src/main/assets/map`. `OpenStreetMapView.kt` serves those assets from an internal HTTPS origin, forwards selected coordinates as JSON, identifies tile requests as SmartMicrogrid/1.0, and keeps normal HTTP caching. There is no JavaScript bridge. Attribution links open in the browser when tapped. Tiles require internet access; a failed tile request shows a retry action.
+
+The tile URL is defined in `assets/map/map.js`. Keep visible attribution and follow the [OpenStreetMap tile usage policy](https://operations.osmfoundation.org/policies/tiles/): interactive viewing only, no bulk downloads or offline prefetch. For a larger deployment use an appropriate hosted or self-hosted tile service.
+
 ---
 
 ## 1. System Communication Architecture
@@ -35,14 +43,14 @@ The `Android/` folder is designated for the **Native Android Application** built
 ## 2. Responsibilities Breakdown
 
 - **Member 2**: Prosumer Mobile Interface (Browse Energy Slots, Create & Track Reservations).
-- **Member 3**: Energy Transaction Verification Interface (Camera QR Code Scanning & Verification).
+- **Member 3 (M3/C3)**: The Android client is part of the platform’s transaction experience. The M3 operational role is `MicrogridOperator`; Prosumer transaction information is intended to be available through the Mobile/Android application. Specific Android M3 screens and camera-scanning behavior are not documented here as verified implementation details.
 
 ---
 
 ## 3. SQLite Role
 SQLite is used strictly for **Android local persistence**:
 - Caching JWT authentication tokens (`SharedPreferences` / `EncryptedSharedPreferences`).
-- Storing offline transaction drafts & session state.
+- Storing client-side session state; transaction cache/draft behavior is not asserted here as an implemented M3 feature.
 - Caching recently viewed energy availability slots.
 
 *MongoDB remains the authoritative server-side database.*

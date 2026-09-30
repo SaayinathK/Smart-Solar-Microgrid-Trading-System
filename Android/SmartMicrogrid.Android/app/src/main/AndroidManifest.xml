@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -27,10 +28,18 @@
 
         <activity android:name=".MainActivity" />
         <activity android:name=".auth.RegisterActivity" />
+        <activity android:name=".auth.RegisterVerifierActivity" />
         <activity android:name=".auth.EditProfileActivity" />
         <activity android:name=".auth.ChangePasswordActivity" />
 
         <activity android:name=".M2.ProsumerMainActivity" />
+        <activity android:name=".M3.VerifierMainActivity" />
+        <activity android:name=".M3.TransactionDetailsActivity" />
+        <activity android:name=".M3.EnergyTransferConfirmationActivity" />
+        <activity android:name=".M3.TransactionCompletionActivity" />
+        <activity android:name=".M3.ProsumerTransactionDetailsActivity" />
+        <activity android:name=".M3.TransactionQrActivity" />
+        <activity android:name=".M3.QRScannerActivity" />
         <activity android:name=".M3.MicrogridOperatorMainActivity" />
         <activity android:name=".M2.AvailableSlotsActivity" />
         <activity android:name=".M2.ReservationsActivity" />

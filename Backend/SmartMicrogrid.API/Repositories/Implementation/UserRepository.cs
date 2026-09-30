@@ -26,7 +26,8 @@ namespace SmartMicrogrid.API.Repositories.Implementation
                 var nameOrEmailFilter = filterBuilder.Or(
                     filterBuilder.Regex(u => u.FirstName, regex),
                     filterBuilder.Regex(u => u.LastName, regex),
-                    filterBuilder.Regex(u => u.Email, regex)
+                    filterBuilder.Regex(u => u.Email, regex),
+                    filterBuilder.Regex(u => u.Nic, regex)
                 );
                 filter &= nameOrEmailFilter;
             }

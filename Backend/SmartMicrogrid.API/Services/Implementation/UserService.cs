@@ -78,6 +78,11 @@ namespace SmartMicrogrid.API.Services.Implementation
             user.LastName = dto.LastName.Trim();
             user.PhoneNumber = dto.PhoneNumber?.Trim() ?? string.Empty;
 
+            if (dto.Nic != null)
+            {
+                user.Nic = dto.Nic.Trim().ToUpper();
+            }
+
             if (dto.Role.HasValue)
             {
                 if (dto.Role.Value is Role.Prosumer && string.IsNullOrWhiteSpace(user.Nic))
@@ -112,6 +117,10 @@ namespace SmartMicrogrid.API.Services.Implementation
             user.FirstName = dto.FirstName.Trim();
             user.LastName = dto.LastName.Trim();
             user.PhoneNumber = dto.PhoneNumber?.Trim() ?? string.Empty;
+            if (dto.Nic != null)
+            {
+                user.Nic = dto.Nic.Trim().ToUpper();
+            }
             user.UpdatedAt = DateTime.UtcNow;
 
             var updated = await _userRepository.UpdateAsync(user);
@@ -140,7 +149,7 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return ApiResponse<UserResponseDto>.FailureResponse("Failed to update user status.");
             }
 
-            var statusMsg = isActive ? "User account activated successfully." : "User account deactivated successfully.";
+            var statusMsg = isActive ? "User account activated successfully by Backoffice officer." : "User account deactivated successfully.";
             return ApiResponse<UserResponseDto>.SuccessResponse(MapToUserResponseDto(user), statusMsg);
         }
 

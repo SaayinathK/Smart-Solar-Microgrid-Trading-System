@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using SmartMicrogrid.API.Models.Common;
 
 namespace SmartMicrogrid.API.DTOs.Auth
 {
@@ -19,9 +20,16 @@ namespace SmartMicrogrid.API.DTOs.Auth
         [Phone(ErrorMessage = "Invalid phone number format.")]
         public string PhoneNumber { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Prosumer NIC is required.")]
-        [RegularExpression(@"^(?:[0-9]{9}[VvXx]|[0-9]{12})$", ErrorMessage = "Enter a valid prosumer NIC.")]
+        /// <summary>
+        /// National Identity Card (NIC) - Mandatory for Prosumer role
+        /// </summary>
+        [RegularExpression(@"^(?:[0-9]{9}[VvXx]|[0-9]{12})$", ErrorMessage = "Enter a valid NIC.")]
         public string Nic { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Role to register for (Default: Prosumer). Admin role is restricted from public self-registration.
+        /// </summary>
+        public Role Role { get; set; } = Role.Prosumer;
 
         [Required(ErrorMessage = "Password is required.")]
         [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]

@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('lastName').value = user.lastName;
     document.getElementById('email').value = user.email;
     document.getElementById('phoneNumber').value = user.phoneNumber || '';
+    document.getElementById('nic').value = user.nic || '';
 
     if (isAdmin) {
       document.getElementById('role').value = user.role;
@@ -57,8 +58,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const firstName = document.getElementById('firstName').value.trim();
     const lastName = document.getElementById('lastName').value.trim();
     const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    const nic = document.getElementById('nic').value.trim().toUpperCase();
 
-    const payload = { firstName, lastName, phoneNumber };
+    const payload = { firstName, lastName, phoneNumber, nic };
 
     if (isAdmin) {
       payload.role = document.getElementById('role').value;

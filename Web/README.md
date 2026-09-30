@@ -16,6 +16,7 @@ Web/
     ├── dashboard.html                 # Main dashboard overview with stat widgets
     │
     ├── pages/
+    │   ├── M3/                         # M3 transaction dashboard, list/history, details, verification, completion
     │   └── users/
     │       ├── users.html             # Admin user list table with search & filters
     │       ├── user-details.html      # Full user BSON record & timestamps
@@ -41,7 +42,9 @@ Web/
     │   ├── api/
     │   │   ├── api-client.js          # Central Fetch client with Bearer token injection
     │   │   ├── auth-api.js            # Auth endpoint functions
-    │   │   └── user-api.js            # User management endpoint functions
+    │   │   ├── user-api.js            # User management endpoint functions
+    │   │   └── transaction-api.js     # M3 transaction endpoint functions
+    │   ├── transactions/              # M3 dashboard, transaction list/history, details, verification, completion
     │   └── users/
     │       ├── users.js               # Users table renderer & filter logic
     │       ├── user-details.js        # User details population script
@@ -51,6 +54,20 @@ Web/
 ```
 
 ---
+
+## OpenStreetMap maps and location picker
+
+Both dashboards and the create/edit location picker use the locally bundled **Leaflet 1.9.4** library with OpenStreetMap tiles. No map key or billing configuration is required. Library files and their BSD license are in `SmartMicrogrid.Web/vendor/leaflet`; tiles still need an internet connection.
+
+Select a dashboard microgrid to move the marker to its saved coordinates. In create/edit forms, click the map, drag the pin, choose **Use my current location**, or type the address and leave the field / press Enter / choose **Find typed address**. Address edits fill coordinates through `GET /api/geocoding?address=...`; map selection uses `GET /api/geocoding/reverse?latitude=...&longitude=...`. Both endpoints require an Admin or MicrogridOperator session. Address searches do not run on every keystroke.
+
+Coordinates and addresses remain manually editable if the map or provider is unavailable. Old lookup responses cannot overwrite newer manual edits or selections. Failed reverse lookups retain the selected point with a coordinate-based address. Approximate address matches must be checked on the map. Current location requires browser permission and HTTPS or localhost.
+
+`MAP_TILE_URL` in `js/config/api-config.js` controls the tile provider. See [backend geocoding configuration](../Backend/README.md#openstreetmap-address-geocoding) to change the Nominatim endpoint. Keep the visible OpenStreetMap attribution when changing map styling.
+
+Public services are suitable for moderate interactive use, not unrestricted production traffic. [Nominatim policy](https://operations.osmfoundation.org/policies/nominatim/) requires an application-wide maximum of one request per second, identification, caching and no autocomplete. The backend serializes and caches forward/reverse requests in one process. Use a self-hosted/provider endpoint or a shared rate limiter before running multiple API instances. [Tile policy](https://operations.osmfoundation.org/policies/tiles/) requires attribution, normal HTTP caching, identifying requests and no bulk/offline tile downloads.
+
+Run `node --test Web/SmartMicrogrid.Web/tests/*.test.cjs`. The tests use stubbed providers and do not contact public map services.
 
 ## 2. Key Architecture Concepts
 
@@ -72,9 +89,11 @@ const API_CONFIG = {
 ### C. Role-Based Sidebar Navigation (`js/common/sidebar.js`)
 Displays custom navigation options based on the authenticated user's assigned role:
 - **`Admin`**: Dashboard, User Management, Operational Reports.
-- **`MicrogridOperator`**: Dashboard, Solar Nodes, Battery Storage.
-- **`Prosumer`**: Dashboard, Browse Energy Slots, My Reservations.
-- **`MicrogridOperator`**: Dashboard, reservation management, QR/pass verification, and transfer completion.
+- **`MicrogridOperator`**: M1 infrastructure pages and M3 transaction operations, including creating transactions from approved reservations, QR generation, manual QR-payload verification, transfer confirmation/completion, and transaction history for assigned microgrids.
+- **`Admin`**: Transaction monitoring/view access; no M3 verification or completion controls.
+- **`Prosumer`**: M3 transaction visibility is provided through the Mobile/Android application; Prosumer does not verify or complete transactions in the Web application.
+
+M3 Web pages are `pages/M3/dashboard.html`, `transactions.html` (including history view), `transaction-details.html`, `transaction-verify.html`, and `transaction-complete.html`. Their scripts are in `js/transactions/`; API calls are centralized in `js/api/transaction-api.js`. QR verification in Web accepts manually entered QR payload/data and does not use a camera scanner.
 
 ---
 

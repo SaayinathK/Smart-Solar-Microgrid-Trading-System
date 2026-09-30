@@ -58,6 +58,7 @@ namespace SmartMicrogrid.API.Services.Implementation
                 ReservedCapacity = 0,
                 UsedCapacity = 0,
                 BatteryCapacity = dto.BatteryCapacity,
+                BatteryStorageSlots = dto.BatteryStorageSlots,
                 CurrentBatteryLevel = dto.CurrentBatteryLevel,
                 BatteryPercentage = batteryPct,
                 Status = string.IsNullOrWhiteSpace(dto.Status) ? "Active" : dto.Status,
@@ -96,6 +97,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             existing.Longitude = dto.Longitude;
             existing.Capacity = dto.Capacity;
             existing.BatteryCapacity = dto.BatteryCapacity;
+            existing.BatteryStorageSlots = dto.BatteryStorageSlots;
             existing.Status = dto.Status;
             existing.IsActive = dto.IsActive;
             if (!string.IsNullOrWhiteSpace(dto.OperatorId))
@@ -129,10 +131,22 @@ namespace SmartMicrogrid.API.Services.Implementation
                 throw new ArgumentException($"Invalid status '{status}'. Allowed values: Active, Inactive, Maintenance, Offline.");
             }
 
+            var existing = await _repository.GetByIdAsync(id);
+            if (existing == null) return false;
+            await EnsureCanDeactivateAsync(id, status, string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase));
+
             bool isActive = string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase);
             if (!isActive && await _reservations.HasActiveForNodeAsync(id))
                 throw new InvalidOperationException("This microgrid has pending or approved reservations and cannot be deactivated.");
             return await _repository.UpdateStatusAsync(id, status, isActive);
+        }
+
+        private async Task EnsureCanDeactivateAsync(string id, string status, bool isActive)
+        {
+            if (!isActive && string.Equals(status, "Inactive", StringComparison.OrdinalIgnoreCase) && await _reservations.HasActiveForNodeAsync(id))
+            {
+                throw new InvalidOperationException("This microgrid cannot be deactivated while active energy reservations exist.");
+            }
         }
 
         private static MicrogridResponseDto MapToResponseDto(MicrogridNode node)
@@ -150,6 +164,7 @@ namespace SmartMicrogrid.API.Services.Implementation
                 ReservedCapacity = node.ReservedCapacity,
                 UsedCapacity = node.UsedCapacity,
                 BatteryCapacity = node.BatteryCapacity,
+                BatteryStorageSlots = node.BatteryStorageSlots,
                 CurrentBatteryLevel = node.CurrentBatteryLevel,
                 BatteryPercentage = node.BatteryPercentage,
                 Status = node.Status,

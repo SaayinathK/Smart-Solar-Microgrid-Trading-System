@@ -8,6 +8,18 @@ The `Backend/` folder contains the central communication layer for the **Smart M
 
 ---
 
+## OpenStreetMap address geocoding
+
+Authenticated Admin and MicrogridOperator users can call `GET /api/geocoding?address=...` and `GET /api/geocoding/reverse?latitude=...&longitude=...`. The backend uses Nominatim and returns `data: { lat, lng, formattedAddress, isApproximate }`. No API key is required.
+
+`OpenStreetMap:GeocodingBaseUrl` in `appsettings.json` defaults to `https://nominatim.openstreetmap.org/`. Set `OpenStreetMap__GeocodingBaseUrl` to an HTTPS Nominatim-compatible provider or self-hosted endpoint to switch services. Optional machine-local settings can be kept in gitignored `appsettings.Local.json`; environment/CLI settings override them. Restart the API after deployment.
+
+The singleton service identifies itself as SmartMicrogrid/1.0, shares a one-request-per-1.1-second limiter across search and reverse lookup, caches up to 1,000 successful results for 24 hours and bounds request queue waits. The browser searches on completed edits or explicit Search/Enter, never autocomplete. A provider rate-limit response triggers a cooldown. Network/provider errors leave manual entry available.
+
+Review the [Nominatim usage policy](https://operations.osmfoundation.org/policies/nominatim/) before deployment: public access is limited to moderate, user-triggered requests, at most one per second **across the entire application**, with attribution and caching. Use a self-hosted/provider endpoint or shared limiter for multiple API instances or higher traffic. This implementation does not support bulk geocoding.
+
+Errors use the normal API envelope: 400 for invalid input, 404 for no address, 429 for a busy queue, 503 for provider throttling/configuration, 504 for timeout and 502 for network/invalid provider responses. Request URL logging is disabled. Run `dotnet test Backend/SmartMicrogrid.API.Tests` for fake-provider coverage without internet access.
+
 ## 1. Architecture Flow
 ```text
 HTTP / JSON REST Request

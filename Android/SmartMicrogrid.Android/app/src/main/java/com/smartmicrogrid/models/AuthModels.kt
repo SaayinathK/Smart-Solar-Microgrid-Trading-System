@@ -21,7 +21,8 @@ data class RegisterRequest(
     @SerializedName("lastName") val lastName: String,
     @SerializedName("email") val email: String,
     @SerializedName("phoneNumber") val phoneNumber: String,
-    @SerializedName("nic") val nic: String,
+    @SerializedName("nic") val nic: String = "",
+    @SerializedName("role") val role: String = "Prosumer",
     @SerializedName("password") val password: String,
     @SerializedName("confirmPassword") val confirmPassword: String
 )

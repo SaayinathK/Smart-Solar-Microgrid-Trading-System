@@ -61,7 +61,7 @@
         </form>
 
         <div class="auth-footer">
-          Don't have an account? <a href="register.html">Register as Prosumer</a>
+          Don't have an account? <a href="register.html">Create Account</a>
         </div>
       </div>
     </div>
@@ -105,6 +105,8 @@
           setTimeout(() => {
             if (response.data.user.role === 'Prosumer') {
               window.location.href = 'mobile-redirect.html';
+            } else if (response.data.user.role === 'TransactionVerifier') {
+              window.location.href = 'pages/M3/dashboard.html';
             } else {
               window.location.href = 'dashboard.html';
             }

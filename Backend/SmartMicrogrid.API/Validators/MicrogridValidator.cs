@@ -23,6 +23,9 @@ namespace SmartMicrogrid.API.Validators
             if (dto.BatteryCapacity < 0)
                 return (false, "Battery capacity cannot be negative.");
 
+            if (dto.BatteryStorageSlots < 0)
+                return (false, "Battery storage slots cannot be negative.");
+
             if (dto.CurrentBatteryLevel < 0 || (dto.BatteryCapacity > 0 && dto.CurrentBatteryLevel > dto.BatteryCapacity))
                 return (false, "Current battery level must be between 0 and total battery capacity.");
 
@@ -62,6 +65,8 @@ namespace SmartMicrogrid.API.Validators
             if (!new[] { "Active", "Inactive", "Maintenance", "Offline" }.Contains(dto.Status, StringComparer.OrdinalIgnoreCase) ||
                 dto.IsActive != string.Equals(dto.Status, "Active", StringComparison.OrdinalIgnoreCase))
                 return (false, "Microgrid status and active flag must agree; only Active status may be active.");
+            if (dto.BatteryStorageSlots < 0)
+                return (false, "Battery storage slots cannot be negative.");
 
             if (dto.Latitude < -90.0 || dto.Latitude > 90.0)
                 return (false, "Latitude must be between -90 and 90 degrees.");

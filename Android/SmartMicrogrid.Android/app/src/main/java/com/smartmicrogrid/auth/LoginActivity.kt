@@ -66,6 +66,10 @@ class LoginActivity : AppCompatActivity() {
         binding.tvRegisterLink.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
+
+        binding.tvRegisterVerifierLink.setOnClickListener {
+            startActivity(Intent(this, RegisterVerifierActivity::class.java))
+        }
     }
 
     private fun observeViewModel() {

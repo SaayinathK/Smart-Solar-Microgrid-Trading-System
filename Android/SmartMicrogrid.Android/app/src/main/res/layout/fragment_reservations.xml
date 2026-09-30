@@ -1,90 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="?android:attr/colorBackground">
 
-    <!-- ================= HEADER SECTION ================= -->
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="14dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="6dp"
-        android:background="?android:attr/colorBackground">
+        app:strokeWidth="0dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="16dp">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:src="@drawable/img_solar_farm"
+                android:scaleType="centerCrop"
+                android:importantForAccessibility="no"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_solar_photo_overlay"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:padding="18dp"
+                android:gravity="bottom"
+                android:minHeight="138dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="My Reservations"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    android:letterSpacing="-0.02" />
+                    android:text="RESERVATIONS"
+                    android:textSize="10sp"
+                    android:textColor="#FFD789"
+                    android:letterSpacing="0.12"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/solar_reservations_title"
+                    android:textSize="23sp"
+                    android:textColor="#FFFFFF"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginTop="6dp" />
 
                 <TextView
                     android:id="@+id/reservation_count"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:textSize="11sp" />
+                    android:layout_marginTop="6dp"
+                    android:textColor="#E0ECF8"
+                    android:textSize="13sp" />
             </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-            <!-- Optional icon badge -->
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:padding="7dp"
-                android:background="@drawable/bg_icon_badge"
-                android:src="@android:drawable/ic_menu_agenda"
-                app:tint="@color/accent"
-                android:contentDescription="Reservations header icon" />
-        </LinearLayout>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/reservation_browse_slots"
+        style="@style/Widget.Material3.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_gravity="end"
+        android:text="Find available energy"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.02"
+        app:icon="@android:drawable/ic_menu_search"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:cornerRadius="14dp"
+        app:iconSize="16dp"
+        android:paddingHorizontal="14dp"
+        android:minHeight="48dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="8dp" />
 
-        <!-- Browse Available Energy Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/reservation_browse_slots"
-            style="@style/Widget.Material3.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="42dp"
-            android:layout_marginTop="6dp"
-            android:layout_gravity="end"
-            android:text="Explore energy"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.02"
-            app:icon="@android:drawable/ic_menu_search"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            app:cornerRadius="20dp"
-            app:iconSize="16dp"
-            android:paddingHorizontal="14dp" />
-    </LinearLayout>
-
-    <!-- ================= SEARCH & FILTER CARD ================= -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="10dp"
+        android:layout_marginHorizontal="20dp"
         android:layout_marginTop="2dp"
-        app:cardCornerRadius="10dp"
-        app:strokeColor="@color/card_stroke_light"
+        app:cardCornerRadius="18dp"
+        app:strokeColor="@color/surface_outline"
         app:strokeWidth="1dp"
         app:cardElevation="1dp">
 
@@ -92,9 +113,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="7dp">
+            android:padding="12dp">
 
-            <!-- Search row -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
+                android:hint="Search node or slot"
+                app:startIconDrawable="@android:drawable/ic_menu_search"
+                app:boxCornerRadiusTopStart="12dp"
+                app:boxCornerRadiusTopEnd="12dp"
+                app:boxCornerRadiusBottomStart="12dp"
+                app:boxCornerRadiusBottomEnd="12dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/reservation_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch"
+                    android:singleLine="true"
+                    android:textSize="14sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -105,66 +146,45 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_marginTop="4dp"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-                    android:hint="Search node or slot"
-                    app:startIconDrawable="@android:drawable/ic_menu_search"
+                    android:hint="Filter by date"
+                    app:startIconDrawable="@drawable/ic_calendar"
                     app:boxCornerRadiusTopStart="12dp"
                     app:boxCornerRadiusTopEnd="12dp"
                     app:boxCornerRadiusBottomStart="12dp"
-                    app:boxCornerRadiusBottomEnd="12dp">
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    android:layout_weight="1">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/reservation_search"
+                        android:id="@+id/reservation_date_filter"
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:inputType="text"
-                        android:imeOptions="actionSearch"
-                        android:singleLine="true" />
+                        android:layout_height="48dp"
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:singleLine="true"
+                        android:textSize="14sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <Spinner
                     android:id="@+id/reservation_status"
-                    android:layout_width="130dp"
-                    android:layout_height="40dp"
+                    android:layout_width="120dp"
+                    android:layout_height="48dp"
                     android:layout_marginStart="6dp"
                     android:background="@drawable/bg_spinner_outlined"
-                    android:paddingHorizontal="10dp" />
+                    android:paddingHorizontal="10dp"
+                    android:textSize="14sp" />
             </LinearLayout>
-
-            <!-- Date filter row -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense"
-                android:hint="Optional date filter (YYYY-MM-DD)"
-                app:startIconDrawable="@drawable/ic_calendar"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/reservation_date_filter"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:focusable="false"
-                    android:clickable="true"
-                    android:cursorVisible="false"
-                    android:singleLine="true" />
-            </com.google.android.material.textfield.TextInputLayout>
-
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- ================= TABS ================= -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/reservation_tabs"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:layout_marginHorizontal="12dp"
+        android:layout_marginHorizontal="20dp"
         app:tabMode="scrollable"
         app:tabGravity="start"
         app:tabIndicatorColor="@color/accent"
@@ -175,7 +195,6 @@
         app:tabRippleColor="@color/accent"
         app:tabTextAppearance="@style/TextAppearance.Material3.TitleSmall" />
 
-    <!-- ================= LIST SECTION ================= -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/reservation_refresh"
         android:layout_width="match_parent"
@@ -192,12 +211,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
-                android:paddingHorizontal="12dp"
+                android:paddingHorizontal="20dp"
                 android:paddingTop="4dp"
                 android:paddingBottom="16dp"
                 android:scrollbars="vertical" />
 
-            <!-- Empty state -->
             <LinearLayout
                 android:id="@+id/reservation_empty"
                 android:layout_width="wrap_content"

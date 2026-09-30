@@ -37,6 +37,10 @@ class RegisterActivity : AppCompatActivity() {
                 showError("First name and last name are required.")
                 return@setOnClickListener
             }
+            if (nic.isEmpty()) {
+                showError("National Identity Card (NIC) is required for Prosumer registration.")
+                return@setOnClickListener
+            }
             if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 showError("A valid email address is required.")
                 return@setOnClickListener
@@ -62,6 +66,7 @@ class RegisterActivity : AppCompatActivity() {
                     email = email,
                     phoneNumber = phone,
                     nic = nic,
+                    role = "Prosumer",
                     password = password,
                     confirmPassword = confirmPassword
                 )

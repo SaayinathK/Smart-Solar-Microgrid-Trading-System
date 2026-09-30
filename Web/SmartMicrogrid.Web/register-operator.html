@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Operator Registration - Smart Microgrid</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/forms.css">
+</head>
+<body>
+  <div id="navbar-container"></div>
+
+  <div class="auth-wrapper">
+    <div class="auth-container">
+      <div class="auth-visual-side">
+        <div class="auth-visual-brand">
+          <div class="logo-icon">⚡</div>
+          <h1>Smart Microgrid</h1>
+        </div>
+        <div class="auth-visual-content">
+          <h2>Operator Registration</h2>
+          <p>Register as a Microgrid Operator to manage grid capacity and battery infrastructure.</p>
+          <div class="auth-feature-list">
+            <div class="auth-feature-item">
+              <span>🏭</span> <strong>Node Operations:</strong> Solar node monitoring
+            </div>
+            <div class="auth-feature-item">
+              <span>🔋</span> <strong>Storage Telemetry:</strong> Battery capacity tracking
+            </div>
+            <div class="auth-feature-item">
+              <span>📈</span> <strong>Capacity Publishing:</strong> Energy slot availability
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Operator Sign Up</h2>
+          <p>Microgrid management portal registration</p>
+        </div>
+
+        <div id="alert-box" class="alert alert-danger"></div>
+
+        <form id="operator-register-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="firstName">First Name</label>
+              <input type="text" id="firstName" class="form-control" placeholder="Alex" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lastName">Last Name</label>
+              <input type="text" id="lastName" class="form-control" placeholder="Operator" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Work Email</label>
+            <input type="email" id="email" class="form-control" placeholder="operator@microgrid.com" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="nic">National Identity Card (NIC) / ID</label>
+            <input type="text" id="nic" class="form-control" placeholder="e.g. 111111111V">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="phoneNumber">Phone Number</label>
+            <input type="tel" id="phoneNumber" class="form-control" placeholder="+94770000002">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="password">Password</label>
+              <input type="password" id="password" class="form-control" placeholder="Min 6 characters" required minlength="6">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="confirmPassword">Confirm Password</label>
+              <input type="password" id="confirmPassword" class="form-control" placeholder="Re-enter password" required minlength="6">
+            </div>
+          </div>
+
+          <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem; padding: 0.8rem;">
+            Register Operator
+          </button>
+        </form>
+
+        <div class="auth-footer" style="margin-top: 1rem;">
+          <a href="register.html">Switch Role</a> | <a href="login.html">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      &copy; 2026 Smart Microgrid Platform
+    </div>
+  </footer>
+
+  <script src="js/config/api-config.js"></script>
+  <script src="js/common/theme.js"></script>
+  <script src="js/common/session.js"></script>
+  <script src="js/api/api-client.js"></script>
+  <script src="js/api/auth-api.js"></script>
+  <script src="js/common/auth.js"></script>
+  <script src="js/common/navbar.js"></script>
+  <script>
+    AuthGuard.redirectIfAuthenticated();
+    renderNavbar();
+
+    const form = document.getElementById('operator-register-form');
+    const alertBox = document.getElementById('alert-box');
+    const btnSubmit = document.getElementById('btn-submit');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.classList.remove('active');
+
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const nic = document.getElementById('nic').value.trim().toUpperCase();
+      const email = document.getElementById('email').value.trim();
+      const phoneNumber = document.getElementById('phoneNumber').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        showError('Passwords do not match.');
+        return;
+      }
+
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = 'Submitting...';
+
+      try {
+        const response = await AuthApi.register({
+          firstName,
+          lastName,
+          nic,
+          email,
+          phoneNumber,
+          role: 'MicrogridOperator',
+          password,
+          confirmPassword
+        });
+
+        if (response.success) {
+          ApiClient.showToast('Operator registered successfully! Please sign in.', 'success');
+          setTimeout(() => { window.location.href = 'login.html'; }, 1200);
+        } else {
+          showError(response.message || 'Registration failed.');
+        }
+      } catch (err) {
+        showError(err.message || 'Connection error.');
+      } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = 'Register Operator';
+      }
+    });
+
+    function showError(msg) {
+      alertBox.textContent = msg;
+      alertBox.classList.add('active');
+    }
+  </script>
+</body>
+</html>

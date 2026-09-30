@@ -16,8 +16,7 @@ class MicrogridDetailsActivity : AppCompatActivity() {
         binding = ActivityMicrogridDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        supportActionBar?.title = "Microgrid Details"
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        binding.toolbar.setNavigationOnClickListener { finish() }
 
         val microgridId = intent.getStringExtra("MICROGRID_ID") ?: ""
 
@@ -26,11 +25,11 @@ class MicrogridDetailsActivity : AppCompatActivity() {
                 binding.tvName.text = it.name
                 binding.tvLocation.text = "Location: ${it.location}"
                 binding.tvDescription.text = it.description ?: "Solar generation node."
-                binding.tvCapacity.text = "Total Capacity: ${it.capacity} kWh"
-                binding.tvAvailableCapacity.text = "Available: ${it.availableCapacity} kWh"
+                binding.tvCapacity.text = "Total Capacity: ${it.capacity} kW"
+                binding.tvAvailableCapacity.text = "Available: ${it.availableCapacity} kW"
                 binding.tvReservedCapacity.text = "Reserved: ${it.reservedCapacity} kWh"
                 binding.tvUsedCapacity.text = "Used: ${it.usedCapacity} kWh"
-                binding.tvBattery.text = "Battery: ${it.currentBatteryLevel} / ${it.batteryCapacity} kWh (${it.batteryPercentage.toInt()}%)"
+                binding.tvBattery.text = "Battery: ${it.currentBatteryLevel} / ${it.batteryCapacity} kWh (${it.batteryPercentage.toInt()}%) · ${it.batteryStorageSlots} storage slots"
                 binding.tvStatus.text = "Status: ${it.status}"
                 binding.tvGps.text = "GPS: Lat ${it.latitude}, Lng ${it.longitude}"
             }
