@@ -53,7 +53,7 @@ Backend/
     │   └── ExceptionMiddleware.cs     # Uniform global exception handler
     ├── Models/ Common/
     │   ├── User.cs                    # MongoDB User document model
-    │   ├── Role.cs                    # Role Enum (Admin, MicrogridOperator, Prosumer, TransactionVerifier)
+    │   ├── Role.cs                    # Role Enum (Admin, MicrogridOperator, Prosumer)
     │   └── ApiResponse.cs             # Generic API JSON response wrapper
     ├── Repositories/
     │   ├── Interfaces/IUserRepository.cs
@@ -106,8 +106,8 @@ cd Backend\SmartMicrogrid.API
 dotnet run
 ```
 
-- **Base URL**: `http://localhost:5000/api`
-- **Swagger Documentation UI**: `http://localhost:5000/swagger`
+- **Base URL**: `http://localhost:5050/api`
+- **Swagger Documentation UI**: `http://localhost:5050/swagger`
 
 ---
 

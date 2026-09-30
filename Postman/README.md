@@ -37,7 +37,7 @@ The `Postman/` folder contains the official importable **Postman Collection (v2.
 
 1. Open **Postman**.
 2. Click **Import** → Select `SmartMicrogrid_UserManagement.postman_collection.json`.
-3. Set collection variable `baseUrl` (Default: `http://localhost:5000/api`).
+3. Set collection variable `baseUrl` (Default: `http://localhost:5050/api`).
 4. Run the **Login** request (`POST /api/auth/login`).
    *The test script automatically captures the returned JWT token into the `{{authToken}}` collection variable.*
 5. Run any protected endpoint request.

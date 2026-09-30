@@ -103,7 +103,7 @@
           SessionManager.setSession(response.data.token, response.data.user);
           ApiClient.showToast('Login successful! Redirecting...', 'success');
           setTimeout(() => {
-            if (response.data.user.role === 'Prosumer' || response.data.user.role === 'TransactionVerifier') {
+            if (response.data.user.role === 'Prosumer') {
               window.location.href = 'mobile-redirect.html';
             } else {
               window.location.href = 'dashboard.html';

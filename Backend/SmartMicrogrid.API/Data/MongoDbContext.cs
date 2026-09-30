@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using SmartMicrogrid.API.Models.Common;
 using SmartMicrogrid.API.Models.M1;
@@ -55,6 +56,7 @@ namespace SmartMicrogrid.API.Data
         }
 
         public IMongoCollection<User> Users => _database.GetCollection<User>(MongoCollections.Users);
+        public IMongoCollection<BsonDocument> GetRawUsersCollection() => _database.GetCollection<BsonDocument>(MongoCollections.Users);
         public IMongoCollection<MicrogridNode> Microgrids => _database.GetCollection<MicrogridNode>(MongoCollections.Microgrids);
         public IMongoCollection<EnergySlot> EnergySlots => _database.GetCollection<EnergySlot>(MongoCollections.EnergySlots);
         public IMongoCollection<Reservation> Reservations => _database.GetCollection<Reservation>(MongoCollections.Reservations);

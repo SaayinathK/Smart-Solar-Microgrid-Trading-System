@@ -4,9 +4,6 @@ namespace SmartMicrogrid.API.Models.Common
     {
         Admin,
         MicrogridOperator,
-        Prosumer,
-        TransactionVerifier,
-        Backoffice,
-        GridOperator
+        Prosumer
     }
 }
