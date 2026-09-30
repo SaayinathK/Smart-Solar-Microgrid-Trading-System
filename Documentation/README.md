@@ -9,6 +9,8 @@ The `Documentation/` folder contains comprehensive architectural and design spec
 
 - **[Architecture.md](Architecture.md)**: High-level 3-tier system architecture, role model, component mappings, and M3 transaction workflow.
 - **[M2-Reservation-Management.md](M2-Reservation-Management.md)**: M2 reservation lifecycle and its integration boundary with M3 transactions.
+- **[Components/Component-1-Microgrid-Management.md](Components/Component-1-Microgrid-Management.md)**: M1 microgrid, capacity, battery, and energy-slot management.
+- **[Components/M4-Platform-Administration.md](Components/M4-Platform-Administration.md)**: M4 administration dashboard, user/role administration, audit trail, system health, configuration, and reporting.
 
 ---
 

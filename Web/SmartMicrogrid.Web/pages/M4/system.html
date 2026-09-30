@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Health - Smart Microgrid</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+</head>
+<body>
+
+  <div id="app-layout-wrapper">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>System Health</h1>
+        <p>Live status of the API, MongoDB, authentication and server</p>
+      </div>
+      <div>
+        <button id="refresh-btn" class="btn btn-secondary">Refresh</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <div class="card-title-row">
+        <div>
+          <h3>Service Status</h3>
+          <p>The database row is the result of an actual <code>ping</code> command sent to MongoDB</p>
+        </div>
+      </div>
+      <div class="operations-grid" style="margin-top: 1.25rem;">
+        <div class="alert-item healthy">
+          <span class="alert-icon">A</span>
+          <div><strong>API</strong><p id="health-api">-</p></div>
+        </div>
+        <div class="alert-item healthy">
+          <span class="alert-icon">D</span>
+          <div><strong>MongoDB</strong><p id="health-db">-</p></div>
+        </div>
+        <div class="alert-item healthy">
+          <span class="alert-icon">L</span>
+          <div><strong>Authentication</strong><p id="health-auth">-</p></div>
+        </div>
+        <div class="alert-item healthy">
+          <span class="alert-icon">S</span>
+          <div><strong>Server</strong><p id="health-server">-</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title-row">
+        <div>
+          <h3>Runtime Details</h3>
+        </div>
+      </div>
+      <div class="table-container" style="margin-top: 1.25rem; padding: 0;">
+        <table class="data-table">
+          <tbody id="health-details">
+            <tr><td colspan="2" class="reservation-message">Loading runtime details...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/admin-api.js"></script>
+  <script src="../../js/common/admin-ui.js"></script>
+  <script>
+    renderAppLayout('m4-system', 'System Health');
+  </script>
+</body>
+</html>

@@ -49,6 +49,9 @@
         <activity android:name=".M1.availability.EnergyAvailabilityActivity" />
         <activity android:name=".M1.slots.EnergySlotActivity" />
 
+        <!-- M4 Platform Administration -->
+        <activity android:name=".M4.AdminMainActivity" />
+
     </application>
 
 </manifest>

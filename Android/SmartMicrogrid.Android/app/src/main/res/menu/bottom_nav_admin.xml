@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/m4_nav_dashboard" android:icon="@drawable/ic_nav_home" android:title="@string/m4_nav_dashboard" app:showAsAction="always" />
+    <item android:id="@+id/m4_nav_users" android:icon="@drawable/ic_nav_profile" android:title="@string/m4_nav_users" app:showAsAction="always" />
+    <item android:id="@+id/m4_nav_health" android:icon="@drawable/ic_nav_scan" android:title="@string/m4_nav_health" app:showAsAction="always" />
+    <item android:id="@+id/m4_nav_settings" android:icon="@android:drawable/ic_menu_manage" android:title="@string/m4_nav_settings" app:showAsAction="always" />
+
+</menu>

@@ -7,5 +7,9 @@ namespace SmartMicrogrid.API.Data
         public const string EnergySlots = "energySlots";
         public const string Reservations = "reservations";
         public const string Transactions = "transactions";
+
+        // M4 - Platform Administration & System Operations
+        public const string SystemActivity = "systemActivity";
+        public const string SystemConfiguration = "systemConfiguration";
     }
 }

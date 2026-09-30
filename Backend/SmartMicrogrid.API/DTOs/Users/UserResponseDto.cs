@@ -10,6 +10,9 @@ namespace SmartMicrogrid.API.DTOs.Users
         public string Nic { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public bool IsActive { get; set; }
+        public string AccountStatus { get; set; } = "Active";
+        public DateTime? StatusChangedAt { get; set; }
+        public string? StatusChangedBy { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

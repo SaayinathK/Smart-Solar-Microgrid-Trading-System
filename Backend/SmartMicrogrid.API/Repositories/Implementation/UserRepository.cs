@@ -15,7 +15,7 @@ namespace SmartMicrogrid.API.Repositories.Implementation
             _context = context;
         }
 
-        public async Task<IEnumerable<User>> GetAllAsync(string? searchTerm = null, Role? roleFilter = null, bool? activeOnly = null)
+        public async Task<IEnumerable<User>> GetAllAsync(string? searchTerm = null, Role? roleFilter = null, bool? activeOnly = null, AccountStatus? accountStatus = null)
         {
             var filterBuilder = Builders<User>.Filter;
             var filter = filterBuilder.Empty;
@@ -40,6 +40,29 @@ namespace SmartMicrogrid.API.Repositories.Implementation
             if (activeOnly.HasValue)
             {
                 filter &= filterBuilder.Eq(u => u.IsActive, activeOnly.Value);
+            }
+
+            if (accountStatus.HasValue)
+            {
+                // Documents written before AccountStatus existed have no stored
+                // enum, so they are classified the same way DashboardService does
+                // and matched on IsActive instead.
+                if (accountStatus.Value == AccountStatus.Active)
+                {
+                    filter &= filterBuilder.Eq(u => u.IsActive, true);
+                }
+                else if (accountStatus.Value == AccountStatus.Inactive)
+                {
+                    filter &= filterBuilder.And(
+                        filterBuilder.Eq(u => u.IsActive, false),
+                        filterBuilder.Ne(u => u.AccountStatus, AccountStatus.Suspended),
+                        filterBuilder.Ne(u => u.AccountStatus, AccountStatus.Pending)
+                    );
+                }
+                else
+                {
+                    filter &= filterBuilder.Eq(u => u.AccountStatus, accountStatus.Value);
+                }
             }
 
             return await _context.Users.Find(filter).SortByDescending(u => u.CreatedAt).ToListAsync();

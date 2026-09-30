@@ -5,6 +5,7 @@ using SmartMicrogrid.API.Models.Common;
 using SmartMicrogrid.API.Models.M1;
 using SmartMicrogrid.API.Models.Transactions;
 using SmartMicrogrid.API.Models.M2;
+using SmartMicrogrid.API.Models.M4;
 
 namespace SmartMicrogrid.API.Data
 {
@@ -87,6 +88,23 @@ namespace SmartMicrogrid.API.Data
                     Builders<Reservation>.IndexKeys
                         .Ascending(r => r.EnergySlotId)
                         .Ascending(r => r.Status)));
+
+                // M4 - audit trail and account status filters
+                SystemActivity.Indexes.CreateOne(new CreateIndexModel<SystemActivity>(
+                    Builders<SystemActivity>.IndexKeys.Descending(a => a.Timestamp)));
+
+                SystemActivity.Indexes.CreateOne(new CreateIndexModel<SystemActivity>(
+                    Builders<SystemActivity>.IndexKeys.Ascending(a => a.UserId)));
+
+                SystemActivity.Indexes.CreateOne(new CreateIndexModel<SystemActivity>(
+                    Builders<SystemActivity>.IndexKeys
+                        .Ascending(a => a.Module)
+                        .Ascending(a => a.Timestamp)));
+
+                Users.Indexes.CreateOne(new CreateIndexModel<User>(
+                    Builders<User>.IndexKeys
+                        .Ascending(u => u.AccountStatus)
+                        .Ascending(u => u.CreatedAt)));
             }
             catch (InvalidOperationException)
             {
@@ -164,5 +182,17 @@ namespace SmartMicrogrid.API.Data
 
         public IMongoCollection<Reservation> Reservations =>
             _database.GetCollection<Reservation>(MongoCollections.Reservations);
+
+        public IMongoCollection<SystemActivity> SystemActivity =>
+            _database.GetCollection<SystemActivity>(MongoCollections.SystemActivity);
+
+        public IMongoCollection<SystemConfiguration> SystemConfiguration =>
+            _database.GetCollection<SystemConfiguration>(MongoCollections.SystemConfiguration);
+
+        /// <summary>
+        /// Exposed for M4 system health, which must actually ping MongoDB rather
+        /// than assume connectivity.
+        /// </summary>
+        public IMongoDatabase Database => _database;
     }
 }

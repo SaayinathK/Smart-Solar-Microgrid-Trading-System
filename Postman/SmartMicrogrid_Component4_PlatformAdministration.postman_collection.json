@@ -1,0 +1,2102 @@
+{
+   "info": {
+      "_postman_id": "c4a1f0e2-7b3d-4a8c-9e5f-1d2b3c4a5e6f",
+      "name": "Smart Microgrid - Component 4 Platform Administration API",
+      "description": "Backoffice REST API for Component 4 (Platform Administration & System Operations).\n\nRun 'Login as Administrator' first: it captures the JWT into {{authToken}} for every other request.\n\nAll /api/admin/* routes are Admin-only. A non-admin receives 403 and an anonymous caller receives 401, so the RBAC folder is safe to run as a negative check.\n\nSuggested order: Authentication -> Administrative Dashboard -> System Configuration -> System Activity -> Reports -> User Account Lifecycle -> Access Control Checks.\n\nThe account lifecycle requests are chained: each one depends on {{targetUserId}}, captured by 'List Users'. 'Restore Account To Active' is intentionally last so the target is not left Pending.",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+   },
+   "variable": [
+      {
+         "key": "baseUrl",
+         "value": "http://localhost:5050/api",
+         "type": "string"
+      },
+      {
+         "key": "authToken",
+         "value": "",
+         "type": "string"
+      },
+      {
+         "key": "targetUserId",
+         "value": "",
+         "type": "string"
+      },
+      {
+         "key": "lastAdminId",
+         "value": "",
+         "type": "string"
+      },
+      {
+         "key": "activityId",
+         "value": "",
+         "type": "string"
+      }
+   ],
+   "item": [
+      {
+         "name": "Authentication",
+         "item": [
+            {
+               "name": "Login as Administrator (Stores JWT)",
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "var j = pm.response.json();",
+                           "pm.test('Login succeeded', function () { pm.expect(j.success).to.be.true; });",
+                           "if (j.success && j.data && j.data.token) {",
+                           "    pm.collectionVariables.set('authToken', j.data.token);",
+                           "}",
+                           "pm.test('Token captured', function () { pm.expect(pm.collectionVariables.get('authToken')).to.be.ok; });"
+                        ]
+                     }
+                  }
+               ],
+               "request": {
+                  "method": "POST",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"email\": \"admin@microgrid.com\",\n  \"password\": \"Admin123!\"\n}"
+                  },
+                  "url": {
+                     "raw": "{{baseUrl}}/auth/login",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "auth",
+                        "login"
+                     ]
+                  }
+               },
+               "response": []
+            }
+         ]
+      },
+      {
+         "name": "Administrative Dashboard",
+         "item": [
+            {
+               "name": "Get Administrative Dashboard",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/dashboard",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "dashboard"
+                     ]
+                  },
+                  "description": "Unified platform snapshot combining user counts, role distribution and M1/M2/M3 telemetry. Each upstream source degrades independently, so a partial response is still a 200."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Dashboard carries user totals', function () { pm.expect(j.data.users).to.be.an('object'); });",
+                           "pm.test('Role distribution present', function () { pm.expect(j.data.roleDistribution).to.be.an('array'); });"
+                        ]
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "System Configuration",
+         "item": [
+            {
+               "name": "Get System Configuration",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/system/configuration",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "system",
+                        "configuration"
+                     ]
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Maintenance flag present', function () { pm.expect(j.data).to.have.property('maintenanceMode'); });",
+                           "pm.test('Registration flag present', function () { pm.expect(j.data).to.have.property('allowRegistration'); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Update Platform Configuration (Preserves Maintenance Banner)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PUT",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/system/configuration",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "system",
+                        "configuration"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"platformName\": \"Smart Microgrid Energy Management & Trading Platform\",\n  \"platformDescription\": \"Pilot deployment covering 10 microgrids.\",\n  \"sessionTimeoutMinutes\": 480,\n  \"maxLoginAttempts\": 5,\n  \"defaultPageSize\": 20\n}"
+                  },
+                  "description": "maintenanceMessage is intentionally omitted. The service treats an omitted message as 'leave unchanged' and an explicit empty string as 'clear the banner'. Set {{maintenanceMessage}} to null and run the Clear Maintenance Banner request afterwards to observe the difference."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Session timeout applied', function () { pm.expect(j.data.sessionTimeoutMinutes).to.eql(480); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Enable Maintenance Mode With Banner",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/system/configuration/maintenance",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "system",
+                        "configuration",
+                        "maintenance"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"maintenanceMode\": true,\n  \"maintenanceMessage\": \"Scheduled grid upgrade\"\n}"
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Maintenance is on', function () { pm.expect(j.data.maintenanceMode).to.be.true; });",
+                           "pm.test('Banner stored', function () { pm.expect(j.data.maintenanceMessage).to.eql('Scheduled grid upgrade'); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Disable Maintenance Mode",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/system/configuration/maintenance",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "system",
+                        "configuration",
+                        "maintenance"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"maintenanceMode\": false\n}"
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Maintenance is off', function () { pm.expect(j.data.maintenanceMode).to.be.false; });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Clear Maintenance Banner Explicitly",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PUT",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/system/configuration",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "system",
+                        "configuration"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"platformName\": \"Smart Microgrid Energy Management & Trading Platform\",\n  \"platformDescription\": \"Pilot deployment covering 10 microgrids.\",\n  \"maintenanceMessage\": \"\",\n  \"sessionTimeoutMinutes\": 480,\n  \"maxLoginAttempts\": 5,\n  \"defaultPageSize\": 20\n}"
+                  },
+                  "description": "Contrast with the 'Preserves Maintenance Banner' request: an explicit empty string clears the banner instead of leaving it alone."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Banner cleared', function () { pm.expect(j.data.maintenanceMessage == null || j.data.maintenanceMessage === '').to.be.true; });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Disable Open Registration",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/system/configuration/registration",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "system",
+                        "configuration",
+                        "registration"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"allowRegistration\": false\n}"
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Registration disabled', function () { pm.expect(j.data.allowRegistration).to.be.false; });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Enable Open Registration",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/system/configuration/registration",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "system",
+                        "configuration",
+                        "registration"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"allowRegistration\": true\n}"
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Registration enabled', function () { pm.expect(j.data.allowRegistration).to.be.true; });"
+                        ]
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "System Activity (Audit Trail)",
+         "item": [
+            {
+               "name": "Get System Activity (Paged, Unfiltered)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/activity?page=1&pageSize=20",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "activity"
+                     ],
+                     "query": [
+                        {
+                           "key": "page",
+                           "value": "1"
+                        },
+                        {
+                           "key": "pageSize",
+                           "value": "20"
+                        }
+                     ]
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Items returned', function () { pm.expect(j.data.items).to.be.an('array'); });",
+                           "pm.test('Paging metadata present', function () { pm.expect(j.data.totalItems).to.be.a('number'); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Filter Activity By Module",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/activity?module=User%20Management&page=1&pageSize=20",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "activity"
+                     ],
+                     "query": [
+                        {
+                           "key": "module",
+                           "value": "User Management"
+                        },
+                        {
+                           "key": "page",
+                           "value": "1"
+                        },
+                        {
+                           "key": "pageSize",
+                           "value": "20"
+                        }
+                     ]
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Only User Management events', function () {",
+                           "  j.data.items.forEach(function (i) { pm.expect(i.module).to.eql('User Management'); });",
+                           "});"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Filter Activity By Action",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/activity?action=USER_SUSPENDED",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "activity"
+                     ],
+                     "query": [
+                        {
+                           "key": "action",
+                           "value": "USER_SUSPENDED"
+                        }
+                     ]
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Only suspension events', function () {",
+                           "  j.data.items.forEach(function (i) { pm.expect(i.action).to.eql('USER_SUSPENDED'); });",
+                           "});"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Filter Activity By Date Range",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/activity?from=2000-01-01T00:00:00Z&to=2000-01-02T00:00:00Z",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "activity"
+                     ],
+                     "query": [
+                        {
+                           "key": "from",
+                           "value": "2000-01-01T00:00:00Z"
+                        },
+                        {
+                           "key": "to",
+                           "value": "2000-01-02T00:00:00Z"
+                        }
+                     ]
+                  },
+                  "description": "A window in the distant past must return no records; widen the range to 2020-01-01..2030-01-01 to see every event."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Out-of-range window is empty', function () { pm.expect(j.data.totalItems).to.eql(0); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Get Single Activity Record",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/activity/{{activityId}}",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "activity",
+                        "{{activityId}}"
+                     ]
+                  },
+                  "description": "Set {{activityId}} from the id field of any record returned above."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });"
+                        ]
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Reports",
+         "item": [
+            {
+               "name": "User Report",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/reports/users?from=&to=&role=&status=",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "reports",
+                        "users"
+                     ],
+                     "query": [
+                        {
+                           "key": "from",
+                           "value": ""
+                        },
+                        {
+                           "key": "to",
+                           "value": ""
+                        },
+                        {
+                           "key": "role",
+                           "value": ""
+                        },
+                        {
+                           "key": "status",
+                           "value": ""
+                        }
+                     ]
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Totals present', function () { pm.expect(j.data.totalUsers).to.be.a('number'); });",
+                           "pm.test('Breakdowns present', function () { pm.expect(j.data.byRole).to.be.an('array'); pm.expect(j.data.byStatus).to.be.an('array'); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "User Report Filtered By Role And Status",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/reports/users?role=Prosumer&status=Active",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "reports",
+                        "users"
+                     ],
+                     "query": [
+                        {
+                           "key": "role",
+                           "value": "Prosumer"
+                        },
+                        {
+                           "key": "status",
+                           "value": "Active"
+                        }
+                     ]
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Only Prosumer rows', function () {",
+                           "  j.data.byRole.forEach(function (r) { pm.expect(r.role).to.eql('Prosumer'); });",
+                           "});"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Role Distribution Report",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/reports/roles",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "reports",
+                        "roles"
+                     ]
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Role rows returned', function () { pm.expect(j.data).to.be.an('array'); });",
+                           "pm.test('Every role carries counts', function () {",
+                           "  j.data.forEach(function (r) {",
+                           "    pm.expect(r).to.have.property('role');",
+                           "    pm.expect(r.userCount).to.be.a('number');",
+                           "    pm.expect(r.activeUserCount).to.be.a('number');",
+                           "  });",
+                           "});"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Activity Report",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/reports/activity?from=&to=",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "reports",
+                        "activity"
+                     ],
+                     "query": [
+                        {
+                           "key": "from",
+                           "value": ""
+                        },
+                        {
+                           "key": "to",
+                           "value": ""
+                        }
+                     ]
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Grouped by action', function () { pm.expect(j.data.byAction).to.be.an('object'); });",
+                           "pm.test('Recent events listed', function () { pm.expect(j.data.recent).to.be.an('array'); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Platform Statistics Report",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/reports/platform?from=&to=",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "reports",
+                        "platform"
+                     ],
+                     "query": [
+                        {
+                           "key": "from",
+                           "value": ""
+                        },
+                        {
+                           "key": "to",
+                           "value": ""
+                        }
+                     ]
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Platform block present', function () { pm.expect(j.data.platform).to.be.an('object'); });"
+                        ]
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "User Account Lifecycle",
+         "item": [
+            {
+               "name": "List Prosumer Accounts (Captures a Safe Target Id)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users?role=Prosumer&activeOnly=true",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users"
+                     ],
+                     "query": [
+                        {
+                           "key": "role",
+                           "value": "Prosumer"
+                        },
+                        {
+                           "key": "activeOnly",
+                           "value": "true"
+                        }
+                     ]
+                  },
+                  "description": "Deliberately scoped to active Prosumers. An unfiltered list starts with the seeded administrator, and the account lifecycle requests below would then stand down or demote the backoffice account and lock every later request out. Do not retarget {{targetUserId}} at an administrator without first reading the 'Last Active Admin' notes below."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "if (j.data.length) { pm.collectionVariables.set('targetUserId', j.data[0].id); }",
+                           "pm.test('Target id captured', function () { pm.expect(pm.collectionVariables.get('targetUserId')).to.be.ok; });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Filter Users By Account Status (Suspended)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users?accountStatus=Suspended",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users"
+                     ],
+                     "query": [
+                        {
+                           "key": "accountStatus",
+                           "value": "Suspended"
+                        }
+                     ]
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('All rows suspended', function () {",
+                           "  j.data.forEach(function (u) { pm.expect(u.accountStatus).to.eql('Suspended'); });",
+                           "});"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Filter Users By Account Status (Inactive)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users?accountStatus=Inactive",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users"
+                     ],
+                     "query": [
+                        {
+                           "key": "accountStatus",
+                           "value": "Inactive"
+                        }
+                     ]
+                  },
+                  "description": "The Inactive filter excludes Suspended and Pending accounts."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('All rows inactive and not suspended', function () {",
+                           "  j.data.forEach(function (u) { pm.expect(u.accountStatus).to.eql('Inactive'); });",
+                           "});"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Suspend Account",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users/{{targetUserId}}/account-status",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users",
+                        "{{targetUserId}}",
+                        "account-status"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"accountStatus\": \"Suspended\"\n}"
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Status is Suspended', function () { pm.expect(j.data.accountStatus).to.eql('Suspended'); });",
+                           "pm.test('IsActive mirrored to false', function () { pm.expect(j.data.isActive).to.be.false; });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Deactivate Account",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users/{{targetUserId}}/account-status",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users",
+                        "{{targetUserId}}",
+                        "account-status"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"accountStatus\": \"Inactive\"\n}"
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Status is Inactive', function () { pm.expect(j.data.accountStatus).to.eql('Inactive'); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Reactivate Account",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users/{{targetUserId}}/account-status",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users",
+                        "{{targetUserId}}",
+                        "account-status"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"accountStatus\": \"Active\"\n}"
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Status is Active', function () { pm.expect(j.data.accountStatus).to.eql('Active'); });",
+                           "pm.test('IsActive mirrored to true', function () { pm.expect(j.data.isActive).to.be.true; });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Mark Account Pending Verification",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users/{{targetUserId}}/account-status",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users",
+                        "{{targetUserId}}",
+                        "account-status"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"accountStatus\": \"Pending\"\n}"
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Status is Pending', function () { pm.expect(j.data.accountStatus).to.eql('Pending'); });",
+                           "pm.test('IsActive mirrored to false', function () { pm.expect(j.data.isActive).to.be.false; });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Restore Account To Active (Run After Pending)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users/{{targetUserId}}/account-status",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users",
+                        "{{targetUserId}}",
+                        "account-status"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"accountStatus\": \"Active\"\n}"
+                  },
+                  "description": "Run this last so the target is not left Pending."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Back to Active', function () { pm.expect(j.data.accountStatus).to.eql('Active'); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Legacy Boolean Status Toggle",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users/{{targetUserId}}/status",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users",
+                        "{{targetUserId}}",
+                        "status"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"isActive\": false\n}"
+                  },
+                  "description": "Retained boolean endpoint. It shares the transition core with /account-status, so both stay behaviourally consistent."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('isActive false', function () { pm.expect(j.data.isActive).to.be.false; });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Legacy Toggle Back On",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users/{{targetUserId}}/status",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users",
+                        "{{targetUserId}}",
+                        "status"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"isActive\": true\n}"
+                  }
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('isActive true', function () { pm.expect(j.data.isActive).to.be.true; });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "List Active Administrators (Review Before Guard Test)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users?role=Admin&activeOnly=true",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users"
+                     ],
+                     "query": [
+                        {
+                           "key": "role",
+                           "value": "Admin"
+                        },
+                        {
+                           "key": "activeOnly",
+                           "value": "true"
+                        }
+                     ]
+                  },
+                  "description": "Prints every active administrator with its id. The guard only fires when only ONE active administrator remains, so read this output before running the next request."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Administrators listed', function () { pm.expect(j.data).to.be.an('array'); });",
+                           "j.data.forEach(function (u) { console.log('  admin:', u.email, u.id); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Last Active Admin Cannot Be Suspended (Expected Failure)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users/{{lastAdminId}}/account-status",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users",
+                        "{{lastAdminId}}",
+                        "account-status"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"accountStatus\": \"Suspended\"\n}"
+                  },
+                  "description": "The platform refuses to stand down its final backoffice officer.\n\nPREREQUISITE: this request only fails as described when exactly one active administrator remains. While a second administrator is still active the same request succeeds, which is the intended redundancy behaviour.\n\nTo exercise it: (1) run 'List Active Administrators', (2) stand every administrator down except one via Suspend Account, (3) put the survivor's id in {{lastAdminId}}, (4) run this request. {{lastAdminId}} ships empty on purpose so a full collection run cannot silently disable a real administrator account."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Request was rejected', function () { pm.expect(pm.response.code).to.be.oneOf([400, 403]); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Guard message returned', function () { pm.expect((j.message || j.error || '').toLowerCase()).to.contain('last active'); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Demote An Administrator Is Refused When Last (Expected Failure)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users/{{lastAdminId}}/role",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users",
+                        "{{lastAdminId}}",
+                        "role"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"role\": \"Prosumer\"\n}"
+                  },
+                  "description": "Only Admin can reassign roles, so demoting the final Admin would leave nobody able to promote anyone back. The platform refuses, exactly as it does for standing the last Admin down. {{lastAdminId}} ships empty so a full run cannot trigger this against a real account; see the 'Last Active Admin Cannot Be Suspended' notes for the prerequisite."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Request was rejected', function () { pm.expect(pm.response.code).to.be.oneOf([400, 403]); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Guard message returned', function () { pm.expect((j.message || j.error || '').toLowerCase()).to.contain('last active backoffice officer'); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Promote Target To Microgrid Operator",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users/{{targetUserId}}/role",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users",
+                        "{{targetUserId}}",
+                        "role"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"role\": \"MicrogridOperator\"\n}"
+                  },
+                  "description": "Promotes the captured Prosumer so the following request has something to reverse. Promoting cannot orphan the backoffice."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Role applied', function () { pm.expect(j.data.role).to.eql('MicrogridOperator'); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Restore Target To Prosumer (Run After Promotion)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/users/{{targetUserId}}/role",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "users",
+                        "{{targetUserId}}",
+                        "role"
+                     ]
+                  },
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"role\": \"Prosumer\"\n}"
+                  },
+                  "description": "Run this last so the target is left as it was found."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Role restored', function () { pm.expect(j.data.role).to.eql('Prosumer'); });"
+                        ]
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "System Health",
+         "item": [
+            {
+               "name": "Get System Health",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/system/health",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "system",
+                        "health"
+                     ]
+                  },
+                  "description": "Database, authentication, API and server status with latency, memory and uptime."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                           "var j = pm.response.json();",
+                           "pm.test('Envelope success is true', function () { pm.expect(j.success).to.be.true; });",
+                           "pm.test('Database status reported', function () { pm.expect(j.data.database).to.be.a('string'); });"
+                        ]
+                     }
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "name": "Access Control Checks (Negative)",
+         "item": [
+            {
+               "name": "Anonymous Dashboard Request (Expect 401)",
+               "request": {
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/dashboard",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "dashboard"
+                     ]
+                  },
+                  "description": "Run without {{authToken}} to confirm the route requires authentication."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 401 (unauthenticated)', function () { pm.response.to.have.status(401); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Non-Admin Dashboard Request (Expect 403)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "GET",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/dashboard",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "dashboard"
+                     ]
+                  },
+                  "description": "Log in as a Prosumer or MicrogridOperator, put that token in {{authToken}}, and run. Admin-only routes must reject non-admin roles even with a valid token."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 403 (non-admin is denied)', function () { pm.response.to.have.status(403); });"
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
+               "name": "Non-Admin Configuration Update (Expect 403)",
+               "request": {
+                  "auth": {
+                     "type": "bearer",
+                     "bearer": [
+                        {
+                           "key": "token",
+                           "value": "{{authToken}}",
+                           "type": "string"
+                        }
+                     ]
+                  },
+                  "method": "PATCH",
+                  "header": [
+                     {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                     }
+                  ],
+                  "body": {
+                     "mode": "raw",
+                     "raw": "{\n  \"maintenanceMode\": true\n}"
+                  },
+                  "url": {
+                     "raw": "{{baseUrl}}/admin/system/configuration/maintenance",
+                     "host": [
+                        "{{baseUrl}}"
+                     ],
+                     "path": [
+                        "admin",
+                        "system",
+                        "configuration",
+                        "maintenance"
+                     ]
+                  },
+                  "description": "Confirms the configuration write path is protected as well as the read path."
+               },
+               "response": [],
+               "event": [
+                  {
+                     "listen": "test",
+                     "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                           "pm.test('Status is 403 (non-admin is denied)', function () { pm.response.to.have.status(403); });"
+                        ]
+                     }
+                  }
+               ]
+            }
+         ]
+      }
+   ]
+}

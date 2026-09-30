@@ -35,12 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const search = searchInput.value.trim();
     const role = roleFilter.value;
-    const activeVal = statusFilter.value;
+    const status = statusFilter.value;
 
     const params = {};
     if (search) params.search = search;
     if (role) params.role = role;
-    if (activeVal !== '') params.activeOnly = activeVal;
+    if (status) params.accountStatus = status;
 
     try {
       const response = await UserApi.getAllUsers(params);
@@ -83,15 +83,22 @@ document.addEventListener('DOMContentLoaded', () => {
       if (user.role === 'Admin') roleClass = 'role-admin';
       else if (user.role === 'MicrogridOperator') roleClass = 'role-operator';
 
-      const statusBadge = user.isActive
+      const accountStatus = user.accountStatus
+        || (user.isActive ? 'Active' : 'Inactive');
+
+      const statusBadge = accountStatus === 'Active'
         ? '<span class="status-badge status-active"><span class="status-dot"></span> Active</span>'
-        : '<span class="status-badge status-inactive">Inactive</span>';
+        : `<span class="status-badge status-${accountStatus.toLowerCase()}">${accountStatus}</span>`;
 
       const createdDate = new Date(user.createdAt).toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
       });
+
+      const primaryAction = accountStatus === 'Active'
+        ? `<button onclick="changeUserStatus('${user.id}', 'Inactive')" class="btn btn-danger btn-sm">Deactivate</button>`
+        : `<button onclick="changeUserStatus('${user.id}', 'Active')" class="btn btn-primary btn-sm">Activate</button>`;
 
       return `
         <tr>
@@ -108,9 +115,15 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="table-actions">
               <a href="user-details.html?id=${user.id}" class="btn btn-secondary btn-sm">View</a>
               <a href="edit-user.html?id=${user.id}" class="btn btn-secondary btn-sm">Edit</a>
-              <button onclick="toggleUserStatus('${user.id}', ${!user.isActive})" class="btn ${user.isActive ? 'btn-danger' : 'btn-primary'} btn-sm">
-                ${user.isActive ? 'Deactivate' : 'Activate'}
-              </button>
+              ${primaryAction}
+              <select class="form-select btn-sm" style="width: auto; min-width: 118px;"
+                      onchange="changeUserStatus('${user.id}', this.value); this.value = '';">
+                <option value="">More...</option>
+                <option value="Suspended">Suspend</option>
+                <option value="Pending">Set Pending</option>
+                ${accountStatus === 'Active' ? '<option value="Inactive">Deactivate</option>' : ''}
+                ${accountStatus !== 'Active' ? '<option value="Active">Activate</option>' : ''}
+              </select>
             </div>
           </td>
         </tr>
@@ -118,12 +131,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }).join('');
   }
 
-  window.toggleUserStatus = async (userId, newStatus) => {
-    const actionText = newStatus ? 'activate' : 'deactivate';
+  window.changeUserStatus = async (userId, newStatus) => {
+    if (!newStatus) return;
+
+    const actionText = {
+      Active: 'activate',
+      Inactive: 'deactivate',
+      Suspended: 'suspend',
+      Pending: 'move to pending review'
+    }[newStatus] || `set to ${newStatus}`;
+
     if (!confirm(`Are you sure you want to ${actionText} this user account?`)) return;
 
     try {
-      const response = await UserApi.updateStatus(userId, newStatus);
+      const response = await UserApi.updateAccountStatus(userId, newStatus);
       if (response.success) {
         ApiClient.showToast(response.message || `User status updated!`, 'success');
         loadUsers();

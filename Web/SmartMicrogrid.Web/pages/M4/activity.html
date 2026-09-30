@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Activity - Smart Microgrid</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <link rel="stylesheet" href="../../css/forms.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+</head>
+<body>
+
+  <div id="app-layout-wrapper">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>System Activity</h1>
+        <p>Audit trail of authentication and administrative actions</p>
+      </div>
+    </div>
+
+    <div class="table-toolbar">
+      <div class="search-box">
+        <select id="module-filter" class="form-select" style="max-width: 200px;">
+          <option value="">All Modules</option>
+          <option value="Authentication">Authentication</option>
+          <option value="User Management">User Management</option>
+          <option value="System Configuration">System Configuration</option>
+          <option value="Administrative Reports">Administrative Reports</option>
+        </select>
+      </div>
+
+      <select id="action-filter" class="form-select" style="max-width: 230px;">
+        <option value="">All Actions</option>
+        <option value="LOGIN_SUCCESS">LOGIN_SUCCESS</option>
+        <option value="LOGIN_FAILED">LOGIN_FAILED</option>
+        <option value="USER_CREATED">USER_CREATED</option>
+        <option value="USER_UPDATED">USER_UPDATED</option>
+        <option value="USER_ACTIVATED">USER_ACTIVATED</option>
+        <option value="USER_DEACTIVATED">USER_DEACTIVATED</option>
+        <option value="USER_SUSPENDED">USER_SUSPENDED</option>
+        <option value="ROLE_CHANGED">ROLE_CHANGED</option>
+        <option value="USER_DELETED">USER_DELETED</option>
+        <option value="SYSTEM_CONFIGURATION_UPDATED">SYSTEM_CONFIGURATION_UPDATED</option>
+        <option value="ADMIN_REPORT_GENERATED">ADMIN_REPORT_GENERATED</option>
+      </select>
+
+      <select id="status-filter" class="form-select" style="max-width: 160px;">
+        <option value="">All Statuses</option>
+        <option value="Success">Success</option>
+        <option value="Failure">Failure</option>
+      </select>
+
+      <input type="date" id="from-filter" class="form-input" style="max-width: 165px;" title="From date">
+      <input type="date" id="to-filter" class="form-input" style="max-width: 165px;" title="To date">
+
+      <button id="clear-btn" class="btn btn-secondary btn-sm">Clear</button>
+    </div>
+
+    <div class="table-container glass-card" style="padding: 0;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Role</th>
+            <th>Action</th>
+            <th>Module</th>
+            <th>Description</th>
+            <th>IP</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="activity-body">
+          <tr><td colspan="8" class="reservation-message">Loading activity...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="reservation-foot" style="margin-top: 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+      <span id="page-label">Page 1</span>
+      <div style="display:flex; gap:9px;">
+        <button id="prev-btn" class="btn btn-secondary btn-sm">Previous</button>
+        <button id="next-btn" class="btn btn-secondary btn-sm">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/admin-api.js"></script>
+  <script src="../../js/common/admin-ui.js"></script>
+  <script>
+    renderAppLayout('m4-activity', 'System Activity');
+  </script>
+</body>
+</html>

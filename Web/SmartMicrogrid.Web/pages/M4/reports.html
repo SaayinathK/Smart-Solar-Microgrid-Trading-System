@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrative Reports - Smart Microgrid</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <link rel="stylesheet" href="../../css/forms.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+</head>
+<body>
+
+  <div id="app-layout-wrapper">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Administrative Reports</h1>
+        <p>User, role, activity and platform statistics</p>
+      </div>
+    </div>
+
+    <div class="table-toolbar">
+      <select id="report-type" class="form-select" style="max-width: 260px;">
+        <option value="users">User Summary Report</option>
+        <option value="roles">Role Distribution Report</option>
+        <option value="activity">System Activity Report</option>
+        <option value="platform">Platform Statistics Report</option>
+      </select>
+
+      <input type="date" id="from-date" class="form-input" style="max-width: 165px;" title="From date">
+      <input type="date" id="to-date" class="form-input" style="max-width: 165px;" title="To date">
+
+      <select id="role-filter" class="form-select" style="max-width: 190px;">
+        <option value="">All Roles</option>
+        <option value="Admin">Admin</option>
+        <option value="MicrogridOperator">Microgrid Operator</option>
+        <option value="Prosumer">Prosumer</option>
+      </select>
+
+      <select id="status-filter" class="form-select" style="max-width: 175px;">
+        <option value="">All Statuses</option>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+        <option value="Suspended">Suspended</option>
+        <option value="Pending">Pending</option>
+      </select>
+
+      <button id="generate-btn" class="btn btn-primary">Generate</button>
+      <button id="csv-btn" class="btn btn-secondary">Export CSV</button>
+    </div>
+
+    <div id="report-output">
+      <div class="card">
+        <p class="text-muted" style="margin:0;">Select a report and press Generate.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/admin-api.js"></script>
+  <script src="../../js/common/admin-ui.js"></script>
+  <script>
+    renderAppLayout('m4-reports', 'Administrative Reports');
+  </script>
+</body>
+</html>

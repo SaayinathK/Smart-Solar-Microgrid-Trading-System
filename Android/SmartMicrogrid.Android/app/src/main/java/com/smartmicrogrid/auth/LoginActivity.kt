@@ -22,12 +22,7 @@ class LoginActivity : AppCompatActivity() {
 
         // If already logged in, skip to correct main
         if (SessionManager.isLoggedIn()) {
-            val role = SessionManager.getUserRole()
-            when (role) {
-                "Prosumer" -> startActivity(Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java))
-                "MicrogridOperator" -> startActivity(Intent(this, com.smartmicrogrid.M3.MicrogridOperatorMainActivity::class.java))
-                else -> startActivity(Intent(this, MainActivity::class.java))
-            }
+            startActivity(Intent(this, mainActivityForRole(SessionManager.getUserRole())))
             finish()
             return
         }
@@ -82,26 +77,24 @@ class LoginActivity : AppCompatActivity() {
         viewModel.loginResult.observe(this) { result ->
             result?.let {
                 if (it.isSuccess) {
-                    val role = SessionManager.getUserRole()
-                    when (role) {
-                        "Prosumer" -> {
-                            startActivity(Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java))
-                            finish()
-                        }
-                        "MicrogridOperator" -> {
-                            startActivity(Intent(this, com.smartmicrogrid.M3.MicrogridOperatorMainActivity::class.java))
-                            finish()
-                        }
-                        else -> {
-                            startActivity(Intent(this, MainActivity::class.java))
-                            finish()
-                        }
-                    }
+                    startActivity(Intent(this, mainActivityForRole(SessionManager.getUserRole())))
+                    finish()
                 } else {
                     showError(it.exceptionOrNull()?.message ?: "Login failed.")
                 }
             }
         }
+    }
+
+    /**
+     * Admins land on the M4 administration portal, which is the only module they
+     * have access to. Every other role keeps its existing entry point.
+     */
+    private fun mainActivityForRole(role: String): Class<*> = when (role) {
+        "Admin" -> com.smartmicrogrid.M4.AdminMainActivity::class.java
+        "Prosumer" -> com.smartmicrogrid.M2.ProsumerMainActivity::class.java
+        "MicrogridOperator" -> com.smartmicrogrid.M3.MicrogridOperatorMainActivity::class.java
+        else -> MainActivity::class.java
     }
 
     private fun showError(message: String) {

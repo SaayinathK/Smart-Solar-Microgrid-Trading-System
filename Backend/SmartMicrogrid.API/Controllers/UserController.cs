@@ -72,9 +72,9 @@ namespace SmartMicrogrid.API.Controllers
         /// </summary>
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllUsers([FromQuery] string? search, [FromQuery] Role? role, [FromQuery] bool? activeOnly)
+        public async Task<IActionResult> GetAllUsers([FromQuery] string? search, [FromQuery] Role? role, [FromQuery] bool? activeOnly, [FromQuery] AccountStatus? accountStatus)
         {
-            var result = await _userService.GetAllUsersAsync(search, role, activeOnly);
+            var result = await _userService.GetAllUsersAsync(search, role, activeOnly, accountStatus);
             return Ok(result);
         }
 
@@ -154,6 +154,23 @@ namespace SmartMicrogrid.API.Controllers
         public async Task<IActionResult> UpdateStatus(string id, [FromBody] UpdateStatusDto dto)
         {
             var result = await _userService.UpdateStatusAsync(id, dto.IsActive);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Move a user account through the full lifecycle: Active, Inactive,
+        /// Suspended or Pending (Admin only)
+        /// </summary>
+        [HttpPatch("{id}/account-status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateAccountStatus(string id, [FromBody] UpdateAccountStatusDto dto)
+        {
+            var result = await _userService.UpdateAccountStatusAsync(id, dto.AccountStatus);
             if (!result.Success)
             {
                 return BadRequest(result);

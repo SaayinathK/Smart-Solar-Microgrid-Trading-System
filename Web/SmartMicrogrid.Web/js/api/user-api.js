@@ -31,6 +31,10 @@ const UserApi = {
     return ApiClient.patch(`/users/${id}/status`, { isActive });
   },
 
+  updateAccountStatus(id, accountStatus) {
+    return ApiClient.patch(`/users/${id}/account-status`, { accountStatus });
+  },
+
   updateRole(id, role) {
     return ApiClient.patch(`/users/${id}/role`, { role });
   },

@@ -7,9 +7,13 @@ using SmartMicrogrid.API.Data;
 using SmartMicrogrid.API.Helpers;
 using SmartMicrogrid.API.Middleware;
 using SmartMicrogrid.API.Repositories.Implementation;
+using SmartMicrogrid.API.Repositories.Implementation.M4;
 using SmartMicrogrid.API.Repositories.Interfaces;
+using SmartMicrogrid.API.Repositories.Interfaces.M4;
 using SmartMicrogrid.API.Services.Implementation;
+using SmartMicrogrid.API.Services.Implementation.M4;
 using SmartMicrogrid.API.Services.Interfaces;
+using SmartMicrogrid.API.Services.Interfaces.M4;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,6 +71,21 @@ builder.Services.AddScoped<IReservationService, ReservationService>();
 builder.Services.AddHostedService<EnergySlotCleanupService>();
 builder.Services.AddHostedService<ReservationExpiryService>();
 builder.Services.AddSingleton<JwtHelper>();
+
+// M4 - Platform Administration & System Operations
+// IHttpContextAccessor backs the audit trail's automatic actor and IP resolution.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ISystemActivityRepository, SystemActivityRepository>();
+builder.Services.AddScoped<ISystemConfigurationRepository, SystemConfigurationRepository>();
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IMicrogridMonitorService, MicrogridMonitorService>();
+builder.Services.AddScoped<IReservationMonitorService, ReservationMonitorService>();
+builder.Services.AddScoped<ITransactionMonitorService, TransactionMonitorService>();
+builder.Services.AddScoped<ISystemHealthService, SystemHealthService>();
+builder.Services.AddScoped<ISystemConfigurationService, SystemConfigurationService>();
+builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 
 // Configure JWT Authentication
 var secretKey = builder.Configuration["Jwt:SecretKey"] ?? "SmartMicrogrid_Super_Secure_JWT_Secret_Key_2026_EAD_University_Project!";

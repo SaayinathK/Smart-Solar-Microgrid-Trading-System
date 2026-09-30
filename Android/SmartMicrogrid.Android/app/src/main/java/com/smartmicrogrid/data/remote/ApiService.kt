@@ -177,4 +177,80 @@ interface ApiService {
     suspend fun updateCurrentUser(
         @Body request: UpdateProfileRequest
     ): Response<ApiResponse<User>>
+
+    // ── M4 Platform Administration Endpoints (Admin only) ──
+
+    @GET("admin/dashboard")
+    suspend fun getAdminDashboard(): Response<ApiResponse<AdminDashboard>>
+
+    @GET("admin/system/health")
+    suspend fun getSystemHealth(): Response<ApiResponse<SystemHealth>>
+
+    @GET("admin/system/configuration")
+    suspend fun getSystemConfiguration(): Response<ApiResponse<SystemConfiguration>>
+
+    @PUT("admin/system/configuration")
+    suspend fun updateSystemConfiguration(
+        @Body request: UpdateConfigurationRequest
+    ): Response<ApiResponse<SystemConfiguration>>
+
+    @PATCH("admin/system/configuration/maintenance")
+    suspend fun setMaintenanceMode(
+        @Body request: MaintenanceModeRequest
+    ): Response<ApiResponse<SystemConfiguration>>
+
+    @PATCH("admin/system/configuration/registration")
+    suspend fun setRegistrationMode(
+        @Body request: RegistrationModeRequest
+    ): Response<ApiResponse<SystemConfiguration>>
+
+    @GET("admin/activity")
+    suspend fun getSystemActivity(
+        @Query("page") page: Int = 1,
+        @Query("pageSize") pageSize: Int = 20,
+        @Query("userId") userId: String? = null,
+        @Query("module") module: String? = null,
+        @Query("action") action: String? = null,
+        @Query("status") status: String? = null,
+        @Query("from") from: String? = null,
+        @Query("to") to: String? = null
+    ): Response<ApiResponse<PagedResult<SystemActivity>>>
+
+    @GET("admin/reports/users")
+    suspend fun getUserReport(
+        @Query("from") from: String? = null,
+        @Query("to") to: String? = null,
+        @Query("role") role: String? = null,
+        @Query("status") status: String? = null
+    ): Response<ApiResponse<UserReport>>
+
+    @GET("admin/reports/roles")
+    suspend fun getRoleReport(): Response<ApiResponse<List<RoleDistribution>>>
+
+    @GET("admin/reports/activity")
+    suspend fun getActivityReport(
+        @Query("from") from: String? = null,
+        @Query("to") to: String? = null
+    ): Response<ApiResponse<ActivityReport>>
+
+    @GET("admin/reports/platform")
+    suspend fun getPlatformReport(
+        @Query("from") from: String? = null,
+        @Query("to") to: String? = null
+    ): Response<ApiResponse<PlatformReport>>
+
+    // ── M4 User Lifecycle Endpoints (Admin only) ──
+
+    @GET("users")
+    suspend fun getAllUsers(
+        @Query("search") search: String? = null,
+        @Query("role") role: String? = null,
+        @Query("accountStatus") accountStatus: String? = null
+    ): Response<ApiResponse<List<User>>>
+
+    @PATCH("users/{id}/account-status")
+    suspend fun updateUserAccountStatus(
+        @Path("id") id: String,
+        @Body body: Map<String, String>
+    ): Response<ApiResponse<User>>
 }

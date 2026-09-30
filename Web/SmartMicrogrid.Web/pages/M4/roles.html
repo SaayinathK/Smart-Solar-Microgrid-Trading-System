@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Role Management - Smart Microgrid</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+</head>
+<body>
+
+  <div id="app-layout-wrapper">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Role Management</h1>
+        <p>Platform roles, their permissions and current user distribution</p>
+      </div>
+      <div>
+        <button id="refresh-btn" class="btn btn-secondary">Refresh</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <p class="text-muted" style="margin:0;">
+        Roles are defined by the platform <code>Role</code> enum on the server and are enforced there through
+        <code>[Authorize(Roles = "...")]</code>. This page is read-only by design: assignments are changed per user
+        from <a href="../users/users.html">User Management</a>. The assignment
+        <code>Admin</code> corresponds to the System Administrator role in the component specification.
+      </p>
+    </div>
+
+    <div class="table-container glass-card" style="padding: 0;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Description</th>
+            <th>Users</th>
+            <th>Active Users</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="roles-body">
+          <tr><td colspan="5" class="reservation-message">Loading roles...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/admin-api.js"></script>
+  <script src="../../js/common/admin-ui.js"></script>
+  <script>
+    renderAppLayout('m4-roles', 'Role Management');
+  </script>
+</body>
+</html>

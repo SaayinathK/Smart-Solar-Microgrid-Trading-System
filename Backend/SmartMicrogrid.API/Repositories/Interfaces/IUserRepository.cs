@@ -4,7 +4,7 @@ namespace SmartMicrogrid.API.Repositories.Interfaces
 {
     public interface IUserRepository
     {
-        Task<IEnumerable<User>> GetAllAsync(string? searchTerm = null, Role? roleFilter = null, bool? activeOnly = null);
+        Task<IEnumerable<User>> GetAllAsync(string? searchTerm = null, Role? roleFilter = null, bool? activeOnly = null, AccountStatus? accountStatus = null);
         Task<User?> GetByIdAsync(string id);
         Task<User?> GetByEmailAsync(string email);
         Task<User> CreateAsync(User user);

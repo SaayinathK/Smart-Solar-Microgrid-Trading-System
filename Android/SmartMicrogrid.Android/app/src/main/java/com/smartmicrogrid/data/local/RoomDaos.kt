@@ -45,3 +45,48 @@ interface ReservationDao {
     @Query("DELETE FROM reservations") suspend fun clear()
     @Transaction suspend fun replaceAll(rows: List<ReservationEntity>) { clear(); insertAll(rows) }
 }
+
+@Dao
+interface AdminDashboardDao {
+    @Query("SELECT * FROM admin_dashboard_cache WHERE cacheKey = :key LIMIT 1")
+    suspend fun get(key: String = AdminDashboardCache.SINGLETON_KEY): AdminDashboardCache?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(cache: AdminDashboardCache)
+
+    @Query("DELETE FROM admin_dashboard_cache")
+    suspend fun clear()
+}
+
+@Dao
+interface AdminConfigurationDao {
+    @Query("SELECT * FROM admin_configuration_cache WHERE cacheKey = :key LIMIT 1")
+    suspend fun get(key: String = AdminConfigurationCache.SINGLETON_KEY): AdminConfigurationCache?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(cache: AdminConfigurationCache)
+
+    @Query("DELETE FROM admin_configuration_cache")
+    suspend fun clear()
+}
+
+@Dao
+interface AdminActivityDao {
+    @Query(
+        "SELECT * FROM admin_activity_cache WHERE queryKey = :queryKey " +
+            "ORDER BY timestamp DESC LIMIT :limit"
+    )
+    suspend fun getForQuery(queryKey: String, limit: Int = 50): List<AdminActivityCache>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(rows: List<AdminActivityCache>)
+
+    @Query("DELETE FROM admin_activity_cache WHERE queryKey = :queryKey")
+    suspend fun clearQuery(queryKey: String)
+
+    @Transaction
+    suspend fun replaceQuery(queryKey: String, rows: List<AdminActivityCache>) {
+        clearQuery(queryKey)
+        insertAll(rows)
+    }
+}

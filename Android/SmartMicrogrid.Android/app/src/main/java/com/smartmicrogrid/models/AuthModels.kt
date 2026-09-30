@@ -38,6 +38,11 @@ data class User(
     @SerializedName("nic") val nic: String = "",
     @SerializedName("role") val role: String = "",
     @SerializedName("isActive") val isActive: Boolean = true,
+    // M4 account lifecycle. isActive stays the authentication gate and always
+    // mirrors AccountStatus; accountStatus is the administrative view of it.
+    @SerializedName("accountStatus") val accountStatus: String = "Active",
+    @SerializedName("statusChangedAt") val statusChangedAt: String? = null,
+    @SerializedName("statusChangedBy") val statusChangedBy: String? = null,
     @SerializedName("createdAt") val createdAt: String = "",
     @SerializedName("updatedAt") val updatedAt: String = ""
 )

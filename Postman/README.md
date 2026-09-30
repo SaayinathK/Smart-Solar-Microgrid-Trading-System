@@ -8,6 +8,7 @@ The `Postman/` folder contains importable **Postman Collections (v2.1)** for the
 ## 1. Importable Collection File
 
 - **[SmartMicrogrid_UserManagement.postman_collection.json](SmartMicrogrid_UserManagement.postman_collection.json)**
+- **[SmartMicrogrid_Component4_PlatformAdministration.postman_collection.json](SmartMicrogrid_Component4_PlatformAdministration.postman_collection.json)** — M4 backoffice endpoints: dashboard, system health, configuration, activity trail, reports, and the account lifecycle. Run *Login as Administrator* first; it captures the JWT into `{{authToken}}` for every other request. Includes an Access Control Checks folder for the negative cases (401 anonymous, 403 non-admin) and is safe to run repeatedly — it leaves no account suspended, deleted, or demoted.
 
 ---
 
@@ -23,13 +24,14 @@ The `Postman/` folder contains importable **Postman Collections (v2.1)** for the
 - `PUT /api/users/me` (Update logged-in profile)
 
 ### C. Admin User Management
-- `GET /api/users` (Get all users with search & role filter)
+- `GET /api/users` (Get all users with search, role & account-status filter)
 - `POST /api/users` (Create user with role assignment)
 - `GET /api/users/{id}` (Get user by ID)
 - `PUT /api/users/{id}` (Update user details)
-- `PATCH /api/users/{id}/status` (Activate / deactivate account)
-- `PATCH /api/users/{id}/role` (Change role assignment)
-- `DELETE /api/users/{id}` (Delete user)
+- `PATCH /api/users/{id}/status` (Legacy boolean activate / deactivate)
+- `PATCH /api/users/{id}/account-status` (Full lifecycle: Active, Inactive, Suspended, Pending — see the M4 collection)
+- `PATCH /api/users/{id}/role` (Change role assignment; refused for the last active administrator)
+- `DELETE /api/users/{id}` (Delete user; refused for the last active administrator)
 
 ---
 

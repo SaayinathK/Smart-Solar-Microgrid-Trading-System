@@ -2,8 +2,10 @@ using SmartMicrogrid.API.DTOs.Auth;
 using SmartMicrogrid.API.DTOs.Users;
 using SmartMicrogrid.API.Helpers;
 using SmartMicrogrid.API.Models.Common;
+using SmartMicrogrid.API.Models.M4;
 using SmartMicrogrid.API.Repositories.Interfaces;
 using SmartMicrogrid.API.Services.Interfaces;
+using SmartMicrogrid.API.Services.Interfaces.M4;
 
 namespace SmartMicrogrid.API.Services.Implementation
 {
@@ -11,11 +13,13 @@ namespace SmartMicrogrid.API.Services.Implementation
     {
         private readonly IUserRepository _userRepository;
         private readonly JwtHelper _jwtHelper;
+        private readonly IAuditService _auditService;
 
-        public AuthService(IUserRepository userRepository, JwtHelper jwtHelper)
+        public AuthService(IUserRepository userRepository, JwtHelper jwtHelper, IAuditService auditService)
         {
             _userRepository = userRepository;
             _jwtHelper = jwtHelper;
+            _auditService = auditService;
         }
 
         public async Task<ApiResponse<UserResponseDto>> RegisterAsync(RegisterDto dto)
@@ -72,16 +76,52 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             if (user == null || !PasswordHelper.VerifyPassword(dto.Password, user.PasswordHash))
             {
+                // M4 audit: record the attempt. The email is included so repeated
+                // failures against one account are visible, but never the password.
+                await _auditService.RecordAsync(
+                    AuditAction.LoginFailed,
+                    AuditModule.Authentication,
+                    user == null
+                        ? $"Failed login attempt for unregistered email {normalizedEmail}."
+                        : $"Failed login attempt for {normalizedEmail} (incorrect password).",
+                    userId: user?.Id,
+                    userName: user == null ? normalizedEmail : $"{user.FirstName} {user.LastName}",
+                    role: user?.Role.ToString(),
+                    entityType: nameof(User),
+                    entityId: user?.Id,
+                    status: AuditStatus.Failure);
+
                 return ApiResponse<LoginResponseDto>.FailureResponse("Invalid email address or password.");
             }
 
             if (!user.IsActive)
             {
+                await _auditService.RecordAsync(
+                    AuditAction.LoginFailed,
+                    AuditModule.Authentication,
+                    $"Login blocked for {normalizedEmail}: account is {M4.DashboardService.ResolveStatus(user)}.",
+                    userId: user.Id,
+                    userName: $"{user.FirstName} {user.LastName}",
+                    role: user.Role.ToString(),
+                    entityType: nameof(User),
+                    entityId: user.Id,
+                    status: AuditStatus.Failure);
+
                 return ApiResponse<LoginResponseDto>.FailureResponse("Your account has been deactivated. Deactivated accounts can only be reactivated by a Backoffice officer.");
             }
 
             var (token, expiresAt) = _jwtHelper.GenerateJwtToken(user);
             var userResponse = MapToUserResponseDto(user);
+
+            await _auditService.RecordAsync(
+                AuditAction.LoginSuccess,
+                AuditModule.Authentication,
+                $"{user.FirstName} {user.LastName} signed in successfully.",
+                userId: user.Id,
+                userName: $"{user.FirstName} {user.LastName}",
+                role: user.Role.ToString(),
+                entityType: nameof(User),
+                entityId: user.Id);
 
             var loginResponse = new LoginResponseDto
             {
@@ -131,6 +171,9 @@ namespace SmartMicrogrid.API.Services.Implementation
                 Nic = user.Nic,
                 Role = user.Role.ToString(),
                 IsActive = user.IsActive,
+                AccountStatus = M4.DashboardService.ResolveStatus(user).ToString(),
+                StatusChangedAt = user.StatusChangedAt,
+                StatusChangedBy = user.StatusChangedBy,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt
             };

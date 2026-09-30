@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Configuration - Smart Microgrid</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <link rel="stylesheet" href="../../css/forms.css">
+</head>
+<body>
+
+  <div id="app-layout-wrapper">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>System Configuration</h1>
+        <p>Platform-wide settings stored in the <code>systemConfiguration</code> collection</p>
+      </div>
+    </div>
+
+    <form id="config-form">
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-title-row">
+          <div>
+            <h3>Platform Identity</h3>
+            <p>Displayed across the administration pages and in the dashboard header</p>
+          </div>
+        </div>
+
+        <div style="display:grid; gap:1rem; margin-top:1.25rem;">
+          <div>
+            <label for="platform-name">Platform Name</label>
+            <input type="text" id="platform-name" class="form-input" required minlength="3" maxlength="120">
+            <small class="text-muted" id="err-name"></small>
+          </div>
+          <div>
+            <label for="platform-description">Platform Description</label>
+            <textarea id="platform-description" class="form-input" rows="3" maxlength="500"></textarea>
+            <small class="text-muted" id="err-description"></small>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-title-row">
+          <div>
+            <h3>Operating Modes</h3>
+            <p>Toggles are applied immediately and each change writes an audit record</p>
+          </div>
+        </div>
+
+        <div style="display:grid; gap:1rem; margin-top:1.25rem;">
+          <div>
+            <label for="maintenance-mode">Maintenance Mode</label>
+            <select id="maintenance-mode" class="form-select">
+              <option value="false">Disabled</option>
+              <option value="true">Enabled</option>
+            </select>
+          </div>
+          <div>
+            <label for="maintenance-message">Maintenance Message</label>
+            <textarea id="maintenance-message" class="form-input" rows="2" maxlength="300"
+              placeholder="Shown to administrators while maintenance mode is active."></textarea>
+          </div>
+          <div>
+            <label for="allow-registration">Public Registration</label>
+            <select id="allow-registration" class="form-select">
+              <option value="true">Allowed</option>
+              <option value="false">Disabled</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-title-row">
+          <div>
+            <h3>Limits</h3>
+            <p>Validated on the server as well as in this form</p>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap:1rem; margin-top:1.25rem;">
+          <div>
+            <label for="session-timeout">Session Timeout (minutes)</label>
+            <input type="number" id="session-timeout" class="form-input" min="5" max="1440" required>
+            <small class="text-muted" id="err-timeout"></small>
+          </div>
+          <div>
+            <label for="max-login-attempts">Maximum Login Attempts</label>
+            <input type="number" id="max-login-attempts" class="form-input" min="1" max="20" required>
+            <small class="text-muted" id="err-attempts"></small>
+          </div>
+          <div>
+            <label for="default-page-size">Default Page Size</label>
+            <input type="number" id="default-page-size" class="form-input" min="5" max="200" required>
+            <small class="text-muted" id="err-page-size"></small>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-bottom:2rem;">
+        <button type="submit" id="save-btn" class="btn btn-primary">Save Configuration</button>
+        <button type="button" id="reload-btn" class="btn btn-secondary">Reload</button>
+      </div>
+    </form>
+
+    <div class="card">
+      <div class="card-title-row">
+        <div>
+          <h3>Change History</h3>
+        </div>
+        <a href="activity.html" class="btn btn-secondary btn-sm">View Audit Log</a>
+      </div>
+      <div style="margin-top:1rem;">
+        <p class="text-muted" style="margin:0;">
+          Last updated: <span id="last-updated">-</span>
+          <span id="last-updated-by"></span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/admin-api.js"></script>
+  <script src="../../js/common/admin-ui.js"></script>
+  <script>
+    renderAppLayout('m4-configuration', 'System Configuration');
+  </script>
+</body>
+</html>

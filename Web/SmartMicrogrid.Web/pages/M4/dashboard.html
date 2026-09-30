@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Smart Microgrid</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/dashboard.css">
+  <link rel="stylesheet" href="../../css/tables.css">
+</head>
+<body>
+
+  <div id="app-layout-wrapper">
+    <div class="page-header">
+      <div class="page-title">
+        <h1>Administration Dashboard</h1>
+        <p id="platform-subtitle">Platform statistics, system health and administrative activity</p>
+      </div>
+      <div>
+        <button id="refresh-btn" class="btn btn-secondary">Refresh</button>
+      </div>
+    </div>
+
+    <div id="maintenance-banner" class="alert-item warning" style="display:none; margin-bottom:1.5rem;">
+      <span class="alert-icon">!</span>
+      <div>
+        <strong>Maintenance mode is active</strong>
+        <p id="maintenance-message">The platform is currently in maintenance mode.</p>
+      </div>
+    </div>
+
+    <!-- User Statistics -->
+    <h2 style="margin-bottom:1rem;">User Statistics</h2>
+    <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom:2.5rem;">
+      <div class="stat-card">
+        <div class="stat-content">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="stat-total-users">-</div>
+        </div>
+      </div>
+      <div class="stat-card cyan-card">
+        <div class="stat-content">
+          <div class="stat-label">Active</div>
+          <div class="stat-value" id="stat-active-users">-</div>
+        </div>
+      </div>
+      <div class="stat-card amber-card">
+        <div class="stat-content">
+          <div class="stat-label">Inactive</div>
+          <div class="stat-value" id="stat-inactive-users">-</div>
+        </div>
+      </div>
+      <div class="stat-card" style="border-top-color: var(--accent-rose);">
+        <div class="stat-content">
+          <div class="stat-label">Suspended</div>
+          <div class="stat-value" id="stat-suspended-users">-</div>
+        </div>
+      </div>
+      <div class="stat-card indigo-card">
+        <div class="stat-content">
+          <div class="stat-label">Pending</div>
+          <div class="stat-value" id="stat-pending-users">-</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role Distribution -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-title-row">
+        <div>
+          <h3>Role Distribution</h3>
+          <p>User accounts per platform role, derived from the shared users collection</p>
+        </div>
+      </div>
+      <div id="role-distribution" style="margin-top:1.25rem;">
+        <p class="text-muted">Loading role distribution...</p>
+      </div>
+    </div>
+
+    <!-- Platform Overview -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-title-row">
+        <div>
+          <h3>Platform Overview</h3>
+          <p>Read-only monitoring of Component 1, 2 and 3 data</p>
+        </div>
+      </div>
+      <div class="operations-grid" style="margin-top:1.25rem;">
+        <div class="alert-item healthy" id="mg-card">
+          <span class="alert-icon">M1</span>
+          <div>
+            <strong>Microgrids: <span id="mg-count">-</span></strong>
+            <p id="mg-note">Loading...</p>
+          </div>
+        </div>
+        <div class="alert-item healthy" id="cap-card">
+          <span class="alert-icon">M1</span>
+          <div>
+            <strong>Available capacity: <span id="cap-value">-</span></strong>
+            <p id="cap-note">Loading...</p>
+          </div>
+        </div>
+        <div class="alert-item healthy" id="res-card">
+          <span class="alert-icon">M2</span>
+          <div>
+            <strong>Reservations: <span id="res-count">-</span></strong>
+            <p id="res-note">Loading...</p>
+          </div>
+        </div>
+        <div class="alert-item healthy" id="txn-card">
+          <span class="alert-icon">M3</span>
+          <div>
+            <strong>Transactions: <span id="txn-count">-</span></strong>
+            <p id="txn-note">Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-title-row">
+        <div>
+          <h3>System Health</h3>
+          <p>Live checks against the running API and MongoDB instance</p>
+        </div>
+        <a href="system.html" class="btn btn-secondary btn-sm">Open System Health</a>
+      </div>
+      <div class="operations-grid" style="margin-top:1.25rem;">
+        <div class="alert-item healthy">
+          <span class="alert-icon">A</span>
+          <div><strong>API</strong><p id="health-api">-</p></div>
+        </div>
+        <div class="alert-item healthy">
+          <span class="alert-icon">D</span>
+          <div><strong>Database</strong><p id="health-db">-</p></div>
+        </div>
+        <div class="alert-item healthy">
+          <span class="alert-icon">S</span>
+          <div><strong>Server</strong><p id="health-server">-</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-title-row">
+        <div>
+          <h3>Recent Administrative Activity</h3>
+          <p id="activity-subtitle">Latest audit records</p>
+        </div>
+        <a href="activity.html" class="btn btn-secondary btn-sm">View All Activity</a>
+      </div>
+      <div class="table-container" style="margin-top:1.25rem; padding:0;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>User</th>
+              <th>Role</th>
+              <th>Action</th>
+              <th>Module</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="recent-activity-body">
+            <tr><td colspan="6" class="reservation-message">Loading activity...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/config/api-config.js"></script>
+  <script src="../../js/common/session.js"></script>
+  <script src="../../js/common/theme.js"></script>
+  <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/api/api-client.js"></script>
+  <script src="../../js/api/admin-api.js"></script>
+  <script src="../../js/common/admin-ui.js"></script>
+  <script>
+    renderAppLayout('m4-dashboard', 'Administration Dashboard');
+  </script>
+</body>
+</html>
