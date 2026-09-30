@@ -16,10 +16,10 @@ class ReservationAdapter(
     private val onApprove: ((Reservation) -> Unit)? = null,
     private val onReject: ((Reservation) -> Unit)? = null,
     private val onComplete: ((Reservation) -> Unit)? = null,
-    private val onPass: ((Reservation) -> Unit)? = null
+    private val onPass: ((Reservation) -> Unit)? = null,
+    private val onDetails: (Reservation) -> Unit = {}
 ) : RecyclerView.Adapter<ReservationAdapter.Holder>() {
 
-class ReservationAdapter(private val onCancel: (Reservation) -> Unit, private val onModify: (Reservation) -> Unit, private val onDetails: (Reservation) -> Unit = {}) : RecyclerView.Adapter<ReservationAdapter.Holder>() {
     private var items: List<Reservation> = emptyList()
 
     class Holder(view: View) : RecyclerView.ViewHolder(view) {
@@ -55,6 +55,7 @@ class ReservationAdapter(private val onCancel: (Reservation) -> Unit, private va
 
         holder.id.text = vCode
         holder.status.text = item.status
+        holder.itemView.setOnClickListener { onDetails(item) }
 
         // Status color styling
         val statusColor = when (item.status.lowercase()) {
@@ -104,7 +105,7 @@ class ReservationAdapter(private val onCancel: (Reservation) -> Unit, private va
         }
 
         // Prosumer cancel/modify
-        val canModifyOrCancel = isProsumer && (item.status == "Pending" || item.status == "Approved")
+        val canModifyOrCancel = isProsumer && (item.status == "Pending" || item.status == "Approved") && ReservationTime.hasTwelveHourNotice(item.startTime)
         holder.modify.visibility = if (canModifyOrCancel) View.VISIBLE else View.GONE
         holder.modify.setOnClickListener { onModify(item) }
 

@@ -47,7 +47,7 @@ class HomeFragment : Fragment() {
                 val rows = if (reservationsResponse.isSuccessful && reservationsResponse.body()?.success == true) reservationsResponse.body()?.data.orEmpty() else emptyList()
                 val next = rows.filter { it.status == "Approved" && runCatching { java.time.Instant.parse(it.startTime).isAfter(java.time.Instant.now()) }.getOrDefault(false) }
                     .minByOrNull { it.startTime }
-                view.findViewById<TextView>(R.id.home_next_reservation).text = next?.let { "${it.microgridName.ifBlank { "Microgrid" }} · ${it.energyAmount} kWh" } ?: "No upcoming approved reservation"
+                view.findViewById<TextView>(R.id.home_next_reservation).text = next?.let { "${it.microgridName.orEmpty().ifBlank { "Microgrid" }} · ${it.energyAmount} kWh" } ?: "No upcoming approved reservation"
                 view.findViewById<TextView>(R.id.home_next_reservation_time).text = next?.let { "${com.smartmicrogrid.M2.ReservationTime.display(it.startTime)} – ${com.smartmicrogrid.M2.ReservationTime.display(it.endTime)}" }.orEmpty()
             } catch (_: Exception) {
                 view.findViewById<TextView>(R.id.home_next_reservation).text = "Reservation summary unavailable"

@@ -17,6 +17,7 @@ import com.smartmicrogrid.databinding.FragmentReservationsBinding
 import com.smartmicrogrid.models.Reservation
 import com.smartmicrogrid.utils.SessionManager
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class MyReservationsFragment : Fragment() {
     private var _binding: FragmentReservationsBinding? = null
@@ -37,7 +38,8 @@ class MyReservationsFragment : Fragment() {
             onApprove = { row -> approve(row) },
             onReject = { row -> reject(row) },
             onComplete = { row -> complete(row) },
-            onPass = { row -> showPass(row) }
+            onPass = { row -> showPass(row) },
+            onDetails = { row -> showDetails(row) }
         )
         binding.reservationList.layoutManager = LinearLayoutManager(requireContext()); binding.reservationList.adapter = adapter
         binding.reservationBrowseSlots.setOnClickListener { startActivity(android.content.Intent(requireContext(), AvailableSlotsActivity::class.java)) }
@@ -86,7 +88,7 @@ class MyReservationsFragment : Fragment() {
                 if (response.isSuccessful && response.body()?.success == true) {
                     reservations = response.body()?.data.orEmpty()
                     if (cacheNic.isNotBlank()) db.reservationDao().replaceAll(cacheNic, reservations.map { com.smartmicrogrid.data.local.ReservationEntity.fromDomain(it) })
-                    binding.reservationSync.text = "Synced just now"; render()
+                    render()
                     val summary = RetrofitClient.apiService.getReservationSummary().body()?.data
                     summary?.let { binding.reservationCount.text = "${it.pendingCount} pending · ${it.approvedFutureCount} approved upcoming · ${"%.1f".format(it.totalEnergyReserved)} kWh reserved" }
                 }
@@ -235,7 +237,7 @@ ${ReservationTime.display(row.startTime)} to ${ReservationTime.display(row.endTi
             }.show()
     }
     private fun showDetails(row: Reservation) {
-        val text = "Reservation ${row.id}\n${row.microgridName.ifBlank { "Microgrid ${row.microgridNodeId}" }}\n${row.location}\n${ReservationTime.display(row.startTime)} – ${ReservationTime.display(row.endTime)}\n${row.energyAmount} kWh\nStatus: ${row.status}"
+        val text = "Reservation ${row.id}\n${row.microgridName.orEmpty().ifBlank { "Microgrid ${row.microgridNodeId}" }}\n${row.location}\n${ReservationTime.display(row.startTime)} – ${ReservationTime.display(row.endTime)}\n${row.energyAmount} kWh\nStatus: ${row.status}"
         AlertDialog.Builder(requireContext()).setTitle("Reservation details").setMessage(text).setPositiveButton("Done", null).show()
     }
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

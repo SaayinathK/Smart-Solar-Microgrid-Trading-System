@@ -14,9 +14,9 @@ data class Reservation(
     @SerializedName("status") val status: String = "Pending",
     @SerializedName("createdAt") val createdAt: String = "",
     @SerializedName("updatedAt") val updatedAt: String = "",
-    
+
     @SerializedName("location") val location: String = "",
-   
+
     @SerializedName("prosumerName") val prosumerName: String? = null,
     @SerializedName("microgridName") val microgridName: String? = null,
     @SerializedName("pricePerUnit") val pricePerUnit: Double = 0.0,
