@@ -124,14 +124,32 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Reservations"
+                            android:text="Pending reservations"
                             android:textSize="12sp"
                             android:textColor="?attr/android:textColorSecondary" />
 
                         <TextView
+                            android:id="@+id/home_pending_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="3 Active"
+                            android:text="—"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="?attr/colorOnSurface" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Upcoming approved"
+                            android:textSize="12sp"
+                            android:textColor="?attr/android:textColorSecondary"
+                            android:layout_marginTop="10dp" />
+
+                        <TextView
+                            android:id="@+id/home_upcoming_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="—"
                             android:textSize="20sp"
                             android:textStyle="bold"
                             android:textColor="?attr/colorOnSurface" />
@@ -144,14 +162,14 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Recent Activity"
+                android:text="Next reservation"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurface"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="12dp" />
 
-            <!-- Activity Card -->
+            <!-- Live next reservation -->
             <com.google.android.material.card.MaterialCardView
                 style="?attr/materialCardViewStyle"
                 android:layout_width="match_parent"
@@ -163,98 +181,29 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- Item 1 -->
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/home_next_reservation"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="12dp">
+                        android:text="Loading your next reservation…"
+                        android:textStyle="bold"
+                        android:textColor="?attr/colorOnSurface" />
 
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="@drawable/bg_glass_input"
-                            android:src="@android:drawable/ic_menu_agenda"
-                            android:padding="8dp"
-                            app:tint="#10b981"
-                            android:layout_marginEnd="16dp" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Reserved 50 kWh"
-                                android:textStyle="bold"
-                                android:textColor="?attr/colorOnSurface" />
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Microgrid Alpha"
-                                android:textSize="12sp"
-                                android:textColor="?attr/android:textColorSecondary" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Today"
-                            android:textSize="12sp"
-                            android:textColor="?attr/android:textColorSecondary" />
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#1AFFFFFF"
-                        android:layout_marginBottom="12dp" />
-
-                    <!-- Item 2 -->
-                    <LinearLayout
+                    <TextView
+                        android:id="@+id/home_next_reservation_time"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:text=""
+                        android:textSize="12sp"
+                        android:textColor="?attr/android:textColorSecondary"
+                        android:layout_marginTop="6dp" />
 
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="@drawable/bg_glass_input"
-                            android:src="@android:drawable/ic_menu_camera"
-                            android:padding="8dp"
-                            app:tint="#ef4444"
-                            android:layout_marginEnd="16dp" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Transaction Verified"
-                                android:textStyle="bold"
-                                android:textColor="?attr/colorOnSurface" />
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Microgrid Beta"
-                                android:textSize="12sp"
-                                android:textColor="?attr/android:textColorSecondary" />
-                        </LinearLayout>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Yesterday"
-                            android:textSize="12sp"
-                            android:textColor="?attr/android:textColorSecondary" />
-                    </LinearLayout>
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/home_book_energy"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Book energy"
+                        android:layout_marginTop="14dp" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

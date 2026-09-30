@@ -7,6 +7,8 @@ namespace SmartMicrogrid.API.Repositories.Interfaces
         Task<IEnumerable<User>> GetAllAsync(string? searchTerm = null, Role? roleFilter = null, bool? activeOnly = null);
         Task<User?> GetByIdAsync(string id);
         Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByNicAsync(string nic);
+        Task<bool> ExistsByNicAsync(string nic, string? excludeUserId = null);
         Task<User> CreateAsync(User user);
         Task<bool> UpdateAsync(User user);
         Task<bool> DeleteAsync(string id);

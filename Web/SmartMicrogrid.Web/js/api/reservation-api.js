@@ -1,6 +1,8 @@
 /* M2 reservation endpoints. The API remains the source of truth for lifecycle rules. */
 const ReservationApi = {
+  access() { return ApiClient.get('/reservations/access'); },
   list(params = {}) { return ApiClient.get('/reservations', params); },
+  availableSlots(params = {}) { return ApiClient.get('/energy-availability', params); },
   summary() { return ApiClient.get('/reservations/summary'); },
   get(id) { return ApiClient.get(`/reservations/${encodeURIComponent(id)}`); },
   create(data) { return ApiClient.post('/reservations', data); },

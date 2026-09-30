@@ -23,16 +23,20 @@ class EnergySlotRepository(
                     energySlotDao.insertAll(entities)
                     Result.success(list)
                 } else {
-                    val cached = energySlotDao.getAllSlots().map { it.toDomain() }
+                    val cached = cachedSlots(microgridId)
                     Result.success(cached)
                 }
             } catch (e: Exception) {
-                val cached = energySlotDao.getAllSlots().map { it.toDomain() }
+                val cached = cachedSlots(microgridId)
                 if (cached.isNotEmpty()) Result.success(cached)
                 else Result.failure(e)
             }
         }
     }
+
+    private suspend fun cachedSlots(microgridId: String?): List<EnergySlot> =
+        (if (microgridId.isNullOrBlank()) energySlotDao.getAllSlots()
+         else energySlotDao.getSlotsForMicrogrid(microgridId)).map { it.toDomain() }
 
     suspend fun getEnergyAvailability(location: String? = null, minimumEnergy: Double? = null): Result<List<EnergyAvailabilitySlot>> {
         return withContext(Dispatchers.IO) {

@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.smartmicrogrid.R
 import com.smartmicrogrid.models.Reservation
 
-class ReservationAdapter(private val onCancel: (Reservation) -> Unit, private val onModify: (Reservation) -> Unit) : RecyclerView.Adapter<ReservationAdapter.Holder>() {
+class ReservationAdapter(private val onCancel: (Reservation) -> Unit, private val onModify: (Reservation) -> Unit, private val onDetails: (Reservation) -> Unit = {}) : RecyclerView.Adapter<ReservationAdapter.Holder>() {
     private var items: List<Reservation> = emptyList()
     class Holder(view: View) : RecyclerView.ViewHolder(view) {
         val id: TextView = view.findViewById(R.id.reservation_id)
@@ -23,13 +23,16 @@ class ReservationAdapter(private val onCancel: (Reservation) -> Unit, private va
     override fun getItemCount() = items.size
     override fun onBindViewHolder(holder: Holder, position: Int) {
         val item = items[position]
-        holder.id.text = "Reservation ${item.id.takeLast(8)} · slot ${item.energySlotId.takeLast(6)}"
-        holder.amount.text = "%.1f kWh".format(item.energyAmount)
-        holder.time.text = "${ReservationTime.display(item.startTime)} – ${ReservationTime.display(item.endTime)}"
+        holder.id.text = "${item.microgridName.ifBlank { "Reservation ${item.id.takeLast(8)}" }} · slot ${item.energySlotId.takeLast(6)}"
+        holder.amount.text = if (item.totalCost > 0) "%.1f kWh · Rs %.2f".format(item.energyAmount, item.totalCost) else "%.1f kWh".format(item.energyAmount)
+        val locked = item.status in listOf("Pending", "Approved") && !ReservationTime.hasTwelveHourNotice(item.startTime)
+        holder.time.text = "${item.location.takeIf { it.isNotBlank() }?.plus(" · ").orEmpty()}${ReservationTime.display(item.startTime)} – ${ReservationTime.display(item.endTime)}${if (locked) " · Changes close 12h before start" else ""}"
         holder.status.text = item.status
-        holder.cancel.visibility = if (item.status == "Pending" || item.status == "Approved") View.VISIBLE else View.GONE
+        holder.itemView.setOnClickListener { onDetails(item) }
+        val canChange = item.status in listOf("Pending", "Approved") && !locked
+        holder.cancel.visibility = if (canChange) View.VISIBLE else View.GONE
         holder.cancel.setOnClickListener { onCancel(item) }
-        holder.modify.visibility = holder.cancel.visibility
+        holder.modify.visibility = if (canChange) View.VISIBLE else View.GONE
         holder.modify.setOnClickListener { onModify(item) }
     }
     fun submit(items: List<Reservation>) { this.items = items; notifyDataSetChanged() }

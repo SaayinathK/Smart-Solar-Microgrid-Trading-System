@@ -12,7 +12,8 @@ public static class RoleCompatibility
     public static string ToAssignmentRole(Role role) => role switch
     {
         Role.Admin or Role.Backoffice => "Backoffice",
-        Role.MicrogridOperator or Role.TransactionVerifier or Role.GridOperator => "GridOperator",
+        Role.MicrogridOperator or Role.GridOperator => "GridOperator",
+        Role.TransactionVerifier => "TransactionVerifier",
         _ => "Prosumer"
     };
 

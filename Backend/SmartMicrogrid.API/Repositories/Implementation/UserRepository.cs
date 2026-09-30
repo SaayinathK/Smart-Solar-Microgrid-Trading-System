@@ -60,6 +60,23 @@ namespace SmartMicrogrid.API.Repositories.Implementation
             return await _context.Users.Find(u => u.Email.ToLower() == email.Trim().ToLower()).FirstOrDefaultAsync();
         }
 
+        public async Task<User?> GetByNicAsync(string nic)
+        {
+            if (string.IsNullOrWhiteSpace(nic)) return null;
+            var normalizedNic = nic.Trim().ToUpperInvariant();
+            return await _context.Users.Find(Builders<User>.Filter.Regex(u => u.Nic, new BsonRegularExpression("^" + normalizedNic + "$", "i"))).FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> ExistsByNicAsync(string nic, string? excludeUserId = null)
+        {
+            if (string.IsNullOrWhiteSpace(nic)) return false;
+            var normalizedNic = nic.Trim().ToUpperInvariant();
+            var filter = Builders<User>.Filter.Regex(u => u.Nic, new BsonRegularExpression("^" + normalizedNic + "$", "i"));
+            if (!string.IsNullOrWhiteSpace(excludeUserId) && ObjectId.TryParse(excludeUserId, out _))
+                filter &= Builders<User>.Filter.Ne(u => u.Id, excludeUserId);
+            return await _context.Users.Find(filter).AnyAsync();
+        }
+
         public async Task<User> CreateAsync(User user)
         {
             user.CreatedAt = DateTime.UtcNow;

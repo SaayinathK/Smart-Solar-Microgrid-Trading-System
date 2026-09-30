@@ -55,9 +55,26 @@ interface ApiService {
     // Energy Availability Endpoint (Public/Prosumer)
     @GET("energy-availability")
     suspend fun getEnergyAvailability(
+        @Query("microgridId") microgridId: String? = null,
         @Query("location") location: String? = null,
         @Query("minimumEnergy") minimumEnergy: Double? = null
     ): Response<ApiResponse<List<EnergyAvailabilitySlot>>>
+
+    // M2 reservation endpoints
+    @GET("reservations")
+    suspend fun getReservations(): Response<ApiResponse<List<Reservation>>>
+
+    @GET("reservations/summary")
+    suspend fun getReservationSummary(): Response<ApiResponse<ReservationSummary>>
+
+    @POST("reservations")
+    suspend fun createReservation(@Body request: CreateReservationRequest): Response<ApiResponse<Reservation>>
+
+    @PUT("reservations/{id}")
+    suspend fun updateReservation(@Path("id") id: String, @Body request: CreateReservationRequest): Response<ApiResponse<Reservation>>
+
+    @PATCH("reservations/{id}/cancel")
+    suspend fun cancelReservation(@Path("id") id: String, @Body body: Map<String, String> = emptyMap()): Response<ApiResponse<Reservation>>
 
     // ── Auth Endpoints ──
 

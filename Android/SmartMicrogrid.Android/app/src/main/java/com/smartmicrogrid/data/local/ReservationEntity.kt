@@ -1,10 +1,11 @@
 package com.smartmicrogrid.data.local
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.smartmicrogrid.models.Reservation
 
-@Entity(tableName = "reservations")
+@Entity(tableName = "reservations", indices = [Index(value = ["prosumerId"])])
 data class ReservationEntity(
     @PrimaryKey val id: String,
     val prosumerId: String,

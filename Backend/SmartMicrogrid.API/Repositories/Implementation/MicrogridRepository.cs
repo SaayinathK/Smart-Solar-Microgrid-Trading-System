@@ -107,6 +107,24 @@ namespace SmartMicrogrid.API.Repositories.Implementation
             return result.ModifiedCount > 0;
         }
 
+        public async Task<bool> TryAdjustSlotCapacityAsync(string id, double amount)
+        {
+            if (amount == 0 || !double.IsFinite(amount)) return false;
+            var filters = Builders<MicrogridNode>.Filter;
+            var filter = filters.Eq(n => n.Id, id);
+            if (amount > 0)
+                filter &= filters.Gte(n => n.AvailableCapacity, amount) & filters.Eq(n => n.IsActive, true) & filters.Eq(n => n.Status, "Active");
+            else
+                filter &= filters.Gte(n => n.ReservedCapacity, -amount);
+
+            var update = Builders<MicrogridNode>.Update
+                .Inc(n => n.AvailableCapacity, -amount)
+                .Inc(n => n.ReservedCapacity, amount)
+                .Set(n => n.UpdatedAt, DateTime.UtcNow);
+            var result = await _context.Microgrids.UpdateOneAsync(filter, update);
+            return result.ModifiedCount == 1;
+        }
+
         public async Task<bool> UpdateBatteryAsync(string id, double batteryCapacity, double currentBatteryLevel, double batteryPercentage, string batteryStatus)
         {
             if (!ObjectId.TryParse(id, out _)) return false;

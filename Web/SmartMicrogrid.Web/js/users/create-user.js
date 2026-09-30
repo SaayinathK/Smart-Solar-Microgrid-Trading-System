@@ -8,6 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('create-user-form');
   const alertBox = document.getElementById('alert-box');
   const btnSubmit = document.getElementById('btn-submit');
+  const roleSelect = document.getElementById('role');
+  const nicField = document.getElementById('nic-field');
+  const nicInput = document.getElementById('nic');
+  const syncNicRequirement = () => {
+    const required = roleSelect.value === 'Prosumer';
+    nicField.hidden = !required;
+    nicInput.required = required;
+  };
+  roleSelect.addEventListener('change', syncNicRequirement);
+  syncNicRequirement();
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -17,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const lastName = document.getElementById('lastName').value.trim();
     const email = document.getElementById('email').value.trim();
     const phoneNumber = document.getElementById('phoneNumber').value.trim();
+    const nic = nicInput.value.trim().toUpperCase();
     const role = document.getElementById('role').value;
     const isActive = document.getElementById('isActive').value === 'true';
     const password = document.getElementById('password').value;
@@ -30,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         lastName,
         email,
         phoneNumber,
+        nic: nic || null,
         role,
         isActive,
         password

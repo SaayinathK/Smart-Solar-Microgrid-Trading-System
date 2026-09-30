@@ -9,7 +9,7 @@ namespace SmartMicrogrid.API.DTOs.M1
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
         public double? MinimumEnergy { get; set; }
-        public string? Status { get; set; } = "Available";
+        public string? Status { get; set; }
     }
 
     public class EnergyAvailabilityResponseDto

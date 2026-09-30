@@ -15,7 +15,7 @@
   <div id="app-layout-wrapper">
     <section class="reservation-hero">
       <div><span class="reservation-eyebrow">DEMAND MANAGEMENT</span><h1>Energy reservations</h1><p>Review and manage energy claims across your microgrid network.</p></div>
-      <div class="hero-status"><span class="live-dot"></span> Reservation service</div>
+      <div class="hero-status" id="reservation-service-status" role="status"><span class="live-dot"></span> Connecting to reservation service…</div>
     </section>
 
     <section class="reservation-stats" aria-label="Reservation summary">
@@ -29,6 +29,7 @@
       <div class="reservation-toolbar-heading"><div><h2>Reservation queue</h2><p>Filter, review and act on prosumer requests.</p></div><button class="btn btn-primary" id="new-reservation" type="button">＋ Create reservation</button></div>
       <div class="reservation-filters">
         <label class="reservation-search"><span>⌕</span><input id="reservation-search" class="form-control" type="search" placeholder="Search prosumer, node or reservation ID"></label>
+        <select id="reservation-node" class="form-select" aria-label="Filter by microgrid"><option value="">All microgrids</option></select>
         <select id="reservation-status" class="form-select"><option value="">All statuses</option><option>Pending</option><option>Approved</option><option>Rejected</option><option>Cancelled</option><option>Completed</option><option>Expired</option></select>
         <input id="reservation-date" class="form-input form-control" type="date" aria-label="Filter by reservation date">
         <button id="refresh-reservations" class="btn btn-secondary" type="button">Refresh</button>
@@ -43,9 +44,10 @@
 
   <dialog id="reservation-dialog" class="reservation-dialog"><form id="reservation-form" method="dialog"><div class="dialog-heading"><div><span class="reservation-eyebrow">STAFF ACTION</span><h2>Create reservation</h2></div><button class="dialog-close" value="cancel" aria-label="Close">×</button></div>
     <label>Prosumer NIC<input class="form-input" name="prosumerId" required placeholder="Enter the registered NIC"></label>
-    <label>Energy slot ID<input class="form-input" name="energySlotId" required placeholder="Select or enter slot ID"></label>
-    <label>Energy amount (kWh)<input class="form-input" name="energyAmount" required type="number" min="0.1" step="0.1"></label>
-    <div class="dialog-note">The API checks slot capacity, ownership and the 7-day booking window.</div>
+    <label>Published energy slot<select class="form-input" id="reservation-slot" name="energySlotId" required><option value="">Loading available M1 slots…</option></select></label>
+    <div id="slot-details" class="dialog-note" aria-live="polite">Select an available slot to see its schedule and remaining capacity.</div>
+    <label>Energy amount (kWh)<input class="form-input" id="reservation-energy" name="energyAmount" required type="number" min="0.1" step="0.1" placeholder="Choose a slot first" disabled></label>
+    <div class="dialog-note">Only currently published slots are listed. The API validates capacity, account status, the seven-day booking window, and reservation rules.</div>
     <div class="dialog-actions"><button class="btn btn-secondary" value="cancel">Cancel</button><button id="save-reservation" class="btn btn-primary" value="default" type="submit">Submit reservation</button></div>
   </form></dialog>
 
@@ -60,7 +62,7 @@
   <script src="../../js/reservations/reservations.js"></script>
   <script>
     AuthGuard.requireAuth();
-    if (!['Backoffice', 'GridOperator', 'Admin', 'MicrogridOperator'].includes(SessionManager.getUserRole())) {
+    if (!['Backoffice', 'GridOperator', 'Admin', 'MicrogridOperator', 'TransactionVerifier'].includes(SessionManager.getUserRole())) {
       ApiClient.showToast('Reservation management is available to staff accounts only.', 'error');
       window.location.href = '/dashboard.html';
     } else {

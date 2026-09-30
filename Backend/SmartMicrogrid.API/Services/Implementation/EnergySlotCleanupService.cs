@@ -47,8 +47,8 @@ namespace SmartMicrogrid.API.Services.Implementation
             var microgridRepository = scope.ServiceProvider.GetRequiredService<IMicrogridRepository>();
 
             var now = DateTime.UtcNow;
-            var allSlots = await slotRepository.GetAllAsync(null, "Available", null, null, null);
-            var expiredSlots = allSlots.Where(s => s.EndTime <= now && s.AvailableAmount > 0).ToList();
+            var allSlots = await slotRepository.GetAllAsync();
+            var expiredSlots = allSlots.Where(s => (s.Status == "Available" || s.Status == "PartiallyReserved") && s.EndTime <= now && s.AvailableAmount > 0).ToList();
 
             if (!expiredSlots.Any()) return;
 
@@ -56,20 +56,15 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             foreach (var slot in expiredSlots)
             {
-                // Update slot status to Expired
-                await slotRepository.UpdateStatusAsync(slot.Id!, "Expired");
+                // The conditional status/amount change makes repeated worker runs idempotent.
+                var expired = await slotRepository.TryExpireAsync(slot.Id!, now);
+                if (expired == null) continue;
 
                 // Return reserved capacity to the microgrid
                 var microgrid = await microgridRepository.GetByIdAsync(slot.MicrogridNodeId);
                 if (microgrid != null)
                 {
-                    var newAvailable = microgrid.AvailableCapacity + slot.AvailableAmount;
-                    if (newAvailable > microgrid.Capacity) newAvailable = microgrid.Capacity;
-                    
-                    var newReserved = microgrid.ReservedCapacity - slot.AvailableAmount;
-                    if (newReserved < 0) newReserved = 0;
-
-                    await microgridRepository.UpdateCapacityAsync(microgrid.Id!, microgrid.Capacity, newAvailable, newReserved, microgrid.UsedCapacity);
+                    await microgridRepository.TryAdjustSlotCapacityAsync(microgrid.Id!, -expired.AvailableAmount);
                 }
             }
 

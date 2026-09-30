@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [MicrogridEntity::class, EnergySlotEntity::class, ReservationEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -24,6 +24,11 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("CREATE TABLE IF NOT EXISTS reservations (id TEXT NOT NULL PRIMARY KEY, prosumerId TEXT NOT NULL, microgridNodeId TEXT NOT NULL, energySlotId TEXT NOT NULL, energyAmount REAL NOT NULL, reservationDate TEXT NOT NULL, startTime TEXT NOT NULL, endTime TEXT NOT NULL, status TEXT NOT NULL, createdAt TEXT NOT NULL, updatedAt TEXT NOT NULL, cachedAt INTEGER NOT NULL)")
             }
         }
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_reservations_prosumerId ON reservations(prosumerId)")
+            }
+        }
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
@@ -33,7 +38,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "smart_microgrid_db"
-                ).addMigrations(MIGRATION_1_2).fallbackToDestructiveMigration().build()
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }

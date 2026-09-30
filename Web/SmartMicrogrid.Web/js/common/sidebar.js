@@ -157,6 +157,17 @@ function getMenuItemsForRole(role, activePage) {
     </div>
   `;
 
+  if (['Backoffice', 'GridOperator', 'Admin', 'MicrogridOperator', 'TransactionVerifier'].includes(role)) {
+    sections += `
+      <div>
+        <div class="sidebar-section-title">Energy Demand</div>
+        <ul class="sidebar-menu">
+          <li><a href="/pages/reservations/reservations.html" class="sidebar-link ${activePage === 'reservations' ? 'active' : ''}">${icons.trading} <span>Reservations</span></a></li>
+        </ul>
+      </div>
+    `;
+  }
+
   // Admin section
   if (role === 'Admin') {
     sections += `

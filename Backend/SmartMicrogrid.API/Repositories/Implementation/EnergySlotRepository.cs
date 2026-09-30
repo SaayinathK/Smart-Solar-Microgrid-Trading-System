@@ -24,8 +24,9 @@ namespace SmartMicrogrid.API.Repositories.Implementation
             var builder = Builders<EnergySlot>.Filter;
             var filter = builder.Empty;
 
-            if (!string.IsNullOrWhiteSpace(microgridId) && ObjectId.TryParse(microgridId, out _))
+            if (!string.IsNullOrWhiteSpace(microgridId))
             {
+                if (!ObjectId.TryParse(microgridId, out _)) return Enumerable.Empty<EnergySlot>();
                 filter &= builder.Eq(s => s.MicrogridNodeId, microgridId);
             }
 
@@ -94,6 +95,19 @@ namespace SmartMicrogrid.API.Repositories.Implementation
             return result.ModifiedCount > 0;
         }
 
+        public async Task<EnergySlot?> TryExpireAsync(string id, DateTime now)
+        {
+            if (!ObjectId.TryParse(id, out _)) return null;
+            var filter = Builders<EnergySlot>.Filter.Eq(s => s.Id, id) &
+                Builders<EnergySlot>.Filter.In(s => s.Status, new[] { "Available", "PartiallyReserved" }) &
+                Builders<EnergySlot>.Filter.Lte(s => s.EndTime, now) &
+                Builders<EnergySlot>.Filter.Gt(s => s.AvailableAmount, 0);
+            var update = Builders<EnergySlot>.Update.Set(s => s.Status, "Expired")
+                .Set(s => s.AvailableAmount, 0).Set(s => s.UpdatedAt, now);
+            return await _context.EnergySlots.FindOneAndUpdateAsync(filter, update,
+                new FindOneAndUpdateOptions<EnergySlot> { ReturnDocument = ReturnDocument.Before });
+        }
+
         public async Task<long> GetCountAsync(string? status = null)
         {
             if (string.IsNullOrWhiteSpace(status))
@@ -105,7 +119,7 @@ namespace SmartMicrogrid.API.Repositories.Implementation
 
         public async Task<double> GetTotalAvailableEnergyAsync()
         {
-            var slots = await _context.EnergySlots.Find(s => s.Status == "Available" && s.EndTime > DateTime.UtcNow).ToListAsync();
+            var slots = await _context.EnergySlots.Find(s => (s.Status == "Available" || s.Status == "PartiallyReserved") && s.AvailableAmount > 0 && s.StartTime > DateTime.UtcNow && s.EndTime > DateTime.UtcNow).ToListAsync();
             return slots.Sum(s => s.AvailableAmount);
         }
     }

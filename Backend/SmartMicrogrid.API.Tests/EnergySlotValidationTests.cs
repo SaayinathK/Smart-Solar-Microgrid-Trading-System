@@ -94,5 +94,22 @@ namespace SmartMicrogrid.API.Tests
             Assert.False(isValid);
             Assert.Contains("exceed", errorMessage?.ToLower());
         }
+
+        [Fact]
+        public void ValidateCreateSlot_PastStartTime_ReturnsFalse()
+        {
+            var dto = new CreateEnergySlotDto
+            {
+                MicrogridNodeId = _activeMicrogrid.Id!,
+                EnergyAmount = 50,
+                StartTime = DateTime.UtcNow.AddMinutes(-5),
+                EndTime = DateTime.UtcNow.AddHours(1),
+                PricePerUnit = 20.0m
+            };
+
+            var (isValid, errorMessage) = EnergySlotValidator.ValidateCreateSlot(dto, _activeMicrogrid);
+            Assert.False(isValid);
+            Assert.Contains("future", errorMessage?.ToLower());
+        }
     }
 }

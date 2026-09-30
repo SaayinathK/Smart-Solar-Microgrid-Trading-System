@@ -42,14 +42,21 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return ApiResponse<UserResponseDto>.FailureResponse("An account with this email address already exists.");
             }
 
+            var normalizedNic = dto.Nic?.Trim().ToUpperInvariant();
+            if (dto.Role is Role.Prosumer && string.IsNullOrWhiteSpace(normalizedNic))
+                return ApiResponse<UserResponseDto>.FailureResponse("Prosumer NIC is required.");
+            if (!string.IsNullOrWhiteSpace(normalizedNic) && await _userRepository.ExistsByNicAsync(normalizedNic))
+                return ApiResponse<UserResponseDto>.FailureResponse("An account with this NIC already exists.");
+
             var user = new User
             {
                 FirstName = dto.FirstName.Trim(),
                 LastName = dto.LastName.Trim(),
                 Email = normalizedEmail,
                 PhoneNumber = dto.PhoneNumber?.Trim() ?? string.Empty,
+                Nic = normalizedNic,
                 PasswordHash = PasswordHelper.HashPassword(dto.Password),
-                Role = dto.Role,
+                Role = RoleCompatibility.ToStoredRole(dto.Role),
                 IsActive = dto.IsActive,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -73,7 +80,9 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             if (dto.Role.HasValue)
             {
-                user.Role = dto.Role.Value;
+                if (dto.Role.Value is Role.Prosumer && string.IsNullOrWhiteSpace(user.Nic))
+                    return ApiResponse<UserResponseDto>.FailureResponse("Prosumer NIC is required before assigning the Prosumer role.");
+                user.Role = RoleCompatibility.ToStoredRole(dto.Role.Value);
             }
 
             if (dto.IsActive.HasValue)
@@ -143,7 +152,7 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return ApiResponse<UserResponseDto>.FailureResponse("User not found.");
             }
 
-            user.Role = newRole;
+            user.Role = RoleCompatibility.ToStoredRole(newRole);
             user.UpdatedAt = DateTime.UtcNow;
 
             var updated = await _userRepository.UpdateAsync(user);
@@ -181,7 +190,8 @@ namespace SmartMicrogrid.API.Services.Implementation
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                Role = user.Role.ToString(),
+                Nic = user.Nic,
+                Role = RoleCompatibility.ToAssignmentRole(user.Role),
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt

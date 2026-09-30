@@ -19,6 +19,10 @@ namespace SmartMicrogrid.API.DTOs.Auth
         [Phone(ErrorMessage = "Invalid phone number format.")]
         public string PhoneNumber { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Prosumer NIC is required.")]
+        [RegularExpression(@"^(?:[0-9]{9}[VvXx]|[0-9]{12})$", ErrorMessage = "Enter a valid prosumer NIC.")]
+        public string Nic { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "Password is required.")]
         [MinLength(6, ErrorMessage = "Password must be at least 6 characters.")]
         public string Password { get; set; } = string.Empty;

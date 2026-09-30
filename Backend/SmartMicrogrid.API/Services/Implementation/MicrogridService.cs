@@ -13,10 +13,14 @@ namespace SmartMicrogrid.API.Services.Implementation
     public class MicrogridService : IMicrogridService
     {
         private readonly IMicrogridRepository _repository;
+        private readonly IReservationService _reservations;
+        private readonly IEnergySlotRepository _slots;
 
-        public MicrogridService(IMicrogridRepository repository)
+        public MicrogridService(IMicrogridRepository repository, IReservationService reservations, IEnergySlotRepository slots)
         {
             _repository = repository;
+            _reservations = reservations;
+            _slots = slots;
         }
 
         public async Task<IEnumerable<MicrogridResponseDto>> GetAllAsync(string? status = null, bool? isActive = null, string? location = null, string? search = null)
@@ -40,6 +44,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
             var batteryPct = BatteryValidator.CalculatePercentage(dto.CurrentBatteryLevel, dto.BatteryCapacity);
+            var isActive = string.Equals(dto.Status, "Active", StringComparison.OrdinalIgnoreCase);
 
             var node = new MicrogridNode
             {
@@ -56,7 +61,7 @@ namespace SmartMicrogrid.API.Services.Implementation
                 CurrentBatteryLevel = dto.CurrentBatteryLevel,
                 BatteryPercentage = batteryPct,
                 Status = string.IsNullOrWhiteSpace(dto.Status) ? "Active" : dto.Status,
-                IsActive = dto.IsActive,
+                IsActive = isActive,
                 OperatorId = string.IsNullOrWhiteSpace(dto.OperatorId) ? operatorId : dto.OperatorId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -71,11 +76,18 @@ namespace SmartMicrogrid.API.Services.Implementation
             var existing = await _repository.GetByIdAsync(id);
             if (existing == null) return null;
 
+            if (existing.IsActive && (!dto.IsActive || !string.Equals(dto.Status, "Active", StringComparison.OrdinalIgnoreCase)) && await _reservations.HasActiveForNodeAsync(id))
+                throw new InvalidOperationException("This microgrid has pending or approved reservations and cannot be deactivated.");
+
             var (isValid, errorMessage) = MicrogridValidator.ValidateUpdate(dto);
             if (!isValid)
             {
                 throw new ArgumentException(errorMessage);
             }
+
+            var committedCapacity = existing.ReservedCapacity + existing.UsedCapacity;
+            if (dto.Capacity + 0.000001 < committedCapacity)
+                throw new InvalidOperationException("Total capacity cannot be reduced below currently reserved and used capacity.");
 
             existing.Name = dto.Name.Trim();
             existing.Location = dto.Location.Trim();
@@ -92,11 +104,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
             // Re-calculate available capacity if capacity updated
-            if (existing.AvailableCapacity > existing.Capacity)
-            {
-                existing.AvailableCapacity = existing.Capacity - existing.ReservedCapacity - existing.UsedCapacity;
-                if (existing.AvailableCapacity < 0) existing.AvailableCapacity = 0;
-            }
+            existing.AvailableCapacity = Math.Max(0, existing.Capacity - existing.ReservedCapacity - existing.UsedCapacity);
 
             existing.BatteryPercentage = BatteryValidator.CalculatePercentage(existing.CurrentBatteryLevel, existing.BatteryCapacity);
 
@@ -106,6 +114,10 @@ namespace SmartMicrogrid.API.Services.Implementation
 
         public async Task<bool> DeleteAsync(string id)
         {
+            if (await _reservations.HasActiveForNodeAsync(id))
+                throw new InvalidOperationException("This microgrid has pending or approved reservations and cannot be deleted.");
+            if ((await _slots.GetAllAsync(id)).Any())
+                throw new InvalidOperationException("This microgrid has energy slots and cannot be deleted. Deactivate it to preserve slot and reservation history.");
             return await _repository.DeleteAsync(id);
         }
 
@@ -118,6 +130,8 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
             bool isActive = string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase);
+            if (!isActive && await _reservations.HasActiveForNodeAsync(id))
+                throw new InvalidOperationException("This microgrid has pending or approved reservations and cannot be deactivated.");
             return await _repository.UpdateStatusAsync(id, status, isActive);
         }
 

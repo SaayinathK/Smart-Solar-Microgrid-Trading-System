@@ -35,12 +35,13 @@ public class ReservationService : IReservationService
         if (slot == null) throw new InvalidOperationException("The energy slot is no longer available or has insufficient capacity.");
         try
         {
+            await RefreshSlotStatusAsync(slotId);
             if (slot.StartTime <= now || slot.StartTime > now.AddDays(7)) throw new ArgumentException("Reservations must start in the future and within 7 days.");
             var node = await _db.Microgrids.Find(n => n.Id == slot.MicrogridNodeId).FirstOrDefaultAsync();
             if (node == null || !node.IsActive || !string.Equals(node.Status, "Active", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("The microgrid for this energy slot is not active.");
             if (!string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(node.Id!, slot.Id!, operatorId);
-            var reservation = new Reservation { ProsumerId = prosumerId, MicrogridNodeId = slot.MicrogridNodeId, EnergySlotId = slotId, EnergyAmount = dto.EnergyAmount, ReservationDate = (dto.ReservationDate ?? slot.StartTime).ToUniversalTime(), StartTime = slot.StartTime, EndTime = slot.EndTime, CreatedAt = now, UpdatedAt = now, Status = "Pending", StatusHistory = { new ReservationStatusEvent { To = "Pending", ChangedBy = actorId, ChangedAt = now } } };
-            return Map(await _reservations.CreateAsync(reservation));
+            var reservation = new Reservation { ProsumerId = prosumerId, MicrogridNodeId = slot.MicrogridNodeId, EnergySlotId = slotId, EnergyAmount = dto.EnergyAmount, ReservationDate = (dto.ReservationDate ?? slot.StartTime).ToUniversalTime(), StartTime = slot.StartTime, EndTime = slot.EndTime, CreatedAt = now, UpdatedAt = now, Status = "Pending", StatusHistory = { new ReservationStatusEvent { To = "Pending", ChangedBy = staff ? actorId : prosumerId, ChangedAt = now } } };
+            return await MapEnrichedAsync(await _reservations.CreateAsync(reservation));
         }
         catch
         {
@@ -48,29 +49,25 @@ public class ReservationService : IReservationService
         }
     }
 
-    public async Task<ReservationResponseDto?> GetByIdAsync(string id, string? operatorId = null) { var r = await _reservations.GetByIdAsync(id); if (r != null && !string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(r.MicrogridNodeId, r.EnergySlotId, operatorId); return r == null ? null : Map(r); }
+    public async Task<ReservationResponseDto?> GetByIdAsync(string id, string? operatorId = null) { var r = await _reservations.GetByIdAsync(id); if (r != null && !string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(r.MicrogridNodeId, r.EnergySlotId, operatorId); return r == null ? null : await MapEnrichedAsync(r); }
     public async Task<ReservationResponseDto> UpdateAsync(string id, string? energySlotId, double energyAmount, string actorId, bool staff, string? operatorId = null)
     {
         var current = await _reservations.GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
         if (!string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(current.MicrogridNodeId, current.EnergySlotId, operatorId);
-        if (!staff && (await _users.GetByIdAsync(actorId))?.Nic != current.ProsumerId) throw new UnauthorizedAccessException("You can only change your own reservations.");
+        if (!staff && !string.Equals((await _users.GetByIdAsync(actorId))?.Nic, current.ProsumerId, StringComparison.OrdinalIgnoreCase)) throw new UnauthorizedAccessException("You can only change your own reservations.");
         if (current.Status is not ("Pending" or "Approved")) throw new ArgumentException("Only pending or approved reservations can be changed.");
         if (current.StartTime < DateTime.UtcNow.AddHours(12)) throw new ArgumentException("Reservations can only be changed at least 12 hours before start time.");
         if (energyAmount <= 0 || double.IsNaN(energyAmount) || double.IsInfinity(energyAmount)) throw new ArgumentException("Energy amount must be greater than zero.");
-        var previousSlotId = current.EnergySlotId;
-        var previousAmount = current.EnergyAmount;
         var targetSlotId = string.IsNullOrWhiteSpace(energySlotId) ? current.EnergySlotId : energySlotId.Trim();
+        if (!string.Equals(targetSlotId, current.EnergySlotId, StringComparison.Ordinal))
+            throw new ArgumentException("A reservation must remain on its original energy slot; only the energy amount can be changed.");
         if (!MongoDB.Bson.ObjectId.TryParse(targetSlotId, out _)) throw new ArgumentException("Invalid energy slot ID.");
-        var movingSlot = targetSlotId != current.EnergySlotId;
-        var targetSlot = movingSlot ? await _db.EnergySlots.Find(s => s.Id == targetSlotId).FirstOrDefaultAsync() : null;
-        if (movingSlot && targetSlot == null) throw new KeyNotFoundException("Target energy slot not found.");
-        if (targetSlot != null && !string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(targetSlot.MicrogridNodeId, targetSlot.Id!, operatorId);
-        var targetStart = targetSlot?.StartTime ?? current.StartTime;
-        var targetEnd = targetSlot?.EndTime ?? current.EndTime;
+        var targetStart = current.StartTime;
+        var targetEnd = current.EndTime;
         if (targetStart <= DateTime.UtcNow || targetStart > DateTime.UtcNow.AddDays(7))
             throw new ArgumentException("Reservations must start in the future and within 7 days.");
 
-        var reservedAmount = movingSlot ? energyAmount : energyAmount - current.EnergyAmount;
+        var reservedAmount = energyAmount - current.EnergyAmount;
         var changedCapacity = false;
         if (Math.Abs(reservedAmount) >= 0.000001)
         {
@@ -81,9 +78,9 @@ public class ReservationService : IReservationService
                 Builders<EnergySlot>.Update.Inc(s => s.AvailableAmount, -reservedAmount).Set(s => s.UpdatedAt, DateTime.UtcNow));
             if (capacityChange.ModifiedCount != 1) throw new InvalidOperationException("The slot does not have enough remaining capacity.");
             changedCapacity = true;
+            await RefreshSlotStatusAsync(targetSlotId);
         }
         current.EnergySlotId = targetSlotId;
-        current.MicrogridNodeId = targetSlot?.MicrogridNodeId ?? current.MicrogridNodeId;
         current.EnergyAmount = energyAmount;
         current.ReservationDate = targetStart;
         current.StartTime = targetStart;
@@ -93,37 +90,38 @@ public class ReservationService : IReservationService
             if (changedCapacity) await RestoreCapacityAsync(targetSlotId, reservedAmount);
             throw new InvalidOperationException("Reservation status changed concurrently. Refresh and try again.");
         }
-        if (movingSlot) await RestoreCapacityAsync(previousSlotId, previousAmount);
         return await GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
     }
     public async Task<List<ReservationResponseDto>> GetAsync(string? prosumerId, string? status, string? nodeId, int page, int pageSize, string? operatorId = null)
     {
         var allowedNodeIds = string.IsNullOrWhiteSpace(operatorId) ? null : await GetOperatorMicrogridIdsAsync(operatorId);
         if (allowedNodeIds is { Count: 0 } || (allowedNodeIds != null && !string.IsNullOrWhiteSpace(nodeId) && !allowedNodeIds.Contains(nodeId))) return new List<ReservationResponseDto>();
-        return (await _reservations.GetAsync(prosumerId, status, nodeId, page, pageSize, allowedNodeIds)).Select(Map).ToList();
+        var rows = await _reservations.GetAsync(prosumerId, status, nodeId, page, pageSize, allowedNodeIds);
+        return (await Task.WhenAll(rows.Select(MapEnrichedAsync))).ToList();
     }
     public async Task<ReservationSummaryDto> SummaryAsync(string? prosumerId = null, string? operatorId = null)
     {
         var start = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
         var allowedNodeIds = string.IsNullOrWhiteSpace(operatorId) ? null : await GetOperatorMicrogridIdsAsync(operatorId);
         var approved = allowedNodeIds is { Count: 0 } ? new List<Reservation>() : await _reservations.GetAsync(prosumerId, "Approved", null, 1, 10000, allowedNodeIds);
-        return new ReservationSummaryDto { PendingCount = allowedNodeIds is { Count: 0 } ? 0 : await _reservations.CountAsync("Pending", prosumerId, allowedNodeIds), ApprovedFutureCount = approved.LongCount(r => r.StartTime > DateTime.UtcNow), CompletedThisMonthCount = allowedNodeIds is { Count: 0 } ? 0 : await _reservations.CountCompletedSinceAsync(start, prosumerId, allowedNodeIds), TotalEnergyReserved = allowedNodeIds is { Count: 0 } ? 0 : await _reservations.SumActiveEnergyAsync(prosumerId, allowedNodeIds) };
+        var next = approved.Where(r => r.StartTime > DateTime.UtcNow).OrderBy(r => r.StartTime).FirstOrDefault();
+        return new ReservationSummaryDto { PendingCount = allowedNodeIds is { Count: 0 } ? 0 : await _reservations.CountAsync("Pending", prosumerId, allowedNodeIds), ApprovedFutureCount = approved.LongCount(r => r.StartTime > DateTime.UtcNow), CompletedThisMonthCount = allowedNodeIds is { Count: 0 } ? 0 : await _reservations.CountCompletedSinceAsync(start, prosumerId, allowedNodeIds), TotalEnergyReserved = allowedNodeIds is { Count: 0 } ? 0 : await _reservations.SumActiveEnergyAsync(prosumerId, allowedNodeIds), NextReservation = next == null ? null : await MapEnrichedAsync(next) };
     }
 
     public async Task<ReservationResponseDto> TransitionAsync(string id, string action, string actorId, bool staff, string? reason = null, string? operatorId = null)
     {
         var current = await _reservations.GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
         if (!string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(current.MicrogridNodeId, current.EnergySlotId, operatorId);
-        if (!staff && (await _users.GetByIdAsync(actorId))?.Nic != current.ProsumerId) throw new UnauthorizedAccessException("You can only change your own reservations.");
+        if (!staff && !string.Equals((await _users.GetByIdAsync(actorId))?.Nic, current.ProsumerId, StringComparison.OrdinalIgnoreCase)) throw new UnauthorizedAccessException("You can only change your own reservations.");
         string expected; string next;
         switch (action.ToLowerInvariant())
         {
             case "approve" when staff: expected = "Pending"; next = "Approved"; break;
             case "reject" when staff: expected = "Pending"; next = "Rejected"; break;
-            case "cancel" when current.Status == "Pending": expected = "Pending"; next = "Cancelled"; break;
-            case "cancel" when current.Status == "Approved":
-                if (current.StartTime < DateTime.UtcNow.AddHours(12)) throw new ArgumentException("Approved reservations can only be cancelled at least 12 hours before start time.");
-                expected = "Approved"; next = "Cancelled"; break;
+            case "cancel" when current.Status is "Pending" or "Approved":
+                if (current.Status == "Pending" && current.StartTime <= DateTime.UtcNow) throw new ArgumentException("Pending reservations can only be cancelled before their start time.");
+                if (current.Status == "Approved" && current.StartTime < DateTime.UtcNow.AddHours(12)) throw new ArgumentException("Approved reservations can only be cancelled at least 12 hours before start time.");
+                expected = current.Status; next = "Cancelled"; break;
             default: throw new ArgumentException("This reservation status transition is not allowed.");
         }
         if (!await _reservations.TransitionAsync(id, expected, next, actorId, reason)) throw new InvalidOperationException("Reservation status changed concurrently. Refresh and try again.");
@@ -136,10 +134,28 @@ public class ReservationService : IReservationService
         var current = await _reservations.GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
         if (!string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(current.MicrogridNodeId, current.EnergySlotId, operatorId);
         if (current.Status != "Approved") throw new ArgumentException("Only approved reservations can be completed.");
+        if (DateTime.UtcNow > current.EndTime) throw new InvalidOperationException("This reservation has expired its delivery window.");
         if (!await _reservations.MarkCompletedAsync(id, actorId)) throw new InvalidOperationException("Reservation was already changed.");
         return await GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
     }
     public Task<bool> HasActiveForNodeAsync(string nodeId) => _reservations.HasActiveForNodeAsync(nodeId);
+    public Task<List<string>> GetAssignedMicrogridIdsAsync(string operatorId) => GetOperatorMicrogridIdsAsync(operatorId);
+
+    private async Task<List<string>> GetOperatorMicrogridIdsAsync(string operatorId)
+    {
+        var nodeIds = await _db.Microgrids.Find(n => n.OperatorId == operatorId).Project(n => n.Id).ToListAsync();
+        var slotNodeIds = await _db.EnergySlots.Find(s => s.CreatedBy == operatorId).Project(s => s.MicrogridNodeId).ToListAsync();
+        return nodeIds.Concat(slotNodeIds).Where(id => !string.IsNullOrWhiteSpace(id)).Select(id => id!).Distinct(StringComparer.Ordinal).ToList();
+    }
+
+    private async Task EnsureOperatorAccessAsync(string nodeId, string slotId, string operatorId)
+    {
+        var slot = await _db.EnergySlots.Find(s => s.Id == slotId).FirstOrDefaultAsync();
+        if (slot == null || slot.MicrogridNodeId != nodeId) throw new InvalidOperationException("The reservation's microgrid and energy slot references do not match.");
+        var assigned = await GetOperatorMicrogridIdsAsync(operatorId);
+        if (!assigned.Contains(nodeId, StringComparer.Ordinal)) throw new UnauthorizedAccessException("You can manage reservations only for microgrids assigned to you.");
+    }
+
     public async Task ExpireOverdueAsync(CancellationToken cancellationToken)
     {
         foreach (var reservation in await _reservations.GetApprovedEndedAsync(DateTime.UtcNow))
@@ -153,8 +169,31 @@ public class ReservationService : IReservationService
         if (!MongoDB.Bson.ObjectId.TryParse(slotId, out _)) return;
         var update = Builders<EnergySlot>.Update.Inc(s => s.AvailableAmount, amount).Set(s => s.UpdatedAt, DateTime.UtcNow);
         await _db.EnergySlots.UpdateOneAsync(s => s.Id == slotId, update);
+        await RefreshSlotStatusAsync(slotId);
+    }
+
+    private async Task RefreshSlotStatusAsync(string slotId)
+    {
+        var slot = await _db.EnergySlots.Find(s => s.Id == slotId).FirstOrDefaultAsync();
+        if (slot == null) return;
+        if (string.Equals(slot.Status, "Cancelled", StringComparison.OrdinalIgnoreCase)) return;
+        var status = slot.EndTime <= DateTime.UtcNow ? "Expired" : slot.AvailableAmount <= 0.0001 ? "FullyReserved" : slot.AvailableAmount >= slot.EnergyAmount ? "Available" : "PartiallyReserved";
+        var filter = Builders<EnergySlot>.Filter.Eq(s => s.Id, slotId) & Builders<EnergySlot>.Filter.Eq(s => s.AvailableAmount, slot.AvailableAmount);
+        await _db.EnergySlots.UpdateOneAsync(filter, Builders<EnergySlot>.Update.Set(s => s.Status, status));
     }
     private static ReservationResponseDto Map(Reservation r) => new() { Id = r.Id ?? string.Empty, ProsumerId = r.ProsumerId, MicrogridNodeId = r.MicrogridNodeId, EnergySlotId = r.EnergySlotId, EnergyAmount = r.EnergyAmount, ReservationDate = r.ReservationDate, StartTime = r.StartTime, EndTime = r.EndTime, Status = r.Status, CreatedAt = r.CreatedAt, UpdatedAt = r.UpdatedAt, StatusHistory = r.StatusHistory };
+
+    private async Task<ReservationResponseDto> MapEnrichedAsync(Reservation r)
+    {
+        var dto = Map(r);
+        var user = await _users.GetByNicAsync(r.ProsumerId);
+        if (user != null) dto.ProsumerName = $"{user.FirstName} {user.LastName}".Trim();
+        var node = await _db.Microgrids.Find(n => n.Id == r.MicrogridNodeId).FirstOrDefaultAsync();
+        if (node != null) { dto.MicrogridName = node.Name; dto.Location = node.Location; }
+        var slot = await _db.EnergySlots.Find(s => s.Id == r.EnergySlotId).FirstOrDefaultAsync();
+        if (slot != null) { dto.PricePerUnit = slot.PricePerUnit; dto.TotalCost = (decimal)r.EnergyAmount * slot.PricePerUnit; }
+        return dto;
+    }
 }
 
 public class ReservationExpiryService : BackgroundService

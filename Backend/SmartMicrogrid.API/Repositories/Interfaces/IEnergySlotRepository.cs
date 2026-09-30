@@ -13,6 +13,7 @@ namespace SmartMicrogrid.API.Repositories.Interfaces
         Task<bool> UpdateAsync(string id, EnergySlot slot);
         Task<bool> DeleteAsync(string id);
         Task<bool> UpdateStatusAsync(string id, string status);
+        Task<EnergySlot?> TryExpireAsync(string id, DateTime now);
         Task<long> GetCountAsync(string? status = null);
         Task<double> GetTotalAvailableEnergyAsync();
     }

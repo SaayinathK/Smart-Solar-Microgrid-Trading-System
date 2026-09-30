@@ -203,6 +203,29 @@
                         android:textSize="15sp"
                         android:layout_marginBottom="14dp" />
 
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="National Identity Card (NIC)"
+                        android:textColor="#CBD5E1"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <EditText
+                        android:id="@+id/et_nic"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_glass_input"
+                        android:textColor="#FFFFFF"
+                        android:textColorHint="#64748B"
+                        android:hint="123456789V or 200012345678"
+                        android:inputType="textCapCharacters"
+                        android:maxLength="12"
+                        android:padding="14dp"
+                        android:textSize="15sp"
+                        android:layout_marginBottom="14dp" />
+
                     <!-- Password -->
                     <TextView
                         android:layout_width="match_parent"

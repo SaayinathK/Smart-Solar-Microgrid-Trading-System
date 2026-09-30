@@ -28,6 +28,7 @@ class RegisterActivity : AppCompatActivity() {
             val lastName = binding.etLastName.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
             val phone = binding.etPhone.text.toString().trim()
+            val nic = binding.etNic.text.toString().trim().uppercase()
             val password = binding.etPassword.text.toString()
             val confirmPassword = binding.etConfirmPassword.text.toString()
 
@@ -38,6 +39,10 @@ class RegisterActivity : AppCompatActivity() {
             }
             if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 showError("A valid email address is required.")
+                return@setOnClickListener
+            }
+            if (!nic.matches(Regex("^(?:[0-9]{9}[VvXx]|[0-9]{12})$"))) {
+                showError("Enter a valid NIC (9 digits and V/X, or 12 digits).")
                 return@setOnClickListener
             }
             if (password.length < 6) {
@@ -56,6 +61,7 @@ class RegisterActivity : AppCompatActivity() {
                     lastName = lastName,
                     email = email,
                     phoneNumber = phone,
+                    nic = nic,
                     password = password,
                     confirmPassword = confirmPassword
                 )

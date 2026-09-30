@@ -66,6 +66,10 @@ namespace SmartMicrogrid.API.Controllers
             {
                 return BadRequest(ApiResponse<object>.FailureResponse(ex.Message));
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ApiResponse<object>.FailureResponse(ex.Message));
+            }
         }
 
         /// <summary>
@@ -93,6 +97,10 @@ namespace SmartMicrogrid.API.Controllers
             {
                 return BadRequest(ApiResponse<object>.FailureResponse(ex.Message));
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ApiResponse<object>.FailureResponse(ex.Message));
+            }
         }
 
         /// <summary>
@@ -102,12 +110,19 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> Delete(string id)
         {
-            var deleted = await _service.DeleteAsync(id);
-            if (!deleted)
+            try
             {
-                return NotFound(ApiResponse<object>.FailureResponse("Microgrid not found or could not be deleted."));
+                var deleted = await _service.DeleteAsync(id);
+                if (!deleted)
+                {
+                    return NotFound(ApiResponse<object>.FailureResponse("Microgrid not found or could not be deleted."));
+                }
+                return Ok(ApiResponse<object>.SuccessResponse(null, "Microgrid deleted successfully."));
             }
-            return Ok(ApiResponse<object>.SuccessResponse(null, "Microgrid deleted successfully."));
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ApiResponse<object>.FailureResponse(ex.Message));
+            }
         }
 
         /// <summary>
@@ -134,6 +149,10 @@ namespace SmartMicrogrid.API.Controllers
             catch (ArgumentException ex)
             {
                 return BadRequest(ApiResponse<object>.FailureResponse(ex.Message));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ApiResponse<object>.FailureResponse(ex.Message));
             }
         }
     }

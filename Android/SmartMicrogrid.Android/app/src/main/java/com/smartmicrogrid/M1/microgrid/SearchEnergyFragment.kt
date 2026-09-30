@@ -33,8 +33,8 @@ class SearchEnergyFragment : Fragment() {
         viewModel = ViewModelProvider(this)[MicrogridViewModel::class.java]
 
         adapter = MicrogridAdapter(emptyList()) { microgrid ->
-            // Tapping a microgrid should open its slots
-            val intent = Intent(requireContext(), com.smartmicrogrid.M1.slots.EnergySlotActivity::class.java).apply {
+            // Pass the selected M1 node into the M2 slot booking flow.
+            val intent = Intent(requireContext(), com.smartmicrogrid.M2.AvailableSlotsActivity::class.java).apply {
                 putExtra("MICROGRID_ID", microgrid.id)
             }
             startActivity(intent)

@@ -66,6 +66,11 @@
             <input type="tel" id="phoneNumber" class="form-control" placeholder="+1234567890">
           </div>
 
+          <div class="form-group">
+            <label class="form-label" for="nic">National Identity Card (NIC)</label>
+            <input type="text" id="nic" class="form-control" placeholder="123456789V or 200012345678" pattern="(?:[0-9]{9}[VvXx]|[0-9]{12})" maxlength="12" required>
+          </div>
+
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="password">Password</label>
@@ -118,6 +123,7 @@
       const lastName = document.getElementById('lastName').value.trim();
       const email = document.getElementById('email').value.trim();
       const phoneNumber = document.getElementById('phoneNumber').value.trim();
+      const nic = document.getElementById('nic').value.trim().toUpperCase();
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
@@ -135,6 +141,7 @@
           lastName,
           email,
           phoneNumber,
+          nic,
           password,
           confirmPassword
         });

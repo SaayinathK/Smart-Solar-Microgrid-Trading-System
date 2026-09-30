@@ -50,9 +50,10 @@ public class ReservationRepository : IReservationRepository
             .Set(r => r.EnergyAmount, updated.EnergyAmount)
             .Set(r => r.ReservationDate, updated.ReservationDate)
             .Set(r => r.StartTime, updated.StartTime)
-            .Set(r => r.EndTime, updated.EndTime)
-            .Set(r => r.UpdatedAt, DateTime.UtcNow);
-        var result = await _context.Reservations.UpdateOneAsync(r => r.Id == updated.Id && r.Status == expectedStatus, change);
+            .Set(r => r.EndTime, updated.EndTime);
+        var expectedUpdatedAt = updated.UpdatedAt;
+        change = change.Set(r => r.UpdatedAt, DateTime.UtcNow);
+        var result = await _context.Reservations.UpdateOneAsync(r => r.Id == updated.Id && r.Status == expectedStatus && r.UpdatedAt == expectedUpdatedAt, change);
         return result.ModifiedCount == 1;
     }
     public Task<long> CountAsync(string? status = null, string? prosumerId = null, IReadOnlyCollection<string>? allowedNodeIds = null)

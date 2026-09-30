@@ -1,6 +1,7 @@
 package com.smartmicrogrid.M2
 
 import java.time.Instant
+import java.time.Duration
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -16,4 +17,8 @@ internal object ReservationTime {
     fun localDate(utcValue: String): String = try {
         Instant.parse(utcValue).atZone(ZoneId.systemDefault()).format(dateFormatter)
     } catch (_: Exception) { utcValue.take(10) }
+
+    fun hasTwelveHourNotice(utcValue: String): Boolean = try {
+        !Instant.parse(utcValue).isBefore(Instant.now().plus(Duration.ofHours(12)))
+    } catch (_: Exception) { false }
 }

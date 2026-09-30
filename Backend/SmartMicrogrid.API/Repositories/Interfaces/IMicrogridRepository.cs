@@ -13,6 +13,7 @@ namespace SmartMicrogrid.API.Repositories.Interfaces
         Task<bool> DeleteAsync(string id);
         Task<bool> UpdateStatusAsync(string id, string status, bool isActive);
         Task<bool> UpdateCapacityAsync(string id, double totalCapacity, double availableCapacity, double reservedCapacity, double usedCapacity);
+        Task<bool> TryAdjustSlotCapacityAsync(string id, double amount);
         Task<bool> UpdateBatteryAsync(string id, double batteryCapacity, double currentBatteryLevel, double batteryPercentage, string batteryStatus);
         Task<long> GetCountAsync(string? status = null);
     }

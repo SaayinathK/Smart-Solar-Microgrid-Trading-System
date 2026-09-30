@@ -21,6 +21,7 @@ data class RegisterRequest(
     @SerializedName("lastName") val lastName: String,
     @SerializedName("email") val email: String,
     @SerializedName("phoneNumber") val phoneNumber: String,
+    @SerializedName("nic") val nic: String,
     @SerializedName("password") val password: String,
     @SerializedName("confirmPassword") val confirmPassword: String
 )
@@ -33,6 +34,7 @@ data class User(
     @SerializedName("lastName") val lastName: String = "",
     @SerializedName("email") val email: String = "",
     @SerializedName("phoneNumber") val phoneNumber: String = "",
+    @SerializedName("nic") val nic: String = "",
     @SerializedName("role") val role: String = "",
     @SerializedName("isActive") val isActive: Boolean = true,
     @SerializedName("createdAt") val createdAt: String = "",

@@ -16,9 +16,14 @@ public class ReservationResponseDto
 {
     public string Id { get; set; } = string.Empty;
     public string ProsumerId { get; set; } = string.Empty;
+    public string ProsumerName { get; set; } = string.Empty;
     public string MicrogridNodeId { get; set; } = string.Empty;
+    public string MicrogridName { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
     public string EnergySlotId { get; set; } = string.Empty;
     public double EnergyAmount { get; set; }
+    public decimal PricePerUnit { get; set; }
+    public decimal TotalCost { get; set; }
     public DateTime ReservationDate { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
@@ -34,6 +39,7 @@ public class ReservationSummaryDto
     public long ApprovedFutureCount { get; set; }
     public long CompletedThisMonthCount { get; set; }
     public double TotalEnergyReserved { get; set; }
+    public ReservationResponseDto? NextReservation { get; set; }
 }
 
 public class RejectReservationDto { public string? Reason { get; set; } }

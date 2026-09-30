@@ -33,7 +33,7 @@ class MyReservationsFragment : Fragment() {
         _binding = FragmentReservationsBinding.inflate(inflater, container, false); return binding.root
     }
     override fun onViewCreated(view: View, state: Bundle?) {
-        adapter = ReservationAdapter({ row -> cancel(row) }, { row -> modify(row) })
+        adapter = ReservationAdapter({ row -> cancel(row) }, { row -> modify(row) }, { row -> showDetails(row) })
         binding.reservationList.layoutManager = LinearLayoutManager(requireContext()); binding.reservationList.adapter = adapter
         binding.reservationBrowseSlots.setOnClickListener { startActivity(android.content.Intent(requireContext(), AvailableSlotsActivity::class.java)) }
         binding.reservationStatus.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, listOf("All statuses", "Pending", "Approved", "Rejected", "Cancelled", "Completed", "Expired"))
@@ -57,7 +57,8 @@ class MyReservationsFragment : Fragment() {
     private fun refresh() {
         viewLifecycleOwner.lifecycleScope.launch {
             binding.reservationRefresh.isRefreshing = true
-            val cachedEntities = db.reservationDao().all()
+            val cacheNic = SessionManager.getUser()?.nic?.trim()?.uppercase(Locale.ROOT).orEmpty()
+            val cachedEntities = if (cacheNic.isBlank()) emptyList() else db.reservationDao().all(cacheNic)
             val cached = cachedEntities.map { it.toDomain() }
             if (cached.isNotEmpty()) {
                 reservations = cached
@@ -68,7 +69,8 @@ class MyReservationsFragment : Fragment() {
             try {
                 val response = RetrofitClient.apiService.getReservations()
                 if (response.isSuccessful && response.body()?.success == true) {
-                    reservations = response.body()?.data.orEmpty(); db.reservationDao().replaceAll(reservations.map { com.smartmicrogrid.data.local.ReservationEntity.fromDomain(it) })
+                    reservations = response.body()?.data.orEmpty()
+                    if (cacheNic.isNotBlank()) db.reservationDao().replaceAll(cacheNic, reservations.map { com.smartmicrogrid.data.local.ReservationEntity.fromDomain(it) })
                     binding.reservationSync.text = "Synced just now"; render()
                     val summary = RetrofitClient.apiService.getReservationSummary().body()?.data
                     summary?.let { binding.reservationCount.text = "${it.pendingCount} pending · ${it.approvedFutureCount} approved upcoming · ${"%.1f".format(it.totalEnergyReserved)} kWh reserved" }
@@ -84,7 +86,7 @@ class MyReservationsFragment : Fragment() {
             val activeStatus = row.status in listOf("Pending", "Approved")
             val category = if (historySelected) !activeStatus else activeStatus
             val date = binding.reservationDateFilter.text?.toString()?.trim().orEmpty()
-            category && (statusFilter == "All statuses" || row.status.equals(statusFilter, true)) && (date.isBlank() || ReservationTime.localDate(row.startTime) == date) && (q.isBlank() || row.energySlotId.contains(q, true) || row.microgridNodeId.contains(q, true) || row.status.contains(q, true))
+            category && (statusFilter == "All statuses" || row.status.equals(statusFilter, true)) && (date.isBlank() || ReservationTime.localDate(row.startTime) == date) && (q.isBlank() || row.energySlotId.contains(q, true) || row.microgridNodeId.contains(q, true) || row.microgridName.contains(q, true) || row.location.contains(q, true) || row.status.contains(q, true))
         }
         adapter.submit(filtered); binding.reservationEmpty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
         binding.reservationCount.text = "${reservations.count { it.status == "Pending" }} pending · ${reservations.count { it.status == "Approved" }} approved"
@@ -119,6 +121,10 @@ class MyReservationsFragment : Fragment() {
                     } catch (e: Exception) { Toast.makeText(requireContext(), e.message ?: "Unable to update reservation", Toast.LENGTH_LONG).show() }
                 }
             }.show()
+    }
+    private fun showDetails(row: Reservation) {
+        val text = "Reservation ${row.id}\n${row.microgridName.ifBlank { "Microgrid ${row.microgridNodeId}" }}\n${row.location}\n${ReservationTime.display(row.startTime)} – ${ReservationTime.display(row.endTime)}\n${row.energyAmount} kWh\nStatus: ${row.status}"
+        AlertDialog.Builder(requireContext()).setTitle("Reservation details").setMessage(text).setPositiveButton("Done", null).show()
     }
     override fun onDestroyView() { super.onDestroyView(); _binding = null }
 }

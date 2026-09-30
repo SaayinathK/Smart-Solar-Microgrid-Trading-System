@@ -27,12 +27,17 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return ApiResponse<UserResponseDto>.FailureResponse("An account with this email address already exists.");
             }
 
+            var normalizedNic = dto.Nic.Trim().ToUpperInvariant();
+            if (await _userRepository.ExistsByNicAsync(normalizedNic))
+                return ApiResponse<UserResponseDto>.FailureResponse("An account with this NIC already exists.");
+
             var user = new User
             {
                 FirstName = dto.FirstName.Trim(),
                 LastName = dto.LastName.Trim(),
                 Email = normalizedEmail,
                 PhoneNumber = dto.PhoneNumber?.Trim() ?? string.Empty,
+                Nic = normalizedNic,
                 PasswordHash = PasswordHelper.HashPassword(dto.Password),
                 Role = Role.Prosumer, // Public registration is strictly forced to Prosumer
                 IsActive = true,
@@ -109,7 +114,8 @@ namespace SmartMicrogrid.API.Services.Implementation
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                Role = user.Role.ToString(),
+                Nic = user.Nic,
+                Role = RoleCompatibility.ToAssignmentRole(user.Role),
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt

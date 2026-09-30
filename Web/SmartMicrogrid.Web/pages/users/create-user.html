@@ -49,6 +49,11 @@
             <input type="tel" id="phoneNumber" class="form-control" placeholder="+1234567890">
           </div>
 
+          <div class="form-group" id="nic-field">
+            <label class="form-label" for="nic">Prosumer NIC</label>
+            <input type="text" id="nic" class="form-control" placeholder="123456789V or 200012345678" pattern="(?:[0-9]{9}[VvXx]|[0-9]{12})" maxlength="12">
+          </div>
+
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="role">Assigned Role *</label>

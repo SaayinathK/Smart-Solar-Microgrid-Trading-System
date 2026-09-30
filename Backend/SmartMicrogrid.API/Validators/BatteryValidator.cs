@@ -6,6 +6,8 @@ namespace SmartMicrogrid.API.Validators
     {
         public static (bool isValid, string? errorMessage) ValidateBattery(UpdateBatteryDto dto)
         {
+            if (!double.IsFinite(dto.BatteryCapacity) || !double.IsFinite(dto.CurrentBatteryLevel))
+                return (false, "Battery values must be finite numbers.");
             if (dto.BatteryCapacity < 0)
                 return (false, "Battery capacity cannot be negative.");
 
@@ -14,6 +16,9 @@ namespace SmartMicrogrid.API.Validators
 
             if (dto.BatteryCapacity > 0 && dto.CurrentBatteryLevel > dto.BatteryCapacity)
                 return (false, "Current battery level cannot exceed total battery capacity.");
+
+            if (dto.BatteryCapacity == 0 && dto.CurrentBatteryLevel != 0)
+                return (false, "Current battery level must be zero when battery capacity is zero.");
 
             return (true, null);
         }

@@ -47,7 +47,12 @@ namespace SmartMicrogrid.API.Services.Implementation
                 throw new ArgumentException(errorMessage);
             }
 
-            var initialAvailable = dto.AvailableAmount ?? dto.EnergyAmount;
+            // M1 publishes the whole slot amount; clients cannot publish a pre-booked slot.
+            var initialAvailable = dto.EnergyAmount;
+
+            if (microgrid == null || string.IsNullOrWhiteSpace(microgrid.Id) ||
+                !await _microgridRepository.TryAdjustSlotCapacityAsync(microgrid.Id, dto.EnergyAmount))
+                throw new InvalidOperationException("Insufficient available microgrid capacity to publish this slot.");
 
             var slot = new EnergySlot
             {
@@ -57,21 +62,21 @@ namespace SmartMicrogrid.API.Services.Implementation
                 StartTime = dto.StartTime.ToUniversalTime(),
                 EndTime = dto.EndTime.ToUniversalTime(),
                 PricePerUnit = dto.PricePerUnit,
-                Status = string.IsNullOrWhiteSpace(dto.Status) ? "Available" : dto.Status,
+                Status = "Available",
                 CreatedBy = createdBy,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
 
-            var created = await _slotRepository.CreateAsync(slot);
-
-            // Deduct available capacity on the microgrid
-            if (microgrid != null)
+            EnergySlot created;
+            try
             {
-                var newAvailable = microgrid.AvailableCapacity - dto.EnergyAmount;
-                if (newAvailable < 0) newAvailable = 0;
-                var newReserved = microgrid.ReservedCapacity + dto.EnergyAmount;
-                await _microgridRepository.UpdateCapacityAsync(microgrid.Id!, microgrid.Capacity, newAvailable, newReserved, microgrid.UsedCapacity);
+                created = await _slotRepository.CreateAsync(slot);
+            }
+            catch
+            {
+                await _microgridRepository.TryAdjustSlotCapacityAsync(microgrid.Id!, -dto.EnergyAmount);
+                throw;
             }
 
             return MapToResponseDto(created, microgrid);
@@ -89,21 +94,43 @@ namespace SmartMicrogrid.API.Services.Implementation
                 throw new ArgumentException(errorMessage);
             }
 
+            var bookedAmount = existing.EnergyAmount - existing.AvailableAmount;
+            if (dto.EnergyAmount < bookedAmount)
+                throw new ArgumentException($"Slot total cannot be reduced below {bookedAmount} kWh already booked.");
+            if (Math.Abs(dto.EnergyAmount - existing.EnergyAmount) > 0.000001 && bookedAmount > 0)
+                throw new InvalidOperationException("Slot energy cannot be resized after M2 has booked part of it.");
+
+            var capacityDelta = dto.EnergyAmount - existing.EnergyAmount;
+            if (Math.Abs(capacityDelta) > 0.000001 &&
+                (microgrid?.Id == null || !await _microgridRepository.TryAdjustSlotCapacityAsync(microgrid.Id, capacityDelta)))
+                throw new InvalidOperationException("Insufficient available capacity to resize this slot.");
+
             existing.EnergyAmount = dto.EnergyAmount;
-            existing.AvailableAmount = dto.AvailableAmount;
+            existing.AvailableAmount = Math.Max(0, existing.AvailableAmount + capacityDelta);
             existing.StartTime = dto.StartTime.ToUniversalTime();
             existing.EndTime = dto.EndTime.ToUniversalTime();
             existing.PricePerUnit = dto.PricePerUnit;
             existing.Status = dto.Status;
             existing.UpdatedAt = DateTime.UtcNow;
 
+            existing.Status = DeriveStatus(existing);
             var success = await _slotRepository.UpdateAsync(id, existing);
+            if (!success && Math.Abs(capacityDelta) > 0.000001 && microgrid?.Id != null)
+                await _microgridRepository.TryAdjustSlotCapacityAsync(microgrid.Id, -capacityDelta);
             return success ? MapToResponseDto(existing, microgrid) : null;
         }
 
         public async Task<bool> DeleteAsync(string id)
         {
-            return await _slotRepository.DeleteAsync(id);
+            var existing = await _slotRepository.GetByIdAsync(id);
+            if (existing == null) return false;
+            if (existing.EnergyAmount - existing.AvailableAmount > 0.000001)
+                throw new InvalidOperationException("A slot with booked M2 energy cannot be deleted.");
+            if (!await _microgridRepository.TryAdjustSlotCapacityAsync(existing.MicrogridNodeId, -existing.AvailableAmount))
+                throw new InvalidOperationException("Unable to return slot energy to microgrid capacity.");
+            if (await _slotRepository.DeleteAsync(id)) return true;
+            await _microgridRepository.TryAdjustSlotCapacityAsync(existing.MicrogridNodeId, existing.AvailableAmount);
+            return false;
         }
 
         public async Task<bool> UpdateStatusAsync(string id, string status)
@@ -114,14 +141,38 @@ namespace SmartMicrogrid.API.Services.Implementation
                 throw new ArgumentException($"Invalid slot status '{status}'. Allowed values: Available, PartiallyReserved, FullyReserved, Expired, Cancelled.");
             }
 
-            return await _slotRepository.UpdateStatusAsync(id, status);
+            var existing = await _slotRepository.GetByIdAsync(id);
+            if (existing == null) return false;
+            if (status.Equals("Expired", StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException("Slot expiry is managed by the UTC cleanup service.");
+            if (status.Equals("Cancelled", StringComparison.OrdinalIgnoreCase))
+            {
+                if (existing.EnergyAmount - existing.AvailableAmount > 0.000001)
+                    throw new InvalidOperationException("A slot with booked M2 energy cannot be cancelled.");
+                var amountToRelease = existing.AvailableAmount;
+                if (!await _microgridRepository.TryAdjustSlotCapacityAsync(existing.MicrogridNodeId, -amountToRelease))
+                    throw new InvalidOperationException("Unable to return slot energy to microgrid capacity.");
+                existing.AvailableAmount = 0;
+                existing.Status = "Cancelled";
+                var updated = await _slotRepository.UpdateAsync(id, existing);
+                if (!updated)
+                    await _microgridRepository.TryAdjustSlotCapacityAsync(existing.MicrogridNodeId, amountToRelease);
+                return updated;
+            }
+            else if (status.Equals("PartiallyReserved", StringComparison.OrdinalIgnoreCase) || status.Equals("FullyReserved", StringComparison.OrdinalIgnoreCase))
+                throw new ArgumentException("Reservation state is managed by M2.");
+            else if (status.Equals("Available", StringComparison.OrdinalIgnoreCase) && existing.AvailableAmount < existing.EnergyAmount)
+                throw new InvalidOperationException("A slot with M2 bookings cannot be marked fully available.");
+
+            existing.Status = DeriveStatus(existing);
+            return await _slotRepository.UpdateAsync(id, existing);
         }
 
         public async Task<IEnumerable<EnergyAvailabilityResponseDto>> GetEnergyAvailabilityAsync(EnergyAvailabilityQueryDto query)
         {
             var slots = await _slotRepository.GetAllAsync(
                 query.MicrogridId,
-                query.Status ?? "Available",
+                null,
                 query.StartTime,
                 query.EndTime,
                 query.MinimumEnergy
@@ -129,7 +180,9 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             // Filter out expired or cancelled slots
             var now = DateTime.UtcNow;
-            slots = slots.Where(s => s.Status == "Available" && s.EndTime > now && s.AvailableAmount > 0);
+            slots = slots.Where(s => (s.Status == "Available" || s.Status == "PartiallyReserved") && s.StartTime > now && s.EndTime > now && s.AvailableAmount > 0);
+            if (!string.IsNullOrWhiteSpace(query.Status))
+                slots = slots.Where(s => string.Equals(s.Status, query.Status, StringComparison.OrdinalIgnoreCase));
 
             var microgridDict = await GetMicrogridDictionaryAsync(slots.Select(s => s.MicrogridNodeId));
 
@@ -137,7 +190,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             slots = slots.Where(s => 
             {
                 var mg = microgridDict.GetValueOrDefault(s.MicrogridNodeId);
-                return mg != null && mg.Status == "Active";
+                return mg != null && mg.IsActive && string.Equals(mg.Status, "Active", StringComparison.OrdinalIgnoreCase);
             });
 
             if (!string.IsNullOrWhiteSpace(query.Location))
@@ -185,6 +238,14 @@ namespace SmartMicrogrid.API.Services.Implementation
             return result;
         }
 
+        private static string DeriveStatus(EnergySlot slot)
+        {
+            if (slot.EndTime <= DateTime.UtcNow) return "Expired";
+            if (slot.AvailableAmount <= 0.000001) return "FullyReserved";
+            if (slot.AvailableAmount + 0.000001 < slot.EnergyAmount) return "PartiallyReserved";
+            return "Available";
+        }
+
         private static EnergySlotResponseDto MapToResponseDto(EnergySlot slot, MicrogridNode? microgrid)
         {
             return new EnergySlotResponseDto
@@ -206,3 +267,4 @@ namespace SmartMicrogrid.API.Services.Implementation
         }
     }
 }
+

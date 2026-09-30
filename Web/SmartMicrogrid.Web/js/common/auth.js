@@ -9,7 +9,8 @@ const AuthGuard = {
       return false;
     }
 
-    if (requiredRole && SessionManager.getUserRole() !== requiredRole) {
+    const allowedRoles = requiredRole == null ? [] : (Array.isArray(requiredRole) ? requiredRole : [requiredRole]);
+    if (allowedRoles.length && !allowedRoles.includes(SessionManager.getUserRole())) {
       ApiClient.showToast('Access denied: You do not have permission to view this page.', 'error');
       setTimeout(() => {
         window.location.href = '/dashboard.html';
@@ -18,6 +19,10 @@ const AuthGuard = {
     }
 
     return true;
+  },
+
+  requireRole(roles) {
+    return this.requireAuth(roles);
   },
 
   redirectIfAuthenticated() {

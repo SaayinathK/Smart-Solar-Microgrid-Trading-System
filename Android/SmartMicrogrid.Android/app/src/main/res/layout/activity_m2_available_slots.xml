@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent">
     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:padding="16dp">
+        <EditText android:id="@+id/m2_slots_location_filter" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Search microgrid or location" android:singleLine="true" android:inputType="text"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+            <EditText android:id="@+id/m2_slots_minimum_filter" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:hint="Minimum kWh" android:singleLine="true" android:inputType="numberDecimal"/>
+            <EditText android:id="@+id/m2_slots_date_filter" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:hint="Start date (YYYY-MM-DD)" android:singleLine="true" android:inputType="date"/>
+        </LinearLayout>
         <Button android:id="@+id/m2_slots_refresh" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Refresh available slots"/>
         <androidx.recyclerview.widget.RecyclerView android:id="@+id/m2_slots_list" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:clipToPadding="false" android:paddingTop="12dp"/>
     </LinearLayout>

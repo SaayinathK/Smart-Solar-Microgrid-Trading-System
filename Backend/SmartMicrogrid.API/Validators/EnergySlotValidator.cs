@@ -17,6 +17,9 @@ namespace SmartMicrogrid.API.Validators
             if (dto.EnergyAmount <= 0)
                 return (false, "Energy amount must be greater than zero.");
 
+            if (!double.IsFinite(dto.EnergyAmount))
+                return (false, "Energy amount must be a finite number.");
+
             var available = dto.AvailableAmount ?? dto.EnergyAmount;
             if (available < 0)
                 return (false, "Available amount cannot be negative.");
@@ -26,6 +29,9 @@ namespace SmartMicrogrid.API.Validators
 
             if (dto.StartTime >= dto.EndTime)
                 return (false, "Slot start time must be strictly earlier than end time.");
+
+            if (dto.StartTime.ToUniversalTime() <= DateTime.UtcNow)
+                return (false, "Slot start time must be in the future (UTC).");
 
             if (dto.PricePerUnit < 0)
                 return (false, "Price per unit cannot be negative.");
@@ -41,6 +47,9 @@ namespace SmartMicrogrid.API.Validators
             if (dto.EnergyAmount <= 0)
                 return (false, "Energy amount must be greater than zero.");
 
+            if (!double.IsFinite(dto.EnergyAmount) || !double.IsFinite(dto.AvailableAmount))
+                return (false, "Energy amounts must be finite numbers.");
+
             if (dto.AvailableAmount < 0)
                 return (false, "Available amount cannot be negative.");
 
@@ -49,6 +58,9 @@ namespace SmartMicrogrid.API.Validators
 
             if (dto.StartTime >= dto.EndTime)
                 return (false, "Slot start time must be strictly earlier than end time.");
+
+            if (dto.StartTime.ToUniversalTime() <= DateTime.UtcNow)
+                return (false, "Slot start time must be in the future (UTC).");
 
             if (dto.PricePerUnit < 0)
                 return (false, "Price per unit cannot be negative.");

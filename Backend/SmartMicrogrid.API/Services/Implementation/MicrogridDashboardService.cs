@@ -22,10 +22,10 @@ namespace SmartMicrogrid.API.Services.Implementation
             var nodes = (await _microgridRepository.GetAllAsync()).ToList();
 
             var totalCount = nodes.Count;
-            var activeCount = nodes.Count(n => n.Status == "Active");
-            var inactiveCount = nodes.Count(n => n.Status == "Inactive");
-            var maintenanceCount = nodes.Count(n => n.Status == "Maintenance");
-            var offlineCount = nodes.Count(n => n.Status == "Offline");
+            var activeCount = nodes.Count(n => n.IsActive && n.Status.Equals("Active", System.StringComparison.OrdinalIgnoreCase));
+            var inactiveCount = nodes.Count(n => n.Status.Equals("Inactive", System.StringComparison.OrdinalIgnoreCase));
+            var maintenanceCount = nodes.Count(n => n.Status.Equals("Maintenance", System.StringComparison.OrdinalIgnoreCase));
+            var offlineCount = nodes.Count(n => n.Status.Equals("Offline", System.StringComparison.OrdinalIgnoreCase));
 
             var totalCapacity = nodes.Sum(n => n.Capacity);
             var availableCapacity = nodes.Sum(n => n.AvailableCapacity);
@@ -36,7 +36,9 @@ namespace SmartMicrogrid.API.Services.Implementation
             var currentBatteryLvl = nodes.Sum(n => n.CurrentBatteryLevel);
             var avgBatteryPct = nodes.Any() ? nodes.Average(n => n.BatteryPercentage) : 0.0;
 
-            var activeSlotsCount = await _slotRepository.GetCountAsync("Available");
+            var slots = (await _slotRepository.GetAllAsync()).ToList();
+            var activeNodeIds = nodes.Where(n => n.IsActive && n.Status.Equals("Active", System.StringComparison.OrdinalIgnoreCase)).Select(n => n.Id).ToHashSet();
+            var activeSlotsCount = slots.Count(s => activeNodeIds.Contains(s.MicrogridNodeId) && (s.Status == "Available" || s.Status == "PartiallyReserved") && s.AvailableAmount > 0 && s.StartTime > System.DateTime.UtcNow && s.EndTime > System.DateTime.UtcNow);
             var availableEnergy = await _slotRepository.GetTotalAvailableEnergyAsync();
 
             return new MicrogridDashboardDto

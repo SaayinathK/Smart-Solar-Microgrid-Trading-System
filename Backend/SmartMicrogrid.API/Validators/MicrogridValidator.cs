@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using SmartMicrogrid.API.DTOs.M1;
 
 namespace SmartMicrogrid.API.Validators
@@ -16,11 +17,21 @@ namespace SmartMicrogrid.API.Validators
             if (dto.Capacity <= 0)
                 return (false, "Total generation capacity must be greater than zero.");
 
+            if (!double.IsFinite(dto.Capacity) || !double.IsFinite(dto.Latitude) || !double.IsFinite(dto.Longitude))
+                return (false, "Capacity and coordinates must be finite numbers.");
+
             if (dto.BatteryCapacity < 0)
                 return (false, "Battery capacity cannot be negative.");
 
             if (dto.CurrentBatteryLevel < 0 || (dto.BatteryCapacity > 0 && dto.CurrentBatteryLevel > dto.BatteryCapacity))
                 return (false, "Current battery level must be between 0 and total battery capacity.");
+
+            if (dto.BatteryCapacity == 0 && dto.CurrentBatteryLevel != 0)
+                return (false, "Current battery level must be zero when battery capacity is zero.");
+
+            if (!new[] { "Active", "Inactive", "Maintenance", "Offline" }.Contains(dto.Status, StringComparer.OrdinalIgnoreCase) ||
+                dto.IsActive != string.Equals(dto.Status, "Active", StringComparison.OrdinalIgnoreCase))
+                return (false, "Microgrid status and active flag must agree; only Active status may be active.");
 
             if (dto.Latitude < -90.0 || dto.Latitude > 90.0)
                 return (false, "Latitude must be between -90 and 90 degrees.");
@@ -42,8 +53,15 @@ namespace SmartMicrogrid.API.Validators
             if (dto.Capacity <= 0)
                 return (false, "Total generation capacity must be greater than zero.");
 
+            if (!double.IsFinite(dto.Capacity) || !double.IsFinite(dto.Latitude) || !double.IsFinite(dto.Longitude))
+                return (false, "Capacity and coordinates must be finite numbers.");
+
             if (dto.BatteryCapacity < 0)
                 return (false, "Battery capacity cannot be negative.");
+
+            if (!new[] { "Active", "Inactive", "Maintenance", "Offline" }.Contains(dto.Status, StringComparer.OrdinalIgnoreCase) ||
+                dto.IsActive != string.Equals(dto.Status, "Active", StringComparison.OrdinalIgnoreCase))
+                return (false, "Microgrid status and active flag must agree; only Active status may be active.");
 
             if (dto.Latitude < -90.0 || dto.Latitude > 90.0)
                 return (false, "Latitude must be between -90 and 90 degrees.");
