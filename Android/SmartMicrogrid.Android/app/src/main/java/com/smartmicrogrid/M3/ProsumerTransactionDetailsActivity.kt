@@ -81,6 +81,18 @@ class ProsumerTransactionDetailsActivity : AppCompatActivity() {
             putExtra(TransactionQrActivity.EXTRA_TRANSACTION_CODE, transaction.transactionCode)
             putExtra(TransactionQrActivity.EXTRA_ENERGY_AMOUNT, transaction.energyAmount)
             putExtra(TransactionQrActivity.EXTRA_STATUS, transaction.status)
+            putExtra(TransactionQrActivity.EXTRA_MICROGRID_NODE_ID, transaction.microgridNodeId)
+            putExtra(TransactionQrActivity.EXTRA_ENERGY_SLOT_ID, transaction.energySlotId)
+            putExtra(
+                TransactionQrActivity.EXTRA_SCHEDULE_LABEL,
+                buildString {
+                    append(TransactionUiFormatters.dateTime(transaction.createdAt))
+                    if (transaction.updatedAt.isNotBlank()) {
+                        append(" • ")
+                        append(TransactionUiFormatters.dateTime(transaction.updatedAt))
+                    }
+                }
+            )
         })
     }
 

@@ -27,6 +27,7 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
+                <!-- ── Page title ── -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -35,6 +36,7 @@
                     android:textSize="22sp"
                     android:textStyle="bold" />
 
+                <!-- ── Status chip ── -->
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_status"
                     android:layout_width="wrap_content"
@@ -46,13 +48,19 @@
                     android:textColor="?attr/colorOnSurface"
                     app:chipBackgroundColor="@color/m3_status_success_background" />
 
+                <!-- ══════════════════════════════════════════════
+                     ISSUE 3 FIX — Polished horizontal stepper
+                     Each step = [node (circle)] + [label below]
+                     Connected by horizontal lines.
+                     Uses drawables instead of Unicode symbols.
+                ═══════════════════════════════════════════════ -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/transaction_timeline"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    app:cardBackgroundColor="?android:attr/colorBackground"
-                    app:cardCornerRadius="12dp"
+                    android:layout_marginTop="14dp"
+                    app:cardBackgroundColor="?attr/colorSurfaceVariant"
+                    app:cardCornerRadius="18dp"
                     app:strokeColor="?attr/colorOutline"
                     app:strokeWidth="1dp">
 
@@ -60,25 +68,240 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="16dp">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Transaction progress"
                             android:textColor="?attr/colorOnSurface"
+                            android:textSize="13sp"
                             android:textStyle="bold" />
 
-                        <TextView android:id="@+id/tv_timeline_created" style="@style/TransactionDetailValue" android:layout_marginTop="6dp" android:text="1  ✓  Created" />
-                        <TextView android:id="@+id/tv_timeline_qr" style="@style/TransactionDetailValue" android:text="2  ○  QR Generated" />
-                        <TextView android:id="@+id/tv_timeline_verified" style="@style/TransactionDetailValue" android:text="3  ○  Verified" />
-                        <TextView android:id="@+id/tv_timeline_transfer" style="@style/TransactionDetailValue" android:text="4  ○  Energy Transfer" />
-                        <TextView android:id="@+id/tv_timeline_completed" style="@style/TransactionDetailValue" android:text="5  ○  Completed" />
+                        <!-- Step nodes + connectors row -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Step 0: Created — node -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <View
+                                    android:id="@+id/tv_timeline_created"
+                                    android:layout_width="18dp"
+                                    android:layout_height="18dp"
+                                    android:layout_gravity="center"
+                                    android:background="@drawable/bg_timeline_node_complete" />
+
+                                <TextView
+                                    android:id="@+id/tv_timeline_created_label"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_marginTop="5dp"
+                                    android:ellipsize="none"
+                                    android:gravity="center"
+                                    android:maxLines="2"
+                                    android:text="Created"
+                                    android:textColor="@color/m3_success"
+                                    android:textSize="10sp" />
+                            </LinearLayout>
+
+                            <!-- Connector 1 -->
+                            <View
+                                android:id="@+id/timeline_connector_1"
+                                android:layout_width="0dp"
+                                android:layout_height="2dp"
+                                android:layout_marginBottom="20dp"
+                                android:layout_weight="0.6"
+                                android:background="@color/m3_success" />
+
+                            <!-- Step 1: QR Ready -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <View
+                                    android:id="@+id/tv_timeline_qr"
+                                    android:layout_width="18dp"
+                                    android:layout_height="18dp"
+                                    android:layout_gravity="center"
+                                    android:background="@drawable/bg_timeline_node_upcoming" />
+
+                                <TextView
+                                    android:id="@+id/tv_timeline_qr_label"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_marginTop="5dp"
+                                    android:ellipsize="none"
+                                    android:gravity="center"
+                                    android:maxLines="2"
+                                    android:text="QR Ready"
+                                    android:textColor="?android:attr/textColorSecondary"
+                                    android:textSize="10sp" />
+                            </LinearLayout>
+
+                            <!-- Connector 2 -->
+                            <View
+                                android:id="@+id/timeline_connector_2"
+                                android:layout_width="0dp"
+                                android:layout_height="2dp"
+                                android:layout_marginBottom="20dp"
+                                android:layout_weight="0.6"
+                                android:background="?attr/colorOutline" />
+
+                            <!-- Step 2: Verified -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <View
+                                    android:id="@+id/tv_timeline_verified"
+                                    android:layout_width="18dp"
+                                    android:layout_height="18dp"
+                                    android:layout_gravity="center"
+                                    android:background="@drawable/bg_timeline_node_upcoming" />
+
+                                <TextView
+                                    android:id="@+id/tv_timeline_verified_label"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_marginTop="5dp"
+                                    android:ellipsize="none"
+                                    android:gravity="center"
+                                    android:maxLines="2"
+                                    android:text="Verified"
+                                    android:textColor="?android:attr/textColorSecondary"
+                                    android:textSize="10sp" />
+                            </LinearLayout>
+
+                            <!-- Connector 3 -->
+                            <View
+                                android:id="@+id/timeline_connector_3"
+                                android:layout_width="0dp"
+                                android:layout_height="2dp"
+                                android:layout_marginBottom="20dp"
+                                android:layout_weight="0.6"
+                                android:background="?attr/colorOutline" />
+
+                            <!-- Step 3: Transfer -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <View
+                                    android:id="@+id/tv_timeline_transfer"
+                                    android:layout_width="18dp"
+                                    android:layout_height="18dp"
+                                    android:layout_gravity="center"
+                                    android:background="@drawable/bg_timeline_node_upcoming" />
+
+                                <TextView
+                                    android:id="@+id/tv_timeline_transfer_label"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_marginTop="5dp"
+                                    android:ellipsize="none"
+                                    android:gravity="center"
+                                    android:maxLines="2"
+                                    android:text="Transfer"
+                                    android:textColor="?android:attr/textColorSecondary"
+                                    android:textSize="10sp" />
+                            </LinearLayout>
+
+                            <!-- Connector 4 -->
+                            <View
+                                android:id="@+id/timeline_connector_4"
+                                android:layout_width="0dp"
+                                android:layout_height="2dp"
+                                android:layout_marginBottom="20dp"
+                                android:layout_weight="0.6"
+                                android:background="?attr/colorOutline" />
+
+                            <!-- Step 4: Completed -->
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <View
+                                    android:id="@+id/tv_timeline_completed"
+                                    android:layout_width="18dp"
+                                    android:layout_height="18dp"
+                                    android:layout_gravity="center"
+                                    android:background="@drawable/bg_timeline_node_upcoming" />
+
+                                <TextView
+                                    android:id="@+id/tv_timeline_completed_label"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center"
+                                    android:layout_marginTop="5dp"
+                                    android:ellipsize="none"
+                                    android:gravity="center"
+                                    android:maxLines="2"
+                                    android:text="Done"
+                                    android:textColor="?android:attr/textColorSecondary"
+                                    android:textSize="10sp" />
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <!-- Status summary below stepper -->
+                        <TextView
+                            android:id="@+id/tv_status_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="QR READY"
+                            android:textColor="?attr/colorPrimary"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_status_message"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Waiting for verification"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="14sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:text="Transaction" android:textColor="?attr/colorOnSurface" android:textSize="16sp" android:textStyle="bold" />
+                <!-- ── Transaction section header ── -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="Transaction"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
+                <!-- Verification success banner -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/verification_success_card"
                     android:layout_width="match_parent"
@@ -125,45 +348,105 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Transaction Code" android:textColor="?android:attr/textColorSecondary" android:textSize="13sp" />
+                <!-- ── ISSUE 7 FIX: Transaction Code — single-line + ellipsis to prevent character wrapping ── -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Transaction Code"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
                 <TextView
                     android:id="@+id/tv_transaction_code"
-                    style="@style/TransactionDetailValue"
-                    android:layout_marginTop="16dp" />
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textIsSelectable="true"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace" />
 
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Reservation ID" android:textColor="?android:attr/textColorSecondary" android:textSize="13sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Reservation ID"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
                 <TextView
                     android:id="@+id/tv_reservation_id"
                     style="@style/TransactionDetailValue" />
 
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:text="Energy and participants" android:textColor="?attr/colorOnSurface" android:textSize="16sp" android:textStyle="bold" />
+                <!-- ── Energy and participants section ── -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="Energy and participants"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Prosumer" android:textColor="?android:attr/textColorSecondary" android:textSize="13sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Prosumer"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
                 <TextView
                     android:id="@+id/tv_prosumer_id"
                     style="@style/TransactionDetailValue" />
 
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Microgrid Node ID" android:textColor="?android:attr/textColorSecondary" android:textSize="13sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Microgrid Node ID"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
                 <TextView
                     android:id="@+id/tv_microgrid_node_id"
                     style="@style/TransactionDetailValue" />
 
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Energy Slot ID" android:textColor="?android:attr/textColorSecondary" android:textSize="13sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Energy Slot ID"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
                 <TextView
                     android:id="@+id/tv_energy_slot_id"
                     style="@style/TransactionDetailValue" />
 
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Energy Amount" android:textColor="?android:attr/textColorSecondary" android:textSize="13sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Energy Amount"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
                 <TextView
                     android:id="@+id/tv_energy_amount"
                     style="@style/TransactionDetailValue" />
 
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Status" android:textColor="?android:attr/textColorSecondary" android:textSize="13sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Status"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="13sp" />
                 <TextView
                     android:id="@+id/tv_status"
                     style="@style/TransactionDetailValue"
                     android:textColor="@color/m3_success" />
 
+                <!-- QR action buttons -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_generate_qr"
                     android:layout_width="match_parent"
@@ -195,25 +478,98 @@
                     android:textSize="14sp"
                     android:visibility="gone" />
 
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:text="Activity times" android:textColor="?attr/colorOnSurface" android:textSize="16sp" android:textStyle="bold" />
+                <!-- ══════════════════════════════════════════════
+                     ISSUE 8 FIX — Activity timestamps
+                     Each entry is label (small secondary) + value
+                     (normal primary) as separate TextViews for
+                     proper visual hierarchy.
+                ═══════════════════════════════════════════════ -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="Activity times"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <!-- Created -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Created"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.04" />
 
                 <TextView
                     android:id="@+id/tv_created_at"
-                    style="@style/TransactionDetailValue" />
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp" />
+
+                <!-- Updated -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Updated"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.04" />
 
                 <TextView
                     android:id="@+id/tv_updated_at"
-                    style="@style/TransactionDetailValue" />
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp" />
+
+                <!-- Verified -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Verified"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.04" />
 
                 <TextView
                     android:id="@+id/tv_verification_time"
-                    style="@style/TransactionDetailValue" />
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp" />
+
+                <!-- Energy Transfer -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Energy Transfer"
+                    android:textColor="?android:attr/textColorSecondary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.04" />
 
                 <TextView
                     android:id="@+id/tv_energy_transfer_time"
-                    style="@style/TransactionDetailValue" />
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp" />
 
-
+                <!-- ── Action area ── -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_confirm_energy_transfer"
                     android:layout_width="match_parent"
