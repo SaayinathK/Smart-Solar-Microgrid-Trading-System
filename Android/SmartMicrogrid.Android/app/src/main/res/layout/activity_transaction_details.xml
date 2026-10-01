@@ -27,7 +27,6 @@
                 android:orientation="vertical"
                 android:padding="20dp">
 
-                <!-- ── Page title ── -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -36,7 +35,6 @@
                     android:textSize="22sp"
                     android:textStyle="bold" />
 
-                <!-- ── Status chip ── -->
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_status"
                     android:layout_width="wrap_content"
@@ -48,12 +46,6 @@
                     android:textColor="?attr/colorOnSurface"
                     app:chipBackgroundColor="@color/m3_status_success_background" />
 
-                <!-- ══════════════════════════════════════════════
-                     ISSUE 3 FIX — Polished horizontal stepper
-                     Each step = [node (circle)] + [label below]
-                     Connected by horizontal lines.
-                     Uses drawables instead of Unicode symbols.
-                ═══════════════════════════════════════════════ -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/transaction_timeline"
                     android:layout_width="match_parent"
@@ -78,7 +70,6 @@
                             android:textSize="13sp"
                             android:textStyle="bold" />
 
-                        <!-- Step nodes + connectors row -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -86,7 +77,6 @@
                             android:gravity="center_vertical"
                             android:orientation="horizontal">
 
-                            <!-- Step 0: Created — node -->
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -115,7 +105,6 @@
                                     android:textSize="10sp" />
                             </LinearLayout>
 
-                            <!-- Connector 1 -->
                             <View
                                 android:id="@+id/timeline_connector_1"
                                 android:layout_width="0dp"
@@ -124,7 +113,6 @@
                                 android:layout_weight="0.6"
                                 android:background="@color/m3_success" />
 
-                            <!-- Step 1: QR Ready -->
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -153,7 +141,6 @@
                                     android:textSize="10sp" />
                             </LinearLayout>
 
-                            <!-- Connector 2 -->
                             <View
                                 android:id="@+id/timeline_connector_2"
                                 android:layout_width="0dp"
@@ -162,7 +149,6 @@
                                 android:layout_weight="0.6"
                                 android:background="?attr/colorOutline" />
 
-                            <!-- Step 2: Verified -->
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -191,7 +177,6 @@
                                     android:textSize="10sp" />
                             </LinearLayout>
 
-                            <!-- Connector 3 -->
                             <View
                                 android:id="@+id/timeline_connector_3"
                                 android:layout_width="0dp"
@@ -200,7 +185,6 @@
                                 android:layout_weight="0.6"
                                 android:background="?attr/colorOutline" />
 
-                            <!-- Step 3: Transfer -->
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -229,7 +213,6 @@
                                     android:textSize="10sp" />
                             </LinearLayout>
 
-                            <!-- Connector 4 -->
                             <View
                                 android:id="@+id/timeline_connector_4"
                                 android:layout_width="0dp"
@@ -238,7 +221,6 @@
                                 android:layout_weight="0.6"
                                 android:background="?attr/colorOutline" />
 
-                            <!-- Step 4: Completed -->
                             <LinearLayout
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
@@ -269,7 +251,6 @@
 
                         </LinearLayout>
 
-                        <!-- Status summary below stepper -->
                         <TextView
                             android:id="@+id/tv_status_title"
                             android:layout_width="match_parent"
@@ -291,7 +272,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- ── Transaction section header ── -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -301,7 +281,6 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <!-- Verification success banner -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/verification_success_card"
                     android:layout_width="match_parent"
@@ -348,7 +327,6 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- ── ISSUE 7 FIX: Transaction Code — single-line + ellipsis to prevent character wrapping ── -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -380,7 +358,6 @@
                     android:id="@+id/tv_reservation_id"
                     style="@style/TransactionDetailValue" />
 
-                <!-- ── Energy and participants section ── -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -446,7 +423,6 @@
                     style="@style/TransactionDetailValue"
                     android:textColor="@color/m3_success" />
 
-                <!-- QR action buttons -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_generate_qr"
                     android:layout_width="match_parent"
@@ -478,12 +454,6 @@
                     android:textSize="14sp"
                     android:visibility="gone" />
 
-                <!-- ══════════════════════════════════════════════
-                     ISSUE 8 FIX — Activity timestamps
-                     Each entry is label (small secondary) + value
-                     (normal primary) as separate TextViews for
-                     proper visual hierarchy.
-                ═══════════════════════════════════════════════ -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -493,7 +463,6 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <!-- Created -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -512,7 +481,6 @@
                     android:textColor="?attr/colorOnSurface"
                     android:textSize="14sp" />
 
-                <!-- Updated -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -531,7 +499,6 @@
                     android:textColor="?attr/colorOnSurface"
                     android:textSize="14sp" />
 
-                <!-- Verified -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -550,7 +517,6 @@
                     android:textColor="?attr/colorOnSurface"
                     android:textSize="14sp" />
 
-                <!-- Energy Transfer -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -569,7 +535,6 @@
                     android:textColor="?attr/colorOnSurface"
                     android:textSize="14sp" />
 
-                <!-- ── Action area ── -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_confirm_energy_transfer"
                     android:layout_width="match_parent"

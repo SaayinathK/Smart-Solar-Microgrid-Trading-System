@@ -165,7 +165,6 @@ class TransactionDetailsActivity : AppCompatActivity() {
             binding.detailsContent.visibility = View.GONE
             binding.errorContent.visibility = View.VISIBLE
             binding.tvError.text = error
-            // Error is shown in the full-screen error panel above — Toast not needed.
         }
 
         viewModel.isVerifying.observe(this) { verifying ->
@@ -213,7 +212,6 @@ class TransactionDetailsActivity : AppCompatActivity() {
             }
             binding.tvQrGenerationMessage.text = error
             binding.tvQrGenerationMessage.visibility = View.VISIBLE
-            // QR generation error is shown inline in tvQrGenerationMessage — Toast not needed.
         }
 
         viewModel.verificationResult.observe(this) { transaction ->
@@ -243,7 +241,6 @@ class TransactionDetailsActivity : AppCompatActivity() {
                 if (it == getString(R.string.transaction_already_verified)) {
                     viewModel.loadTransaction(displayedTransactionId)
                 }
-                // Inline tvVerificationMessage already shows the error — Toast removed to avoid duplication.
             }
         }
 
@@ -322,7 +319,6 @@ class TransactionDetailsActivity : AppCompatActivity() {
         binding.chipStatus.chipBackgroundColor = ColorStateList.valueOf(getColor(statusBackground))
         binding.chipStatus.setTextColor(getColor(statusForeground))
         binding.tvStatus.setTextColor(getColor(statusForeground))
-        // Issue 8: timestamps now show just the value (labels are separate Views in layout)
         binding.tvCreatedAt.text = TransactionUiFormatters.dateTime(transaction.createdAt)
         binding.tvUpdatedAt.text = TransactionUiFormatters.dateTime(transaction.updatedAt)
         binding.tvVerificationTime.text = TransactionUiFormatters.dateTime(transaction.verificationTime)
@@ -391,7 +387,6 @@ class TransactionDetailsActivity : AppCompatActivity() {
         }
         binding.transactionTimeline.visibility = if (step >= 0) View.VISIBLE else View.GONE
 
-        // Node views (circles) — now plain View elements with background drawables.
         val nodeViews = listOf(
             binding.tvTimelineCreated,
             binding.tvTimelineQr,
@@ -399,7 +394,6 @@ class TransactionDetailsActivity : AppCompatActivity() {
             binding.tvTimelineTransfer,
             binding.tvTimelineCompleted
         )
-        // Companion label TextViews.
         val labelViews = listOf(
             binding.tvTimelineCreatedLabel,
             binding.tvTimelineQrLabel,
@@ -426,7 +420,6 @@ class TransactionDetailsActivity : AppCompatActivity() {
             labelViews[index].alpha = if (index <= step) 1f else 0.65f
         }
 
-        // Connector lines.
         val connectorViews = listOf(
             binding.timelineConnector1,
             binding.timelineConnector2,
@@ -451,7 +444,6 @@ class TransactionDetailsActivity : AppCompatActivity() {
         val canRetry = allowRetry && isVerificationEligible(viewModel.transaction.value?.status.orEmpty())
         binding.btnScanQr.visibility = if (canRetry) View.VISIBLE else View.GONE
         if (canRetry) binding.btnScanQr.setText(R.string.scan_again)
-        // Inline tvVerificationMessage already shows the message — Toast removed to avoid duplication.
     }
 
     private fun parseTransactionQr(qrData: String): Pair<String, String>? {
