@@ -2,14 +2,18 @@ package com.smartmicrogrid.M3
 
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Color
+import android.app.Dialog
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
+import android.view.WindowManager
+import android.graphics.drawable.ColorDrawable
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.smartmicrogrid.R
 import com.smartmicrogrid.databinding.ActivityTransactionDetailsBinding
+import com.smartmicrogrid.databinding.DialogVerificationSuccessBinding
 
 class TransactionDetailsActivity : AppCompatActivity() {
 
@@ -18,6 +22,7 @@ class TransactionDetailsActivity : AppCompatActivity() {
     private var displayedTransactionId = ""
     private var scannedQrData: String? = null
     private var lastDisplayedStatus: String? = null
+    private var verificationSuccessDialog: Dialog? = null
     private val scannerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -96,7 +101,16 @@ class TransactionDetailsActivity : AppCompatActivity() {
                         transaction.transactionCode,
                         transaction.energyAmount,
                         transaction.status,
-                        transaction.qrCodeData
+                        transaction.qrCodeData,
+                        transaction.microgridNodeId,
+                        transaction.energySlotId,
+                        buildString {
+                            append(TransactionUiFormatters.dateTime(transaction.createdAt))
+                            if (transaction.updatedAt.isNotBlank()) {
+                                append(" • ")
+                                append(TransactionUiFormatters.dateTime(transaction.updatedAt))
+                            }
+                        }
                     )
                 }
             }
@@ -151,7 +165,6 @@ class TransactionDetailsActivity : AppCompatActivity() {
             binding.detailsContent.visibility = View.GONE
             binding.errorContent.visibility = View.VISIBLE
             binding.tvError.text = error
-            Toast.makeText(this, error, Toast.LENGTH_LONG).show()
         }
 
         viewModel.isVerifying.observe(this) { verifying ->
@@ -177,7 +190,16 @@ class TransactionDetailsActivity : AppCompatActivity() {
                     result.transactionCode,
                     transaction.energyAmount,
                     result.status,
-                    result.qrCodeData
+                    result.qrCodeData,
+                    transaction.microgridNodeId,
+                    transaction.energySlotId,
+                    buildString {
+                        append(TransactionUiFormatters.dateTime(transaction.createdAt))
+                        if (transaction.updatedAt.isNotBlank()) {
+                            append(" • ")
+                            append(TransactionUiFormatters.dateTime(transaction.updatedAt))
+                        }
+                    }
                 )
             }
             viewModel.clearQrGenerationResult()
@@ -190,7 +212,6 @@ class TransactionDetailsActivity : AppCompatActivity() {
             }
             binding.tvQrGenerationMessage.text = error
             binding.tvQrGenerationMessage.visibility = View.VISIBLE
-            Toast.makeText(this, error, Toast.LENGTH_LONG).show()
         }
 
         viewModel.verificationResult.observe(this) { transaction ->
@@ -201,6 +222,9 @@ class TransactionDetailsActivity : AppCompatActivity() {
                 ) getString(R.string.transaction_verified) else "Verification response received. Status: ${it.status}"
                 binding.tvVerificationMessage.visibility = View.VISIBLE
                 scannedQrData = null
+                if (it.status.equals("Verified", ignoreCase = true)) {
+                    showVerificationSuccessDialog(it)
+                }
             }
         }
 
@@ -217,11 +241,57 @@ class TransactionDetailsActivity : AppCompatActivity() {
                 if (it == getString(R.string.transaction_already_verified)) {
                     viewModel.loadTransaction(displayedTransactionId)
                 }
-                Toast.makeText(this, it, Toast.LENGTH_LONG).show()
             }
         }
 
         viewModel.loadTransaction(transactionId)
+    }
+
+    private fun showVerificationSuccessDialog(transaction: com.smartmicrogrid.models.Transaction) {
+        if (verificationSuccessDialog?.isShowing == true || isFinishing || isDestroyed) return
+
+        val dialog = Dialog(this)
+        val dialogBinding = DialogVerificationSuccessBinding.inflate(layoutInflater)
+        dialog.setContentView(dialogBinding.root)
+        dialog.setCanceledOnTouchOutside(false)
+        dialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            attributes = attributes.apply { dimAmount = 0.68f }
+        }
+
+        dialogBinding.tvEnergyValue.text = getString(
+            R.string.energy_amount_kwh,
+            transaction.energyAmount.toString()
+        )
+        dialogBinding.tvTransactionValue.text = transaction.transactionCode.ifBlank {
+            transaction.id.ifBlank { getString(R.string.not_available) }
+        }
+        if (transaction.microgridNodeId.isBlank()) {
+            dialogBinding.microgridSummary.visibility = View.GONE
+        } else {
+            dialogBinding.tvMicrogridValue.text = transaction.microgridNodeId
+        }
+        dialogBinding.btnClose.setOnClickListener { dialog.dismiss() }
+        dialogBinding.btnContinue.setOnClickListener {
+            dialog.dismiss()
+            binding.btnConfirmEnergyTransfer.performClick()
+        }
+        dialog.setOnShowListener {
+            val width = resources.displayMetrics.widthPixels
+            val horizontalMargin = (32 * resources.displayMetrics.density).toInt()
+            val maxWidth = (420 * resources.displayMetrics.density).toInt()
+            dialog.window?.setLayout((width - horizontalMargin).coerceAtMost(maxWidth), WindowManager.LayoutParams.WRAP_CONTENT)
+            dialogBinding.successIconContainer.apply {
+                alpha = 0f
+                scaleX = 0.86f
+                scaleY = 0.86f
+                animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(240L).start()
+            }
+        }
+        dialog.setOnDismissListener { verificationSuccessDialog = null }
+        verificationSuccessDialog = dialog
+        dialog.show()
     }
 
     private fun displayTransaction(transaction: com.smartmicrogrid.models.Transaction) {
@@ -237,6 +307,9 @@ class TransactionDetailsActivity : AppCompatActivity() {
         binding.tvEnergyAmount.text = "${transaction.energyAmount} kWh"
         binding.tvStatus.text = TransactionUiFormatters.statusLabel(transaction.status)
         binding.chipStatus.text = TransactionUiFormatters.statusLabel(transaction.status)
+        val (statusTitle, statusDescription) = TransactionUiFormatters.statusSummary(transaction.status)
+        binding.tvStatusMessage.text = statusDescription
+        binding.tvStatusTitle.text = statusTitle
         val (statusBackground, statusForeground) = when (transaction.status.lowercase()) {
             "completed", "verified" -> R.color.m3_status_success_background to R.color.m3_status_success_foreground
             "rejected", "cancelled" -> R.color.m3_status_error_background to R.color.m3_status_error_foreground
@@ -246,10 +319,10 @@ class TransactionDetailsActivity : AppCompatActivity() {
         binding.chipStatus.chipBackgroundColor = ColorStateList.valueOf(getColor(statusBackground))
         binding.chipStatus.setTextColor(getColor(statusForeground))
         binding.tvStatus.setTextColor(getColor(statusForeground))
-        binding.tvCreatedAt.text = "Created: ${TransactionUiFormatters.dateTime(transaction.createdAt)}"
-        binding.tvUpdatedAt.text = "Updated: ${TransactionUiFormatters.dateTime(transaction.updatedAt)}"
-        binding.tvVerificationTime.text = "Verified: ${TransactionUiFormatters.dateTime(transaction.verificationTime)}"
-        binding.tvEnergyTransferTime.text = "Energy transfer: ${TransactionUiFormatters.dateTime(transaction.energyTransferTime)}"
+        binding.tvCreatedAt.text = TransactionUiFormatters.dateTime(transaction.createdAt)
+        binding.tvUpdatedAt.text = TransactionUiFormatters.dateTime(transaction.updatedAt)
+        binding.tvVerificationTime.text = TransactionUiFormatters.dateTime(transaction.verificationTime)
+        binding.tvEnergyTransferTime.text = TransactionUiFormatters.dateTime(transaction.energyTransferTime)
         updateTimeline(transaction.status)
         binding.verificationSuccessCard.visibility = if (
             transaction.status.equals("Verified", ignoreCase = true)
@@ -297,6 +370,12 @@ class TransactionDetailsActivity : AppCompatActivity() {
         lastDisplayedStatus = transaction.status
     }
 
+    /**
+     * Issue 3 fix: Updates the horizontal stepper nodes and connectors using proper
+     * circle drawables (bg_timeline_node_complete / _active / _upcoming) instead of
+     * Unicode symbols ✓●○ in TextViews.  Each node is a View; its sibling label
+     * is a separate companion TextView.
+     */
     private fun updateTimeline(status: String) {
         val step = when (status.lowercase()) {
             "pending" -> 0
@@ -307,25 +386,52 @@ class TransactionDetailsActivity : AppCompatActivity() {
             else -> -1
         }
         binding.transactionTimeline.visibility = if (step >= 0) View.VISIBLE else View.GONE
-        val steps = listOf(
+
+        val nodeViews = listOf(
             binding.tvTimelineCreated,
             binding.tvTimelineQr,
             binding.tvTimelineVerified,
             binding.tvTimelineTransfer,
             binding.tvTimelineCompleted
         )
-        steps.forEachIndexed { index, view ->
-            view.setTextColor(
-                getColor(
-                    when {
-                        index < step -> R.color.m3_success
-                        index == step -> R.color.primary
-                        else -> R.color.m3_text_secondary
-                    }
-                )
+        val labelViews = listOf(
+            binding.tvTimelineCreatedLabel,
+            binding.tvTimelineQrLabel,
+            binding.tvTimelineVerifiedLabel,
+            binding.tvTimelineTransferLabel,
+            binding.tvTimelineCompletedLabel
+        )
+
+        nodeViews.forEachIndexed { index, nodeView ->
+            val isComplete = index < step
+            val isCurrent = index == step
+            val drawable = when {
+                isComplete -> R.drawable.bg_timeline_node_complete
+                isCurrent  -> R.drawable.bg_timeline_node_active
+                else       -> R.drawable.bg_timeline_node_upcoming
+            }
+            nodeView.background = getDrawable(drawable)
+            val labelColor = when {
+                isComplete -> R.color.m3_success
+                isCurrent  -> R.color.primary
+                else       -> R.color.m3_text_secondary
+            }
+            labelViews[index].setTextColor(getColor(labelColor))
+            labelViews[index].alpha = if (index <= step) 1f else 0.65f
+        }
+
+        val connectorViews = listOf(
+            binding.timelineConnector1,
+            binding.timelineConnector2,
+            binding.timelineConnector3,
+            binding.timelineConnector4
+        )
+        connectorViews.forEachIndexed { index, view ->
+            val active = step > index
+            view.setBackgroundColor(
+                getColor(if (active) R.color.m3_success else R.color.m3_text_secondary)
             )
-            view.text = "${index + 1}  ${if (index < step) "✓" else if (index == step) "●" else "○"}  " +
-                listOf("Created", "QR Generated", "Verified", "Energy Transfer", "Completed")[index]
+            view.alpha = if (active) 1f else 0.35f
         }
     }
 
@@ -338,7 +444,6 @@ class TransactionDetailsActivity : AppCompatActivity() {
         val canRetry = allowRetry && isVerificationEligible(viewModel.transaction.value?.status.orEmpty())
         binding.btnScanQr.visibility = if (canRetry) View.VISIBLE else View.GONE
         if (canRetry) binding.btnScanQr.setText(R.string.scan_again)
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     private fun parseTransactionQr(qrData: String): Pair<String, String>? {
@@ -361,7 +466,10 @@ class TransactionDetailsActivity : AppCompatActivity() {
         transactionCode: String,
         energyAmount: Double,
         status: String,
-        qrCodeData: String
+        qrCodeData: String,
+        microgridNodeId: String = "",
+        energySlotId: String = "",
+        scheduleLabel: String = ""
     ) {
         startActivity(Intent(this, TransactionQrActivity::class.java).apply {
             putExtra(TransactionQrActivity.EXTRA_TRANSACTION_ID, transactionId)
@@ -369,6 +477,9 @@ class TransactionDetailsActivity : AppCompatActivity() {
             putExtra(TransactionQrActivity.EXTRA_ENERGY_AMOUNT, energyAmount)
             putExtra(TransactionQrActivity.EXTRA_STATUS, status)
             putExtra(TransactionQrActivity.EXTRA_QR_CODE_DATA, qrCodeData)
+            putExtra(TransactionQrActivity.EXTRA_MICROGRID_NODE_ID, microgridNodeId)
+            putExtra(TransactionQrActivity.EXTRA_ENERGY_SLOT_ID, energySlotId)
+            putExtra(TransactionQrActivity.EXTRA_SCHEDULE_LABEL, scheduleLabel)
         })
     }
 

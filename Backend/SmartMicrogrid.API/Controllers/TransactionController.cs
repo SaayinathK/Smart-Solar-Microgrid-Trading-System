@@ -26,10 +26,7 @@ namespace SmartMicrogrid.API.Controllers
         }
 
 
-        // ============================================================
-        // GET: /api/transactions
-        // Get transactions based on the logged-in user's role
-        // ============================================================
+        // Get transactions
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -47,10 +44,7 @@ namespace SmartMicrogrid.API.Controllers
         }
 
 
-        // ============================================================
-        // GET: /api/transactions/{transactionId}
-        // Get a single transaction
-        // ============================================================
+        // Get transaction by ID
         [HttpGet("{transactionId}")]
         public async Task<IActionResult> GetById(
             string transactionId)
@@ -82,10 +76,7 @@ namespace SmartMicrogrid.API.Controllers
         }
 
 
-        // ============================================================
-        // POST: /api/transactions
-        // Create a transaction from an approved reservation
-        // ============================================================
+        // Create a transaction
         [HttpPost]
         [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> Create(
@@ -119,10 +110,7 @@ namespace SmartMicrogrid.API.Controllers
         }
 
 
-        // ============================================================
-        // POST: /api/transactions/{transactionId}/generate-qr
-        // Generate QR data for a transaction
-        // ============================================================
+        // Generate transaction QR
         [HttpPost("{transactionId}/generate-qr")]
         [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> GenerateQr(
@@ -153,10 +141,7 @@ namespace SmartMicrogrid.API.Controllers
         }
 
 
-        // ============================================================
-        // POST: /api/transactions/{transactionId}/verify
-        // Verify QR and reservation information
-        // ============================================================
+        // Verify transaction
         [HttpPost("{transactionId}/verify")]
         [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> Verify(
@@ -179,10 +164,8 @@ namespace SmartMicrogrid.API.Controllers
             var userId = GetCurrentUserId();
             var operatorId = User.IsInRole("MicrogridOperator") ? userId : null;
 
-            // --------------------------------------------------------
-            // The transaction ID from the URL is now passed directly
+            // The transaction ID from the URL is passed directly
             // to the service together with the scanned QR data.
-            // --------------------------------------------------------
             var transaction =
                 await _transactionService.VerifyAsync(
                     transactionId,
@@ -202,10 +185,7 @@ namespace SmartMicrogrid.API.Controllers
         }
 
 
-        // ============================================================
-        // POST: /api/transactions/{transactionId}/complete
-        // Complete the energy transaction
-        // ============================================================
+        // Complete transaction
         [HttpPost("{transactionId}/complete")]
         [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> Complete(
@@ -245,10 +225,7 @@ namespace SmartMicrogrid.API.Controllers
         }
 
 
-        // ============================================================
-        // PATCH: /api/transactions/{transactionId}/status
         // Update transaction status
-        // ============================================================
         [HttpPatch("{transactionId}/status")]
         [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> UpdateStatus(
@@ -287,9 +264,6 @@ namespace SmartMicrogrid.API.Controllers
         }
 
 
-        // ============================================================
-        // GET CURRENT USER ID FROM JWT
-        // ============================================================
         private string GetCurrentUserId()
         {
             return User.FindFirstValue(
@@ -300,9 +274,6 @@ namespace SmartMicrogrid.API.Controllers
         }
 
 
-        // ============================================================
-        // GET CURRENT USER ROLE FROM JWT
-        // ============================================================
         private string GetCurrentRole()
         {
             return User.FindFirstValue(

@@ -1,0 +1,5 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <!-- Fill is white; actual color is applied via backgroundTintList in code. -->
+    <solid android:color="#FFFFFF" />
+</shape>
