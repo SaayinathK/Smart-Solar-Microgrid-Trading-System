@@ -4,43 +4,33 @@ namespace SmartMicrogrid.API.Services.Interfaces
 {
     public interface ITransactionService
     {
-        // ============================================================
-        // CREATE TRANSACTION
-        // ============================================================
+        // Create transaction
         Task<TransactionResponse> CreateAsync(
             CreateTransactionRequest request,
             string currentUserId,
             string? operatorId = null);
 
 
-        // ============================================================
-        // GET ALL TRANSACTIONS
-        // ============================================================
+        // Get all transactions
         Task<List<TransactionResponse>> GetAllAsync(
             string currentUserId,
             string currentRole);
 
 
-        // ============================================================
-        // GET TRANSACTION BY ID
-        // ============================================================
+        // Get transaction by ID
         Task<TransactionResponse?> GetByIdAsync(
             string transactionId,
             string currentUserId,
             string currentRole);
 
 
-        // ============================================================
-        // GENERATE QR
-        // ============================================================
+        // Generate QR
         Task<GenerateQrResponse?> GenerateQrAsync(
             string transactionId,
             string currentUserId);
 
 
-        // ============================================================
-        // VERIFY TRANSACTION
-        // ============================================================
+        // Verify transaction
         Task<TransactionResponse?> VerifyAsync(
             string transactionId,
             VerifyTransactionRequest request,
@@ -48,18 +38,14 @@ namespace SmartMicrogrid.API.Services.Interfaces
             string? operatorId = null);
 
 
-        // ============================================================
-        // COMPLETE TRANSACTION
-        // ============================================================
+        // Complete transaction
         Task<TransactionResponse?> CompleteAsync(
             string transactionId,
             CompleteTransactionRequest request,
             string currentUserId);
 
 
-        // ============================================================
-        // UPDATE TRANSACTION STATUS
-        // ============================================================
+        // Update transaction status
         Task<TransactionResponse?> UpdateStatusAsync(
             string transactionId,
             string status,

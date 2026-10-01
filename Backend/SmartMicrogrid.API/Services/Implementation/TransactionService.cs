@@ -26,9 +26,7 @@ namespace SmartMicrogrid.API.Services.Implementation
         }
 
 
-        // ============================================================
-        // CREATE TRANSACTION
-        // ============================================================
+        // Create transaction
         public async Task<TransactionResponse> CreateAsync(
             CreateTransactionRequest request,
             string currentUserId,
@@ -54,9 +52,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Get reservation from M2
-            // --------------------------------------------------------
             var reservation =
                 await _reservationService.GetByIdAsync(
                     request.ReservationId,
@@ -69,9 +64,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
             // Only approved reservations can create transactions
-            // --------------------------------------------------------
             if (!string.Equals(
                     reservation.Status,
                     "Approved",
@@ -82,9 +75,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
             // Prevent duplicate transaction for same reservation
-            // --------------------------------------------------------
             var existing =
                 await _transactionRepository
                     .GetByReservationIdAsync(
@@ -97,9 +88,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Create new transaction
-            // --------------------------------------------------------
             var transaction = new Transaction
             {
                 ReservationId = reservation.Id,
@@ -130,9 +118,7 @@ namespace SmartMicrogrid.API.Services.Implementation
         }
 
 
-        // ============================================================
-        // GET ALL TRANSACTIONS
-        // ============================================================
+        // Get all transactions
         public async Task<List<TransactionResponse>> GetAllAsync(
             string currentUserId,
             string currentRole)
@@ -140,10 +126,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             List<Transaction> transactions;
 
 
-            // --------------------------------------------------------
-            // PROSUMER
-            // Only own transactions
-            // --------------------------------------------------------
+            // Prosumer can only access their own transactions
             if (currentRole.Equals(
                     "Prosumer",
                     StringComparison.OrdinalIgnoreCase))
@@ -157,10 +140,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // MICROGRID OPERATOR
-            // Relevant operational transaction information
-            // --------------------------------------------------------
+            // Operator sees transactions relevant to their operations
             else if (currentRole.Equals(
                          "MicrogridOperator",
                          StringComparison.OrdinalIgnoreCase))
@@ -176,10 +156,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // SYSTEM ADMINISTRATOR
-            // System-level monitoring
-            // --------------------------------------------------------
+            // Admin has system-level access
             else if (currentRole.Equals(
                          "Admin",
                          StringComparison.OrdinalIgnoreCase))
@@ -190,9 +167,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Unknown role
-            // --------------------------------------------------------
             else
             {
                 throw new UnauthorizedAccessException(
@@ -206,9 +180,7 @@ namespace SmartMicrogrid.API.Services.Implementation
         }
 
 
-        // ============================================================
-        // GET TRANSACTION BY ID
-        // ============================================================
+        // Get transaction by ID
         public async Task<TransactionResponse?> GetByIdAsync(
             string transactionId,
             string currentUserId,
@@ -230,9 +202,6 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return null;
             }
 
-            // --------------------------------------------------------
-            // Authorization
-            // --------------------------------------------------------
             if (currentRole.Equals(
                     "Admin",
                     StringComparison.OrdinalIgnoreCase))
@@ -280,9 +249,7 @@ namespace SmartMicrogrid.API.Services.Implementation
         }
 
 
-        // ============================================================
-        // GENERATE QR
-        // ============================================================
+        // Generate transaction QR
         public async Task<GenerateQrResponse?> GenerateQrAsync(
             string transactionId,
             string currentUserId)
@@ -308,9 +275,7 @@ namespace SmartMicrogrid.API.Services.Implementation
                 transaction.MicrogridNodeId);
 
 
-            // --------------------------------------------------------
-            // QR can only be generated once for Pending transaction
-            // --------------------------------------------------------
+            // QR can only be generated once for a pending transaction
             if (!transaction.Status.Equals(
                     "Pending",
                     StringComparison.OrdinalIgnoreCase))
@@ -320,9 +285,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Generate unique transaction code
-            // --------------------------------------------------------
             var transactionCode =
                 GenerateTransactionCode();
 
@@ -331,9 +293,6 @@ namespace SmartMicrogrid.API.Services.Implementation
                 transactionCode;
 
 
-            // --------------------------------------------------------
-            // QR payload
-            // --------------------------------------------------------
             transaction.QrCodeData =
                 $"SMART-MICROGRID|TRANSACTION|{transaction.Id}|{transactionCode}";
 
@@ -360,9 +319,7 @@ namespace SmartMicrogrid.API.Services.Implementation
         }
 
 
-        // ============================================================
-        // VERIFY TRANSACTION
-        // ============================================================
+        // Verify transaction
         public async Task<TransactionResponse?> VerifyAsync(
             string transactionId,
             VerifyTransactionRequest request,
@@ -397,9 +354,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             await EnsureMicrogridOperatorIdentityAsync(currentUserId, operatorId);
 
 
-            // --------------------------------------------------------
-            // Get transaction using URL transaction ID
-            // --------------------------------------------------------
             var transaction =
                 await _transactionRepository
                     .GetByIdAsync(transactionId);
@@ -411,9 +365,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Check QR exists
-            // --------------------------------------------------------
             if (string.IsNullOrWhiteSpace(
                     transaction.QrCodeData))
             {
@@ -422,9 +373,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
             // Make sure scanned QR belongs to this transaction
-            // --------------------------------------------------------
             if (!string.Equals(
                     transaction.QrCodeData,
                     request.QrCodeData,
@@ -435,9 +384,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Transaction must be ready for verification
-            // --------------------------------------------------------
             if (!transaction.Status.Equals(
                     "QRGenerated",
                     StringComparison.OrdinalIgnoreCase)
@@ -451,9 +397,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Get reservation from M2
-            // --------------------------------------------------------
             var reservation =
                 await _reservationService.GetByIdAsync(
                     transaction.ReservationId,
@@ -476,9 +419,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Reservation must still be approved
-            // --------------------------------------------------------
             if (!string.Equals(
                     reservation.Status,
                     "Approved",
@@ -505,11 +445,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Validate reservation against transaction
-            // --------------------------------------------------------
 
-            // Prosumer validation
             if (!string.Equals(
                     transaction.ProsumerId,
                     reservation.ProsumerId,
@@ -529,7 +465,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // Microgrid validation
             if (!string.Equals(
                     transaction.MicrogridNodeId,
                     reservation.MicrogridNodeId,
@@ -549,7 +484,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // Energy slot validation
             if (!string.Equals(
                     transaction.EnergySlotId,
                     reservation.EnergySlotId,
@@ -569,7 +503,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // Energy amount validation
             if (transaction.EnergyAmount !=
                 reservation.EnergyAmount)
             {
@@ -587,9 +520,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Verification successful
-            // --------------------------------------------------------
             transaction.VerifiedBy =
                 currentUserId;
 
@@ -611,9 +541,7 @@ namespace SmartMicrogrid.API.Services.Implementation
         }
 
 
-        // ============================================================
-        // COMPLETE TRANSACTION
-        // ============================================================
+        // Complete transaction
         public async Task<TransactionResponse?> CompleteAsync(
             string transactionId,
             CompleteTransactionRequest request,
@@ -632,9 +560,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Confirmation validation
-            // --------------------------------------------------------
             if (!string.Equals(
                     request.Confirmation,
                     "CONFIRMED",
@@ -659,9 +584,6 @@ namespace SmartMicrogrid.API.Services.Implementation
                 transaction.MicrogridNodeId);
 
 
-            // --------------------------------------------------------
-            // Transaction must be verified first
-            // --------------------------------------------------------
             if (!transaction.Status.Equals(
                     "Verified",
                     StringComparison.OrdinalIgnoreCase)
@@ -675,10 +597,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Only the verifier who verified the transaction
-            // can complete it
-            // --------------------------------------------------------
+            // Only the verifier who verified the transaction can complete it
             if (!string.IsNullOrWhiteSpace(
                     transaction.VerifiedBy)
                 &&
@@ -689,9 +608,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Energy transfer begins
-            // --------------------------------------------------------
             if (!transaction.Status.Equals(
                     "EnergyTransferInProgress",
                     StringComparison.OrdinalIgnoreCase))
@@ -711,9 +627,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Complete transaction
-            // --------------------------------------------------------
             transaction.Status =
                 "Completed";
 
@@ -729,9 +642,7 @@ namespace SmartMicrogrid.API.Services.Implementation
         }
 
 
-        // ============================================================
-        // UPDATE STATUS
-        // ============================================================
+        // Update transaction status
         public async Task<TransactionResponse?> UpdateStatusAsync(
             string transactionId,
             string status,
@@ -765,9 +676,6 @@ namespace SmartMicrogrid.API.Services.Implementation
                 transaction.MicrogridNodeId);
 
 
-            // --------------------------------------------------------
-            // Normalize requested status
-            // --------------------------------------------------------
             var requestedStatus =
                 status.Trim();
 
@@ -789,9 +697,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // --------------------------------------------------------
-            // Validate status transition
-            // --------------------------------------------------------
             var validTransition =
                 IsValidStatusTransition(
                     transaction.Status,
@@ -857,9 +762,6 @@ namespace SmartMicrogrid.API.Services.Implementation
         }
 
 
-        // ============================================================
-        // VALIDATE TRANSACTION STATUS TRANSITION
-        // ============================================================
         private static bool IsValidStatusTransition(
             string currentStatus,
             string newStatus)
@@ -874,7 +776,6 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // Same status does not require an update
             if (currentStatus.Equals(
                     newStatus,
                     StringComparison.OrdinalIgnoreCase))
@@ -981,9 +882,6 @@ namespace SmartMicrogrid.API.Services.Implementation
         }
 
 
-        // ============================================================
-        // GENERATE TRANSACTION CODE
-        // ============================================================
         private static string GenerateTransactionCode()
         {
             return
@@ -992,9 +890,6 @@ namespace SmartMicrogrid.API.Services.Implementation
         }
 
 
-        // ============================================================
-        // MAP MODEL -> RESPONSE DTO
-        // ============================================================
         private static TransactionResponse Map(
             Transaction transaction)
         {
