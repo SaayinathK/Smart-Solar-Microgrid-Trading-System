@@ -74,16 +74,17 @@ object SessionManager {
 
     fun getBaseUrl(): String {
         return if (::prefs.isInitialized) {
-            prefs.getString("custom_api_base_url", Constants.API_BASE_URL) ?: Constants.API_BASE_URL
+            val saved = prefs.getString(Constants.KEY_CUSTOM_API_BASE_URL, null)
+            if (!saved.isNullOrBlank()) saved else Constants.API_BASE_URL
         } else {
             Constants.API_BASE_URL
         }
     }
 
     fun setBaseUrl(url: String) {
-        val formatted = if (!url.endsWith("/")) "$url/" else url
+        val formatted = ServerDiscovery.formatBaseUrl(url)
         if (::prefs.isInitialized) {
-            prefs.edit().putString("custom_api_base_url", formatted).apply()
+            prefs.edit().putString(Constants.KEY_CUSTOM_API_BASE_URL, formatted).apply()
         }
         RetrofitClient.updateBaseUrl(formatted)
     }
