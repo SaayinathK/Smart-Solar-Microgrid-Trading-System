@@ -108,7 +108,7 @@ _service = service; _users = users; }
     public async Task<IActionResult> Update(string id, [FromBody] UpdateReservationDto dto)
     {
         // Execute update operations
-        try { return Ok(ApiResponse<object>.SuccessResponse(await _service.UpdateAsync(id, dto.EnergySlotId, dto.EnergyAmount, ActorId, IsStaff, IsOperator ? ActorId : null), "Reservation updated.")); }
+        try { return Ok(ApiResponse<object>.SuccessResponse(await _service.UpdateAsync(id, dto.EnergySlotId, dto.EnergyAmount, ActorId, IsStaff, IsOperator ? ActorId : null, dto.StartTime), "Reservation updated.")); }
         catch (KeyNotFoundException ex) { return NotFound(ApiResponse<object>.FailureResponse(ex.Message)); }
         catch (UnauthorizedAccessException ex) { return StatusCode(403, ApiResponse<object>.FailureResponse(ex.Message)); }
         catch (ArgumentException ex) { return BadRequest(ApiResponse<object>.FailureResponse(ex.Message)); }

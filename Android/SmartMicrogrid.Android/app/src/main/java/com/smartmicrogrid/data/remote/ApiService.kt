@@ -127,7 +127,7 @@ interface ApiService {
     @PUT("reservations/{id}")
     suspend fun updateReservation(
         @Path("id") id: String,
-        @Body request: CreateReservationRequest
+        @Body request: com.smartmicrogrid.models.UpdateReservationRequest
     ): Response<ApiResponse<Reservation>>
 
     @PATCH("reservations/{id}/cancel")

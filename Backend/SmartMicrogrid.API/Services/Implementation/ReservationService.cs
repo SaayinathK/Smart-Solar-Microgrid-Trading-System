@@ -82,7 +82,7 @@ _reservations = reservations; _db = db; _users = users; }
     /// <summary>
     /// Updates the specified async record.
     /// </summary>
-    public async Task<ReservationResponseDto> UpdateAsync(string id, string? energySlotId, double energyAmount, string actorId, bool staff, string? operatorId = null)
+    public async Task<ReservationResponseDto> UpdateAsync(string id, string? energySlotId, double energyAmount, string actorId, bool staff, string? operatorId = null, DateTime? newStartTime = null)
     {
         // Execute update async operations
         var current = await _reservations.GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
@@ -99,8 +99,9 @@ _reservations = reservations; _db = db; _users = users; }
         var targetSlot = movingSlot ? await _db.EnergySlots.Find(s => s.Id == targetSlotId).FirstOrDefaultAsync() : null;
         if (movingSlot && targetSlot == null) throw new KeyNotFoundException("Target energy slot not found.");
         if (targetSlot != null && !string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(targetSlot.MicrogridNodeId, targetSlot.Id!, operatorId);
-        var targetStart = targetSlot?.StartTime ?? current.StartTime;
-        var targetEnd = targetSlot?.EndTime ?? current.EndTime;
+        var targetStart = newStartTime ?? targetSlot?.StartTime ?? current.StartTime;
+        var duration = current.EndTime > current.StartTime ? current.EndTime - current.StartTime : TimeSpan.FromHours(1);
+        var targetEnd = targetSlot?.EndTime ?? (newStartTime.HasValue && targetSlot == null ? newStartTime.Value.Add(duration) : current.EndTime);
         if (targetStart <= DateTime.UtcNow || targetStart > DateTime.UtcNow.AddDays(7))
             throw new ArgumentException("Reservations must start in the future and within 7 days.");
 

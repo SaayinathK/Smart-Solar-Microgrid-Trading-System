@@ -19,7 +19,7 @@ public interface IReservationService
     /// <summary>
     /// Updates the specified async record.
     /// </summary>
-    Task<ReservationResponseDto> UpdateAsync(string id, string? energySlotId, double energyAmount, string actorId, bool staff, string? operatorId = null);
+    Task<ReservationResponseDto> UpdateAsync(string id, string? energySlotId, double energyAmount, string actorId, bool staff, string? operatorId = null, DateTime? newStartTime = null);
     /// <summary>
     /// Retrieves by id async details.
     /// </summary>

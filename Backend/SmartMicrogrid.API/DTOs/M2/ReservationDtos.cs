@@ -54,6 +54,7 @@ public class UpdateReservationDto
 {
     public string? EnergySlotId { get; set; }
     [Range(0.1, 1000000)] public double EnergyAmount { get; set; }
+    public DateTime? StartTime { get; set; }
 }
 public class ReservationStatusUpdateDto
 {
