@@ -96,11 +96,8 @@ class MicrogridOperatorMainActivity : AppCompatActivity() {
 
         return true
     }
-<<<<<<< HEAD
-=======
 
     companion object {
         const val EXTRA_OPEN_HISTORY = "OPEN_TRANSACTION_HISTORY"
     }
->>>>>>> f9f447293450984f806d97ac86b63694aa1e7ab6
 }
