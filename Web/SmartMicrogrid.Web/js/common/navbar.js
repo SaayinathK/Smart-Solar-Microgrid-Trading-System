@@ -17,7 +17,7 @@ function renderNavbar(activePage = '') {
   const currentTheme = ThemeManager.getTheme();
 
   container.innerHTML = `
-    <nav class="navbar">
+    <nav class="navbar" aria-label="Main navigation">
       <div class="container navbar-container">
         <a href="/dashboard.html" class="navbar-brand">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -28,7 +28,7 @@ function renderNavbar(activePage = '') {
 
         ${isAuthenticated ? `
           <ul class="navbar-nav">
-            <li><a href="/dashboard.html" class="nav-link ${activePage === 'dashboard' ? 'active' : ''}">Dashboard</a></li>
+            <li><a href="/dashboard.html" class="nav-link ${activePage === 'dashboard' ? 'active' : ''}">Overview</a></li>
             ${isAdmin ? `<li><a href="/pages/users/users.html" class="nav-link ${activePage === 'users' ? 'active' : ''}">User Management</a></li>` : ''}
           </ul>
 

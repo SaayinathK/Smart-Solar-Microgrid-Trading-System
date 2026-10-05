@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import com.smartmicrogrid.MainActivity
 import com.smartmicrogrid.databinding.ActivityLoginBinding
 import com.smartmicrogrid.utils.SessionManager
@@ -12,7 +12,7 @@ import com.smartmicrogrid.utils.ServerDiscovery
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private val viewModel: AuthViewModel by viewModels()

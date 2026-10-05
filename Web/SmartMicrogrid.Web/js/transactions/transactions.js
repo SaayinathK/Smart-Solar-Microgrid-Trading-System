@@ -5,23 +5,17 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (!AuthGuard.requireRole(['Admin', 'MicrogridOperator'])) return;
 
-  const historyView = new URLSearchParams(window.location.search).get('view') === 'history';
-  renderAppLayout(historyView ? 'history' : 'transactions', historyView ? 'Transaction History' : 'Energy Transactions');
+  renderAppLayout('transactions', 'Energy Transactions');
 
   const createTransactionCard = document.getElementById('create-transaction-card');
   const isOperator = SessionManager.getUserRole() === 'MicrogridOperator';
-  createTransactionCard.hidden = !isOperator || historyView;
+  createTransactionCard.hidden = !isOperator;
   document.getElementById('create-transaction-form').addEventListener('submit', createTransactionFromReservation);
 
   const refreshButton = document.getElementById('refresh-transactions');
   const filterSelect = document.getElementById('transaction-filter');
   const searchInput = document.getElementById('transaction-search');
-
-  if (historyView) {
-    filterSelect.value = 'history';
-    document.getElementById('transactions-list-title').textContent = 'Transaction History';
-    document.getElementById('transactions-page-description').textContent = 'Review completed and terminal energy transactions.';
-  }
+  if (new URLSearchParams(window.location.search).get('view') === 'history') filterSelect.value = 'history';
 
   refreshButton.addEventListener('click', loadTransactions);
   filterSelect.addEventListener('change', renderTransactions);

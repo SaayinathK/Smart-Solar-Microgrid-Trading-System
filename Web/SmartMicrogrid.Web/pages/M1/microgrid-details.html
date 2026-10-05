@@ -24,11 +24,12 @@
       backdrop-filter: blur(10px);
     }
   </style>
+  <link rel="stylesheet" href="../../css/interface.css">
 </head>
 <body>
 
   <div id="app-layout-wrapper">
-    <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+    <div data-page-intro style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center;">
       <a href="microgrids.html" class="btn btn-secondary">← Back</a>
       <h2 id="node-name">Loading Node...</h2>
       <span id="node-status" class="status-badge" style="margin-left: auto;"></span>
@@ -95,6 +96,7 @@
   <script src="../../js/api/microgrid-api.js"></script>
   <script src="../../js/api/energy-slots-api.js"></script>
   <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js"></script>
 
   <script>

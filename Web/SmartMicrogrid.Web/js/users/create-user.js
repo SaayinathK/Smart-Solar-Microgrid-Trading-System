@@ -3,7 +3,7 @@
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-  AuthGuard.requireAuth('Admin');
+  if (!AuthGuard.requireAuth('Admin')) return;
 
   const form = document.getElementById('create-user-form');
   const alertBox = document.getElementById('alert-box');

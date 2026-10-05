@@ -1,11 +1,11 @@
 package com.smartmicrogrid.M2
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import com.smartmicrogrid.R
 import com.smartmicrogrid.utils.SessionManager
 
-class ReservationsActivity : AppCompatActivity() {
+class ReservationsActivity : WorkspaceActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

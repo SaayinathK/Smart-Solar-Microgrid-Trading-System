@@ -10,12 +10,12 @@ import android.view.WindowManager
 import android.graphics.drawable.ColorDrawable
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import com.smartmicrogrid.R
 import com.smartmicrogrid.databinding.ActivityTransactionDetailsBinding
 import com.smartmicrogrid.databinding.DialogVerificationSuccessBinding
 
-class TransactionDetailsActivity : AppCompatActivity() {
+class TransactionDetailsActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityTransactionDetailsBinding
     private val viewModel: TransactionDetailsViewModel by viewModels()

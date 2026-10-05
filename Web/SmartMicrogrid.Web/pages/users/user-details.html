@@ -36,16 +36,18 @@
       word-break: break-all;
     }
   </style>
+  <link rel="stylesheet" href="../../css/interface.css">
+  <link rel="stylesheet" href="../../css/admin.css">
 </head>
 <body>
 
   <div id="app-layout-wrapper">
     <div style="max-width: 900px;">
       
-      <div class="page-header">
+      <div data-page-intro class="page-header">
         <div class="page-title">
           <h1>User Account Details</h1>
-          <p>MongoDB Document ID & System Information</p>
+          <p>Review contact details, account access, and user status.</p>
         </div>
         <div style="display: flex; gap: 0.75rem;">
           <a href="users.html" class="btn btn-secondary">← Back to Users</a>
@@ -68,6 +70,7 @@
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/api/user-api.js"></script>
   <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js"></script>
   <script src="../../js/users/user-details.js"></script>
   <script>

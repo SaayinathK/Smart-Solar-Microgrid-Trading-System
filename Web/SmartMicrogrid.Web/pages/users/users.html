@@ -9,26 +9,19 @@
   <link rel="stylesheet" href="../../css/sidebar.css">
   <link rel="stylesheet" href="../../css/forms.css">
   <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/interface.css">
+  <link rel="stylesheet" href="../../css/admin.css">
 </head>
 <body>
 
   <div id="app-layout-wrapper">
-    <div class="page-header">
+    <div data-page-intro class="page-header">
       <div class="page-title">
         <h1>User Management</h1>
         <p>System account directory, roles, and status management</p>
       </div>
       <div>
         <a href="create-user.html" class="btn btn-primary">+ Create User</a>
-      </div>
-    </div>
-
-        <div class="hero-image-banner mb-4">
-      <img src="../../images/bg_energy_home.jpg" alt="User Directory Management">
-      <div class="hero-image-overlay">
-        <span class="hero-eyebrow">Access Control &amp; Prosumer Verification</span>
-        <h2>User Management Directory</h2>
-        <p>Manage system identities, role-based access rights, pending prosumer registrations, and account activation states across the platform.</p>
       </div>
     </div>
 
@@ -59,17 +52,17 @@
 
     <div class="table-toolbar">
       <div class="search-box">
-        <input type="text" id="search-input" class="search-input" placeholder="Search by name, email, or NIC...">
+        <input type="text" id="search-input" class="search-input" placeholder="Search by name, email, or NIC..." aria-label="Search users">
       </div>
 
-      <select id="role-filter" class="form-select" style="max-width: 200px;">
+      <select id="role-filter" class="form-select" style="max-width: 200px;" aria-label="Filter users by role">
         <option value="">All Roles</option>
         <option value="Admin">Admin</option>
         <option value="MicrogridOperator">Microgrid Operator</option>
         <option value="Prosumer">Prosumer</option>
       </select>
 
-      <select id="status-filter" class="form-select" style="max-width: 180px;">
+      <select id="status-filter" class="form-select" style="max-width: 180px;" aria-label="Filter users by account status">
         <option value="">All Statuses</option>
         <option value="Active">Active</option>
         <option value="Inactive">Inactive</option>
@@ -95,7 +88,7 @@
         </thead>
         <tbody id="users-table-body">
           <tr>
-            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+            <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">
               Loading system users...
             </td>
           </tr>
@@ -110,6 +103,7 @@
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/api/user-api.js"></script>
   <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js"></script>
   <script src="../../js/users/users.js"></script>
   <script>

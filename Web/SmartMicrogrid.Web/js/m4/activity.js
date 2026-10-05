@@ -2,7 +2,7 @@
    Smart Microgrid Energy System - M4 System Activity (Audit Log) Controller
    ========================================================================== */
 
-const activityState = { page: 1, pageSize: 20, totalPages: 1 };
+const activityState = { page: 1, pageSize: 20, totalPages: 1, request: 0 };
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!AuthGuard.requireAuth('Admin')) return;
@@ -41,7 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
   load();
 
   async function load() {
+    const request = ++activityState.request;
     body.innerHTML = AdminUi.loadingRow(8);
+    document.getElementById('prev-btn').disabled = true;
+    document.getElementById('next-btn').disabled = true;
 
     const params = { page: activityState.page, pageSize: activityState.pageSize };
     if (moduleFilter.value) params.module = moduleFilter.value;
@@ -57,14 +60,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const response = await AdminApi.getActivity(params);
+      if (request !== activityState.request) return;
 
       if (response.success && response.data) {
         render(response.data);
       } else {
         body.innerHTML = AdminUi.emptyRow(8, response.message || 'Failed to load activity records.');
+        document.getElementById('page-label').textContent = 'Activity could not be loaded.';
       }
     } catch (err) {
+      if (request !== activityState.request) return;
       body.innerHTML = AdminUi.emptyRow(8, err.message || 'Network error while loading activity records.');
+      document.getElementById('page-label').textContent = 'Activity could not be loaded.';
     }
   }
 

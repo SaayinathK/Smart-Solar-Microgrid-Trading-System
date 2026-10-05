@@ -5,12 +5,12 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import com.google.gson.Gson
 import com.smartmicrogrid.databinding.ActivityTransactionCompletionBinding
 import com.smartmicrogrid.models.Transaction
 
-class TransactionCompletionActivity : AppCompatActivity() {
+class TransactionCompletionActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityTransactionCompletionBinding
     private val viewModel: EnergyTransferConfirmationViewModel by viewModels()

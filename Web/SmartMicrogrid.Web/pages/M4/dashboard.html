@@ -9,26 +9,19 @@
   <link rel="stylesheet" href="../../css/sidebar.css">
   <link rel="stylesheet" href="../../css/dashboard.css">
   <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/interface.css">
+  <link rel="stylesheet" href="../../css/admin.css">
 </head>
 <body>
 
   <div id="app-layout-wrapper">
-    <div class="page-header">
+    <div data-page-intro class="page-header">
       <div class="page-title">
         <h1>Administration Dashboard</h1>
         <p id="platform-subtitle">Platform statistics, system health and administrative activity</p>
       </div>
       <div>
         <button id="refresh-btn" class="btn btn-secondary">Refresh</button>
-      </div>
-    </div>
-
-        <div class="hero-image-banner mb-4">
-      <img src="../../images/bg_web_dashboard.png" alt="Admin Dashboard Telemetry">
-      <div class="hero-image-overlay">
-        <span class="hero-eyebrow">Enterprise Telemetry &amp; System Health</span>
-        <h2>Central Governance Console</h2>
-        <p>Monitor real-time microgrid telemetry, user lifecycle compliance, smart contract execution, and cluster integrity across all distributed nodes.</p>
       </div>
     </div>
 
@@ -42,32 +35,32 @@
 
     <!-- User Statistics -->
     <h2 style="margin-bottom:1rem;">User Statistics</h2>
-    <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom:2.5rem;">
-      <div class="stat-card">
+    <div class="admin-stat-grid">
+      <div class="stat-card admin-stat-card">
         <div class="stat-content">
           <div class="stat-label">Total Users</div>
           <div class="stat-value" id="stat-total-users">-</div>
         </div>
       </div>
-      <div class="stat-card cyan-card">
+      <div class="stat-card admin-stat-card cyan-card">
         <div class="stat-content">
           <div class="stat-label">Active</div>
           <div class="stat-value" id="stat-active-users">-</div>
         </div>
       </div>
-      <div class="stat-card amber-card">
+      <div class="stat-card admin-stat-card amber-card">
         <div class="stat-content">
           <div class="stat-label">Inactive</div>
           <div class="stat-value" id="stat-inactive-users">-</div>
         </div>
       </div>
-      <div class="stat-card" style="border-top-color: var(--accent-rose);">
+      <div class="stat-card admin-stat-card rose-card">
         <div class="stat-content">
           <div class="stat-label">Suspended</div>
           <div class="stat-value" id="stat-suspended-users">-</div>
         </div>
       </div>
-      <div class="stat-card indigo-card">
+      <div class="stat-card admin-stat-card indigo-card">
         <div class="stat-content">
           <div class="stat-label">Pending</div>
           <div class="stat-value" id="stat-pending-users">-</div>
@@ -186,10 +179,12 @@
   <script src="../../js/common/session.js"></script>
   <script src="../../js/common/theme.js"></script>
   <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js"></script>
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/api/admin-api.js"></script>
   <script src="../../js/common/admin-ui.js"></script>
+  <script src="../../js/m4/admin-dashboard.js"></script>
   <script>
     renderAppLayout('m4-dashboard', 'Administration Dashboard');
   </script>

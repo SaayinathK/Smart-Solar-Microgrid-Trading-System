@@ -5,7 +5,7 @@
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
-  AuthGuard.requireAuth('Admin');
+  if (!AuthGuard.requireAuth('Admin')) return;
 
   const tableBody = document.getElementById('users-table-body');
   const searchInput = document.getElementById('search-input');
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tableBody.innerHTML = `
           <tr>
             <td colspan="8" style="text-align: center; color: var(--accent-rose); padding: 2rem;">
-              ${response.message || 'Failed to load users.'}
+            ${escapeUserHtml(response.message || 'Failed to load users.')}
             </td>
           </tr>
         `;
@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
       tableBody.innerHTML = `
         <tr>
           <td colspan="8" style="text-align: center; color: var(--accent-rose); padding: 2rem;">
-            ${err.message || 'Error connecting to API.'}
+            ${escapeUserHtml(err.message || 'Error connecting to API.')}
           </td>
         </tr>
       `;
@@ -147,8 +147,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const accountStatus = user.accountStatus
         || (user.isActive ? 'Active' : 'Inactive');
+      const safeStatus = ['Active', 'Pending', 'Inactive', 'Suspended'].includes(accountStatus) ? accountStatus : 'Unknown';
 
-      let statusBadge = `<span class="status-badge status-${accountStatus.toLowerCase()}">${accountStatus}</span>`;
+      let statusBadge = `<span class="status-badge">${escapeUserHtml(safeStatus)}</span>`;
       if (accountStatus === 'Active') {
         statusBadge = '<span class="status-badge status-active"><span class="status-dot"></span> Active</span>';
       } else if (accountStatus === 'Pending') {
@@ -164,39 +165,45 @@ document.addEventListener('DOMContentLoaded', () => {
         month: 'short',
         day: 'numeric'
       });
+      const userId = encodeURIComponent(String(user.id || ''));
 
       let primaryAction = '';
       if (accountStatus === 'Active') {
-        primaryAction = `<button onclick="changeUserStatus('${user.id}', 'Inactive')" class="btn btn-outline-danger btn-sm">Deactivate</button>`;
+        primaryAction = `<button onclick="changeUserStatus('${userId}', 'Inactive')" class="btn btn-outline-danger btn-sm">Deactivate</button>`;
       } else if (accountStatus === 'Pending') {
         primaryAction = `<button onclick="changeUserStatus('${user.id}', 'Active')" class="btn btn-success btn-sm font-weight-bold">✓ Activate</button>`;
       } else {
-        primaryAction = `<button onclick="changeUserStatus('${user.id}', 'Active')" class="btn btn-primary btn-sm">Activate</button>`;
+        primaryAction = `<button onclick="changeUserStatus('${userId}', 'Active')" class="btn btn-primary btn-sm">Activate</button>`;
+      }
+      if (accountStatus === 'Pending') {
+        statusBadge = '<span class="status-badge status-pending">Pending activation</span>';
+        primaryAction = `<button onclick="changeUserStatus('${userId}', 'Active')" class="btn btn-primary btn-sm">Activate</button>`;
       }
 
       return `
         <tr>
           <td>
-            <strong>${user.firstName} ${user.lastName}</strong>
+            <strong>${escapeUserHtml(`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unnamed user')}</strong>
           </td>
-          <td><code>${user.nic || '-'}</code></td>
-          <td>${user.email}</td>
-          <td>${user.phoneNumber || '-'}</td>
-          <td><span class="role-pill ${roleClass}">${user.role}</span></td>
+          <td><code>${escapeUserHtml(user.nic || '-')}</code></td>
+          <td>${escapeUserHtml(user.email || '-')}</td>
+          <td>${escapeUserHtml(user.phoneNumber || '-')}</td>
+          <td><span class="role-pill ${roleClass}">${escapeUserHtml(user.role || 'Unknown')}</span></td>
           <td>${statusBadge}</td>
           <td>${createdDate}</td>
           <td>
             <div class="table-actions">
-              <a href="user-details.html?id=${user.id}" class="btn btn-secondary btn-sm">View</a>
-              <a href="edit-user.html?id=${user.id}" class="btn btn-secondary btn-sm">Edit</a>
+              <a href="user-details.html?id=${userId}" class="btn btn-secondary btn-sm">View</a>
+              <a href="edit-user.html?id=${userId}" class="btn btn-secondary btn-sm">Edit</a>
               ${primaryAction}
               <select class="form-select btn-sm" style="width: auto; min-width: 118px;"
-                      onchange="changeUserStatus('${user.id}', this.value); this.value = '';">
+                      onchange="handleUserAction('${userId}', this.value); this.value = '';">
                 <option value="">More...</option>
                 <option value="Suspended">Suspend</option>
                 <option value="Pending">Set Pending</option>
                 ${accountStatus === 'Active' ? '<option value="Inactive">Deactivate</option>' : ''}
                 ${accountStatus !== 'Active' ? '<option value="Active">Activate</option>' : ''}
+                <option value="__delete">Delete user...</option>
               </select>
             </div>
           </td>
@@ -229,4 +236,29 @@ document.addEventListener('DOMContentLoaded', () => {
       ApiClient.showToast(err.message || 'Server error occurred.', 'error');
     }
   };
+
+  window.handleUserAction = (userId, action) => {
+    if (action === '__delete') return window.deleteUserAccount(userId);
+    return window.changeUserStatus(userId, action);
+  };
+
+  window.deleteUserAccount = async (userId) => {
+    if (!confirm('Permanently delete this user account? This action cannot be undone.')) return;
+
+    try {
+      const response = await UserApi.deleteUser(userId);
+      if (response.success) {
+        ApiClient.showToast(response.message || 'User account deleted.', 'success');
+        await loadUsers();
+      } else {
+        ApiClient.showToast(response.message || 'User account could not be deleted.', 'error');
+      }
+    } catch (err) {
+      ApiClient.showToast(err.message || 'Server error while deleting the user account.', 'error');
+    }
+  };
 });
+
+function escapeUserHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}

@@ -3,12 +3,12 @@ package com.smartmicrogrid.M3
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import com.smartmicrogrid.R
 import com.smartmicrogrid.databinding.ActivityProsumerTransactionDetailsBinding
 import com.smartmicrogrid.models.Transaction
 
-class ProsumerTransactionDetailsActivity : AppCompatActivity() {
+class ProsumerTransactionDetailsActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityProsumerTransactionDetailsBinding
     private val viewModel: TransactionDetailsViewModel by viewModels()

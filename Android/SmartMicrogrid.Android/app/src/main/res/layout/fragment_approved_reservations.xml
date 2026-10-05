@@ -36,7 +36,7 @@
                 android:layout_marginTop="2dp"
                 android:text="@string/approved_reservations"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textSize="24sp"
+                android:textSize="@dimen/screen_title_size"
                 android:fontFamily="sans-serif-medium"
                 android:textStyle="bold" />
         </LinearLayout>

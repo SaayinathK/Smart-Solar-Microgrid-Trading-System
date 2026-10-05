@@ -25,7 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="@dimen/screen_gutter">
 
                 <TextView
                     android:id="@+id/tv_completion_success_icon"
@@ -42,7 +42,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/transaction_completed"
                     android:textColor="@color/m3_success"
-                    android:textSize="24sp"
+                    android:textSize="@dimen/screen_title_size"
                     android:textStyle="bold" />
 
                 <TextView

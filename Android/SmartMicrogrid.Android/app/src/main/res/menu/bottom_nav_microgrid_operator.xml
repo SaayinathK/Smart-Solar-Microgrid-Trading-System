@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/nav_home" android:icon="@drawable/ic_nav_home" android:title="Home" app:showAsAction="always" />
-    <item android:id="@+id/nav_scan" android:icon="@drawable/ic_nav_scan" android:title="Operations" app:showAsAction="always" />
-    <item android:id="@+id/nav_transactions" android:icon="@drawable/ic_nav_transactions" android:title="Transactions" app:showAsAction="always" />
-    <item android:id="@+id/nav_pending" android:icon="@drawable/ic_nav_pending" android:title="Reservations" app:showAsAction="always" />
+    <item android:id="@+id/nav_scan" android:icon="@drawable/ic_nav_grid" android:title="Grids" app:showAsAction="always" />
+    <item android:id="@+id/nav_transactions" android:icon="@drawable/ic_nav_transactions" android:title="Transfers" app:showAsAction="always" />
+    <item android:id="@+id/nav_pending" android:icon="@drawable/ic_nav_pending" android:title="Bookings" app:showAsAction="always" />
     <item android:id="@+id/nav_profile" android:icon="@drawable/ic_nav_profile" android:title="Profile" app:showAsAction="always" />
 
 </menu>

@@ -12,7 +12,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import androidx.core.content.FileProvider
 import androidx.core.content.getSystemService
 import androidx.core.view.ViewCompat
@@ -29,7 +29,7 @@ import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.Locale
 
-class TransactionQrActivity : AppCompatActivity() {
+class TransactionQrActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityTransactionQrBinding
     private var currentQrBitmap: Bitmap? = null

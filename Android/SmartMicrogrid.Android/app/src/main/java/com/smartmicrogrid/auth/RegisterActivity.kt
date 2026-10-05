@@ -3,11 +3,11 @@ package com.smartmicrogrid.auth
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import com.smartmicrogrid.databinding.ActivityRegisterBinding
 import com.smartmicrogrid.models.RegisterRequest
 
-class RegisterActivity : AppCompatActivity() {
+class RegisterActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private val viewModel: AuthViewModel by viewModels()

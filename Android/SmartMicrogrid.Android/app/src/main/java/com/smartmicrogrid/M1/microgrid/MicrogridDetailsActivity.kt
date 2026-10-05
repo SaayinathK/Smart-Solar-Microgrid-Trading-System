@@ -3,10 +3,10 @@ package com.smartmicrogrid.M1.microgrid
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import com.smartmicrogrid.databinding.ActivityMicrogridDetailsBinding
 
-class MicrogridDetailsActivity : AppCompatActivity() {
+class MicrogridDetailsActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityMicrogridDetailsBinding
     private val viewModel: MicrogridViewModel by viewModels()

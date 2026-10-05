@@ -28,13 +28,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function render(health) {
-    document.getElementById('health-api').innerHTML = AdminUi.healthPill(health.api);
-    document.getElementById('health-auth').innerHTML = AdminUi.healthPill(health.authentication);
-    document.getElementById('health-server').innerHTML = AdminUi.healthPill(health.server);
+    const apiIndicator = document.getElementById('health-api');
+    const authIndicator = document.getElementById('health-auth');
+    const serverIndicator = document.getElementById('health-server');
+    apiIndicator.innerHTML = AdminUi.healthPill(health.api);
+    authIndicator.innerHTML = AdminUi.healthPill(health.authentication);
+    serverIndicator.innerHTML = AdminUi.healthPill(health.server);
+    AdminUi.setHealthState(apiIndicator, health.api);
+    AdminUi.setHealthState(authIndicator, health.authentication);
+    AdminUi.setHealthState(serverIndicator, health.server);
 
-    document.getElementById('health-db').innerHTML =
+    const databaseIndicator = document.getElementById('health-db');
+    databaseIndicator.innerHTML =
       AdminUi.healthPill(health.database) +
       (health.databaseDetail ? `<br><small class="text-muted">${escapeHtml(health.databaseDetail)}</small>` : '');
+    AdminUi.setHealthState(databaseIndicator, health.database);
 
     const rows = [
       ['Environment', escapeHtml(health.environment || '-')],

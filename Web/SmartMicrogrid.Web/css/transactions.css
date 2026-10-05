@@ -266,6 +266,10 @@
   font-weight: 600;
 }
 
+.transaction-filter-label[hidden] {
+  display: none;
+}
+
 .transactions-state {
   padding: 1.5rem;
   color: var(--text-secondary);

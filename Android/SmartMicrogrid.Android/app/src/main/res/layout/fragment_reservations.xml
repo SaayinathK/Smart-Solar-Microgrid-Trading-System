@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:strokeWidth="0dp"
-        android:layout_marginHorizontal="20dp"
+        android:layout_marginHorizontal="@dimen/screen_gutter"
         android:layout_marginTop="16dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -62,7 +62,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/solar_reservations_title"
-                    android:textSize="23sp"
+                    android:textSize="@dimen/screen_title_size"
                     android:textColor="#FFFFFF"
                     android:fontFamily="sans-serif-medium"
                     android:layout_marginTop="6dp" />
@@ -80,7 +80,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/reservation_browse_slots"
-        style="@style/Widget.Material3.Button"
+        style="@style/Widget.SmartMicrogrid.Button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
@@ -96,13 +96,13 @@
         app:iconSize="16dp"
         android:paddingHorizontal="14dp"
         android:minHeight="48dp"
-        android:layout_marginHorizontal="20dp"
+        android:layout_marginHorizontal="@dimen/screen_gutter"
         android:layout_marginBottom="8dp" />
 
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="20dp"
+        android:layout_marginHorizontal="@dimen/screen_gutter"
         android:layout_marginTop="2dp"
         app:cardCornerRadius="18dp"
         app:strokeColor="@color/surface_outline"
@@ -184,7 +184,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:layout_marginHorizontal="20dp"
+        android:layout_marginHorizontal="@dimen/screen_gutter"
         app:tabMode="scrollable"
         app:tabGravity="start"
         app:tabIndicatorColor="@color/accent"

@@ -9,13 +9,15 @@
   <link rel="stylesheet" href="../../css/sidebar.css">
   <link rel="stylesheet" href="../../css/forms.css">
   <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/interface.css">
+  <link rel="stylesheet" href="../../css/admin.css">
 </head>
 <body>
 
   <div id="app-layout-wrapper">
     <div style="max-width: 680px;">
       
-      <div class="page-header">
+      <div data-page-intro class="page-header">
         <div class="page-title">
           <h1 id="page-heading">Edit User Account</h1>
           <p>Update personal information, role, status, or password</p>
@@ -68,8 +70,10 @@
             <div class="form-group">
               <label class="form-label" for="isActive">Account Status *</label>
               <select id="isActive" class="form-select">
-                <option value="true">Active Account</option>
-                <option value="false">Inactive Account</option>
+                <option value="Active">Active Account</option>
+                <option value="Pending">Pending Review</option>
+                <option value="Inactive">Inactive Account</option>
+                <option value="Suspended">Suspended</option>
               </select>
             </div>
           </div>
@@ -117,6 +121,7 @@
   <script src="../../js/api/auth-api.js"></script>
   <script src="../../js/api/user-api.js"></script>
   <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js"></script>
   <script src="../../js/users/edit-user.js"></script>
   <script>

@@ -10,11 +10,13 @@
   <link rel="stylesheet" href="../../css/dashboard.css">
   <link rel="stylesheet" href="../../css/forms.css">
   <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/interface.css">
+  <link rel="stylesheet" href="../../css/admin.css">
 </head>
 <body>
 
   <div id="app-layout-wrapper">
-    <div class="page-header">
+    <div data-page-intro class="page-header">
       <div class="page-title">
         <h1>System Activity</h1>
         <p>Audit trail of authentication and administrative actions</p>
@@ -23,7 +25,7 @@
 
     <div class="table-toolbar">
       <div class="search-box">
-        <select id="module-filter" class="form-select" style="max-width: 200px;">
+        <select id="module-filter" class="form-select" style="max-width: 200px;" aria-label="Filter by module">
           <option value="">All Modules</option>
           <option value="Authentication">Authentication</option>
           <option value="User Management">User Management</option>
@@ -32,7 +34,7 @@
         </select>
       </div>
 
-      <select id="action-filter" class="form-select" style="max-width: 230px;">
+      <select id="action-filter" class="form-select" style="max-width: 230px;" aria-label="Filter by action">
         <option value="">All Actions</option>
         <option value="LOGIN_SUCCESS">LOGIN_SUCCESS</option>
         <option value="LOGIN_FAILED">LOGIN_FAILED</option>
@@ -41,20 +43,23 @@
         <option value="USER_ACTIVATED">USER_ACTIVATED</option>
         <option value="USER_DEACTIVATED">USER_DEACTIVATED</option>
         <option value="USER_SUSPENDED">USER_SUSPENDED</option>
+        <option value="USER_REACTIVATED">USER_REACTIVATED</option>
+        <option value="USER_STATUS_CHANGED">USER_STATUS_CHANGED</option>
+        <option value="ROLE_ASSIGNED">ROLE_ASSIGNED</option>
         <option value="ROLE_CHANGED">ROLE_CHANGED</option>
         <option value="USER_DELETED">USER_DELETED</option>
         <option value="SYSTEM_CONFIGURATION_UPDATED">SYSTEM_CONFIGURATION_UPDATED</option>
         <option value="ADMIN_REPORT_GENERATED">ADMIN_REPORT_GENERATED</option>
       </select>
 
-      <select id="status-filter" class="form-select" style="max-width: 160px;">
+      <select id="status-filter" class="form-select" style="max-width: 160px;" aria-label="Filter by result">
         <option value="">All Statuses</option>
         <option value="Success">Success</option>
         <option value="Failure">Failure</option>
       </select>
 
-      <input type="date" id="from-filter" class="form-input" style="max-width: 165px;" title="From date">
-      <input type="date" id="to-filter" class="form-input" style="max-width: 165px;" title="To date">
+      <input type="date" id="from-filter" class="form-input" style="max-width: 165px;" title="From date" aria-label="Activity from date">
+      <input type="date" id="to-filter" class="form-input" style="max-width: 165px;" title="To date" aria-label="Activity to date">
 
       <button id="clear-btn" class="btn btn-secondary btn-sm">Clear</button>
     </div>
@@ -92,10 +97,12 @@
   <script src="../../js/common/session.js"></script>
   <script src="../../js/common/theme.js"></script>
   <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js"></script>
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/api/admin-api.js"></script>
   <script src="../../js/common/admin-ui.js"></script>
+  <script src="../../js/m4/activity.js"></script>
   <script>
     renderAppLayout('m4-activity', 'System Activity');
   </script>

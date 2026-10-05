@@ -102,12 +102,18 @@ function setComponentCard(cardId, valueId, noteId, stat, value) {
 }
 
 function renderHealth(health) {
-  document.getElementById('health-api').innerHTML = AdminUi.healthPill(health.api);
-  document.getElementById('health-db').innerHTML =
+  const apiIndicator = document.getElementById('health-api');
+  const databaseIndicator = document.getElementById('health-db');
+  const serverIndicator = document.getElementById('health-server');
+  apiIndicator.innerHTML = AdminUi.healthPill(health.api);
+  databaseIndicator.innerHTML =
     AdminUi.healthPill(health.database) +
     (health.databaseLatencyMs ? ` <span class="text-muted">(${AdminUi.formatNumber(health.databaseLatencyMs)} ms)</span>` : '');
-  document.getElementById('health-server').innerHTML =
+  serverIndicator.innerHTML =
     AdminUi.healthPill(health.server) + ` <span class="text-muted">${escapeHtml(health.environment || '')}</span>`;
+  AdminUi.setHealthState(apiIndicator, health.api);
+  AdminUi.setHealthState(databaseIndicator, health.database);
+  AdminUi.setHealthState(serverIndicator, health.server);
 }
 
 function renderActivity(activity) {

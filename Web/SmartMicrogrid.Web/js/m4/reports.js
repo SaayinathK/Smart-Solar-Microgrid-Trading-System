@@ -20,8 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyFilterVisibility() {
     const isUserReport = typeSelect.value === 'users';
+    const hasDateRange = isUserReport || typeSelect.value === 'activity' || typeSelect.value === 'platform';
     roleFilter.disabled = !isUserReport;
     statusFilter.disabled = !isUserReport;
+    document.getElementById('from-date').disabled = !hasDateRange;
+    document.getElementById('to-date').disabled = !hasDateRange;
   }
 
   function dateRangeParams() {
@@ -198,17 +201,32 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function exportCsv() {
-    // The rendered tables are the export source, so the CSV always matches the view.
+    // Export the generated metrics and tables so the file matches the visible report.
     const tables = output.querySelectorAll('table');
-    if (!tables.length) {
+    const stats = Array.from(output.querySelectorAll('.stat-card'));
+    if (!tables.length && !stats.length) {
       ApiClient.showToast('Generate a report before exporting.', 'error');
       return;
     }
 
     const lines = [];
+    const reportTitle = output.querySelector(':scope > .card > h3')?.textContent.trim();
+    if (reportTitle) lines.push(csvCell(reportTitle));
+
+    if (stats.length) {
+      lines.push(csvCell('Summary'), 'Metric,Value');
+      stats.forEach(stat => {
+        const label = stat.querySelector('h3')?.textContent.trim() || 'Metric';
+        const value = stat.querySelector('.stat-value')?.textContent.trim() || '';
+        lines.push([csvCell(label), csvCell(value)].join(','));
+      });
+      lines.push('');
+    }
+
     tables.forEach(table => {
-      const heading = table.closest('.card')?.querySelector('h3')?.textContent;
-      if (heading) lines.push(csvCell(heading));
+      let section = table.closest('.table-container')?.previousElementSibling;
+      while (section && !['H2', 'H3', 'H4'].includes(section.tagName)) section = section.previousElementSibling;
+      if (section) lines.push(csvCell(section.textContent.trim()));
 
       table.querySelectorAll('tr').forEach(row => {
         const cells = Array.from(row.querySelectorAll('th, td'))

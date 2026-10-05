@@ -7,9 +7,9 @@
     android:clickable="true"
     android:focusable="true"
     app:cardBackgroundColor="?attr/colorSurface"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="4dp"
-    app:strokeColor="#332563EB"
+    app:cardCornerRadius="@dimen/surface_corner"
+    app:cardElevation="1dp"
+    app:strokeColor="@color/surface_outline"
     app:strokeWidth="1dp">
 
     <LinearLayout
@@ -52,7 +52,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="14sp" />
+            android:fontFamily="sans-serif-medium"
+            android:textSize="22sp" />
 
         <TextView
             android:id="@+id/tv_context"

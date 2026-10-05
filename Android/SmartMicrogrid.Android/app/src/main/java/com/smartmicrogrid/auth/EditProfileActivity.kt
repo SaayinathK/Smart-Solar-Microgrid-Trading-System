@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import com.smartmicrogrid.databinding.ActivityEditProfileBinding
 import com.smartmicrogrid.models.UpdateProfileRequest
 import com.smartmicrogrid.utils.SessionManager
 
-class EditProfileActivity : AppCompatActivity() {
+class EditProfileActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityEditProfileBinding
     private val viewModel: AuthViewModel by viewModels()

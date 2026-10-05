@@ -5,11 +5,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.smartmicrogrid.databinding.ActivityMicrogridListBinding
 
-class MicrogridListActivity : AppCompatActivity() {
+class MicrogridListActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityMicrogridListBinding
     private val viewModel: MicrogridViewModel by viewModels()

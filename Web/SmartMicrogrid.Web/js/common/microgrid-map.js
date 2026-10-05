@@ -43,6 +43,11 @@ class MicrogridMap {
         </a>
       </div>`;
 
+    container.querySelector('[data-provider="google"]').textContent = `${String.fromCodePoint(0x1F4CD)} Google Maps`;
+    container.querySelector('[data-provider="leaflet"]').textContent = `${String.fromCodePoint(0x1F343)} Leaflet OSM`;
+    this.openMapsLink = container.querySelector('[data-google-maps-link]');
+    this.openMapsLink.textContent = `Open in Google Maps ${String.fromCodePoint(0x2197)}`;
+
     this.frame = container.querySelector('[data-map-frame]');
     this.message = container.querySelector('[data-map-message]');
     this.list = container.querySelector('[data-map-list]');

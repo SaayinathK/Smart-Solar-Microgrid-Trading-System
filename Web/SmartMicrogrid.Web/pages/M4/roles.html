@@ -9,11 +9,13 @@
   <link rel="stylesheet" href="../../css/sidebar.css">
   <link rel="stylesheet" href="../../css/dashboard.css">
   <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/interface.css">
+  <link rel="stylesheet" href="../../css/admin.css">
 </head>
 <body>
 
   <div id="app-layout-wrapper">
-    <div class="page-header">
+    <div data-page-intro class="page-header">
       <div class="page-title">
         <h1>Role Management</h1>
         <p>Platform roles, their permissions and current user distribution</p>
@@ -54,10 +56,12 @@
   <script src="../../js/common/session.js"></script>
   <script src="../../js/common/theme.js"></script>
   <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js"></script>
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/api/admin-api.js"></script>
   <script src="../../js/common/admin-ui.js"></script>
+  <script src="../../js/m4/roles.js"></script>
   <script>
     renderAppLayout('m4-roles', 'Role Management');
   </script>

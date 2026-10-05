@@ -5,30 +5,51 @@
     android:layout_height="match_parent"
     android:background="?android:attr/windowBackground">
 
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="wrap_content"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/transaction_hero"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:text="@string/my_transactions"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:layout_marginHorizontal="@dimen/screen_gutter"
+        android:layout_marginTop="16dp"
+        app:strokeWidth="0dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:layout_width="0dp" android:layout_height="0dp"
+                android:src="@drawable/img_battery_storage" android:scaleType="centerCrop"
+                android:importantForAccessibility="no"
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" />
+            <View
+                android:layout_width="0dp" android:layout_height="0dp"
+                android:background="@drawable/bg_solar_photo_overlay"
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" />
+            <LinearLayout
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:orientation="vertical" android:padding="@dimen/screen_gutter"
+                android:minHeight="140dp" android:gravity="bottom"
+                app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="@string/energy_workspace_label" android:textColor="#FFFFFF"
+                    android:textSize="10sp" android:letterSpacing="0.12" android:textStyle="bold" />
+                <TextView android:id="@+id/tv_title" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:layout_marginTop="8dp"
+                    android:text="@string/my_transactions" android:textColor="#FFFFFF"
+                    android:textSize="@dimen/screen_title_size" android:fontFamily="sans-serif-medium" />
+                <TextView android:id="@+id/tv_subtitle" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:layout_marginTop="6dp"
+                    android:text="@string/prosumer_transaction_records" android:textColor="#FFFFFF" android:textSize="14sp" />
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
 
-    <TextView
-        android:id="@+id/tv_subtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:text="@string/prosumer_transaction_records"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="14sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
@@ -38,7 +59,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_subtitle">
+        app:layout_constraintTop_toBottomOf="@id/transaction_hero">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
@@ -46,9 +67,9 @@
             android:layout_height="match_parent"
             android:clipToPadding="false"
             android:contentDescription="@string/my_transactions_list"
-            android:paddingHorizontal="16dp"
+            android:paddingHorizontal="@dimen/screen_gutter"
             android:paddingTop="16dp"
-            android:paddingBottom="80dp" />
+            android:paddingBottom="20dp" />
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <ProgressBar

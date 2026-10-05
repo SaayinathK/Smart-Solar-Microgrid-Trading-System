@@ -2,14 +2,15 @@ package com.smartmicrogrid.M3
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.smartmicrogrid.R
+import com.smartmicrogrid.ui.NavigationMotion
 import com.smartmicrogrid.auth.LoginActivity
 import com.smartmicrogrid.utils.SessionManager
 
-class MicrogridOperatorMainActivity : AppCompatActivity() {
+class MicrogridOperatorMainActivity : WorkspaceActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,11 +71,11 @@ class MicrogridOperatorMainActivity : AppCompatActivity() {
                 bottomNav.selectedItemId = R.id.nav_home
             }
         }
+        NavigationMotion.configure(bottomNav)
     }
 
     private fun loadFragment(fragment: Fragment): Boolean {
-        supportFragmentManager.beginTransaction()
-            .setCustomAnimations(R.anim.fade_in, R.anim.fade_out)
+        NavigationMotion.transition(supportFragmentManager.beginTransaction(), this)
             .replace(R.id.fragment_container, fragment)
             .commit()
 

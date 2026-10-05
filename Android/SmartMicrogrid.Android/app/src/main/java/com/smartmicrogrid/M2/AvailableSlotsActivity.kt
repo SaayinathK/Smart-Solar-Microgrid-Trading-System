@@ -9,7 +9,7 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +20,7 @@ import com.smartmicrogrid.models.CreateReservationRequest
 import com.smartmicrogrid.models.EnergyAvailabilitySlot
 import kotlinx.coroutines.launch
 
-class AvailableSlotsActivity : AppCompatActivity() {
+class AvailableSlotsActivity : WorkspaceActivity() {
     private lateinit var adapter: AvailableSlotsAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

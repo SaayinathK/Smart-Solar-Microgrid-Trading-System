@@ -10,10 +10,11 @@
   <link rel="stylesheet" href="../../css/tables.css">
   <link rel="stylesheet" href="../../css/forms.css">
   <link rel="stylesheet" href="../../css/transactions.css">
+  <link rel="stylesheet" href="../../css/interface.css">
 </head>
 <body>
   <div id="app-layout-wrapper">
-    <section class="page-header transaction-page-header">
+    <section data-page-intro class="page-header transaction-page-header">
       <div class="page-title">
         <h1>Verify Transaction</h1>
         <p>Paste the QR payload shown in transaction details. This page does not use a camera scanner.</p>
@@ -99,6 +100,7 @@
   <script src="../../js/common/session.js"></script>
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js"></script>
   <script src="../../js/api/transaction-api.js"></script>
   <script src="../../js/transactions/transaction-verify.js"></script>

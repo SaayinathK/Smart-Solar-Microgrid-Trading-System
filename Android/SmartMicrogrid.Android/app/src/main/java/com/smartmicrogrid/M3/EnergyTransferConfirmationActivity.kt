@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.content.Intent
 import android.view.View
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import com.google.gson.Gson
 import com.smartmicrogrid.databinding.ActivityEnergyTransferConfirmationBinding
 import com.smartmicrogrid.models.Transaction
 
-class EnergyTransferConfirmationActivity : AppCompatActivity() {
+class EnergyTransferConfirmationActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityEnergyTransferConfirmationBinding
     private val viewModel: EnergyTransferConfirmationViewModel by viewModels()

@@ -193,4 +193,9 @@
     <string name="m4_filter_all">All</string>
     <string name="m4_refresh">Refresh</string>
     <string name="m4_no_records">No records to display.</string>
+    <string name="energy_workspace_label">ENERGY WORKSPACE</string>
+    <string name="workspace_users_title">People &amp; access</string>
+    <string name="workspace_health_title">System health</string>
+    <string name="workspace_settings_title">Workspace settings</string>
+    <string name="workspace_brand">SmartMicrogrid</string>
 </resources>

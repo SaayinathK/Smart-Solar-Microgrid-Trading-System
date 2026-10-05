@@ -31,6 +31,9 @@
         <!-- Glass Card & Navigation Styles -->
         <item name="materialCardViewStyle">@style/Widget.SmartMicrogrid.CardView.Glass</item>
         <item name="materialButtonStyle">@style/Widget.SmartMicrogrid.Button</item>
+        <item name="textInputStyle">@style/Widget.SmartMicrogrid.TextInput</item>
+        <item name="toolbarStyle">@style/Widget.SmartMicrogrid.Toolbar</item>
+        <item name="android:windowAnimationStyle">@style/Animation.SmartMicrogrid</item>
         <item name="bottomNavigationStyle">@style/Widget.SmartMicrogrid.BottomNavigationView</item>
     </style>
 
@@ -39,23 +42,28 @@
         <item name="strokeColor">@color/surface_outline</item>
         <item name="strokeWidth">1dp</item>
         <item name="cardElevation">1dp</item>
-        <item name="cardCornerRadius">20dp</item>
+        <item name="cardCornerRadius">@dimen/surface_corner</item>
     </style>
 
     <style name="Widget.SmartMicrogrid.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
         <item name="android:background">@drawable/bg_bottom_navigation</item>
-        <item name="elevation">12dp</item>
+        <item name="elevation">4dp</item>
         <item name="itemIconTint">@color/nav_item_tint_selector</item>
         <item name="itemTextColor">@color/nav_item_tint_selector</item>
         <item name="itemActiveIndicatorStyle">@style/Widget.SmartMicrogrid.BottomNavigationView.ActiveIndicator</item>
         <item name="itemRippleColor">#263B82F6</item>
         <item name="labelVisibilityMode">labeled</item>
         <item name="itemIconSize">22dp</item>
+        <item name="android:minHeight">@dimen/navigation_height</item>
+        <item name="itemPaddingTop">10dp</item>
+        <item name="itemPaddingBottom">10dp</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.SmartMicrogrid.Navigation.Active</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.SmartMicrogrid.Navigation</item>
     </style>
 
     <style name="Widget.SmartMicrogrid.BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
         <item name="android:color">#263B82F6</item>
-        <item name="android:width">48dp</item>
+        <item name="android:width">56dp</item>
         <item name="android:height">32dp</item>
     </style>
 </resources>

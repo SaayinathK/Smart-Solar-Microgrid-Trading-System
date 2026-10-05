@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.smartmicrogrid.M1.availability.EnergyAvailabilityAdapter
 import com.smartmicrogrid.databinding.ActivityEnergySlotsBinding
 import com.smartmicrogrid.models.EnergyAvailabilitySlot
 
-class EnergySlotActivity : AppCompatActivity() {
+class EnergySlotActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityEnergySlotsBinding
     private val viewModel: EnergySlotViewModel by viewModels()

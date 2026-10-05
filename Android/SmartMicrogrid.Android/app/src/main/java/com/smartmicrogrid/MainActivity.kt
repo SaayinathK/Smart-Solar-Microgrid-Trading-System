@@ -2,13 +2,13 @@ package com.smartmicrogrid
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import com.smartmicrogrid.M1.availability.EnergyAvailabilityActivity
 import com.smartmicrogrid.M1.microgrid.MicrogridListActivity
 import com.smartmicrogrid.M1.slots.EnergySlotActivity
 import com.smartmicrogrid.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityMainBinding
 

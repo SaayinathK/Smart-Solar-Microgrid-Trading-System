@@ -13,19 +13,26 @@ function getWebAppUrl(path) {
   return new URL(path, appBase).href;
 }
 
-function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
+function renderAppLayout(activePage = 'dashboard', pageTitle = 'Overview') {
   const layoutContainer = document.getElementById('app-layout-wrapper');
-  if (!layoutContainer) return;
+  if (!layoutContainer || layoutContainer.dataset.layoutReady) return;
+  layoutContainer.dataset.layoutReady = 'true';
 
-  const user = SessionManager.getUser();
+  const rawUser = SessionManager.getUser();
+  const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const user = rawUser ? { ...rawUser, firstName: escape(rawUser.firstName), lastName: escape(rawUser.lastName), nic: escape(rawUser.nic) } : null;
+  const roleLabel = rawUser?.role === 'MicrogridOperator' ? 'Microgrid operator' : rawUser?.role === 'Admin' ? 'Administrator' : 'Prosumer';
   const role = user ? user.role : 'Guest';
+  if (role === 'Admin' && (activePage.startsWith('m4-') || activePage === 'users')) {
+    document.body.classList.add('admin-workspace');
+  }
   const currentTheme = ThemeManager.getTheme();
 
   let roleClass = 'role-prosumer';
   if (role === 'Admin') roleClass = 'role-admin';
   else if (role === 'MicrogridOperator') roleClass = 'role-operator';
 
-  const userInitial = user && user.firstName ? user.firstName.charAt(0).toUpperCase() : 'U';
+  const userInitial = rawUser?.firstName ? escape(rawUser.firstName.charAt(0).toUpperCase()) : 'U';
 
   // Role-Specific Navigation Menu Configs
   const menuItems = getMenuItemsForRole(role, activePage);
@@ -33,10 +40,12 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
   const innerContentHTML = layoutContainer.innerHTML;
 
   layoutContainer.innerHTML = `
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <div class="app-layout">
-      
+      <button class="sidebar-backdrop" aria-label="Close navigation" tabindex="-1" onclick="setSidebarOpen(false)"></button>
+
       <!-- Professional Sidebar Navigation -->
-      <aside id="sidebar" class="sidebar">
+      <aside id="sidebar" class="sidebar" aria-label="Workspace navigation">
         <div class="sidebar-header">
           <div class="sidebar-brand-badge">
             <svg class="sidebar-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,10 +54,11 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
           </div>
           <div class="sidebar-brand-text">
             <div class="sidebar-title">SmartMicrogrid</div>
-            <div class="sidebar-subtitle"><span class="status-dot-pulse"></span> Solar Trading</div>
+            <div class="sidebar-subtitle">ENERGY WORKSPACE</div>
           </div>
         </div>
 
+        <button class="sidebar-close" aria-label="Close navigation" onclick="setSidebarOpen(false)">&times;</button>
         <div class="sidebar-user-card">
           <div class="sidebar-user-avatar-wrapper">
             <div class="sidebar-user-avatar">${userInitial}</div>
@@ -57,21 +67,20 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
           <div class="sidebar-user-info">
             <div class="sidebar-user-name" title="${user ? `${user.firstName} ${user.lastName}` : 'User'}">${user ? `${user.firstName} ${user.lastName}` : 'User'}</div>
             <div class="sidebar-user-role-row">
-              <span class="role-pill ${roleClass}">${role}</span>
-              ${user && user.nic ? `<span class="nic-pill" title="Prosumer NIC">${user.nic}</span>` : ''}
+              <span class="sidebar-role-label">${roleLabel}</span>
+
             </div>
           </div>
         </div>
 
-        <nav class="sidebar-nav">
+        <div class="sidebar-search"><svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5" stroke-width="1.8"/><path d="m16 16 4 4" stroke-width="1.8"/></svg><input id="navigation-search" type="search" placeholder="Find a page…" aria-label="Find a navigation page" autocomplete="off"></div>
+        <nav class="sidebar-nav" aria-label="Main navigation">
           ${menuItems}
         </nav>
+        <p class="sidebar-no-results" role="status" hidden>No matching pages.</p>
 
         <div class="sidebar-footer">
-          <div class="sidebar-system-status">
-            <span class="status-dot-pulse"></span>
-            <span>API Server: <strong>Port 5050</strong></span>
-          </div>
+          <div class="sidebar-workspace-caption">Smarter energy. Connected communities.</div>
           <button id="theme-toggle-btn" onclick="ThemeManager.toggleTheme()" class="theme-toggle-btn">
             ${currentTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </button>
@@ -86,27 +95,24 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
       <div class="app-main">
         <header class="app-header">
           <div class="header-left">
-            <button class="mobile-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation">
+            <button class="mobile-toggle-btn" onclick="toggleSidebar()" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar">
               <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
               </svg>
             </button>
             <div class="header-title-group">
-              <div class="header-breadcrumb">Platform / ${role}</div>
-              <div class="header-title">${pageTitle}</div>
+              <div class="header-breadcrumb">Workspace <span aria-hidden="true">/</span> ${roleLabel}</div>
+              <div class="workspace-brand">SmartMicrogrid</div>
             </div>
           </div>
 
           <div class="header-right">
-            <div class="header-live-badge">
-              <span class="status-dot-pulse"></span>
-              <span>Live Trading</span>
-            </div>
-            <span class="role-pill ${roleClass}">${role} Portal</span>
+            <span class="header-date">${new Intl.DateTimeFormat(undefined, {month: 'short', day: 'numeric', year: 'numeric'}).format(new Date())}</span>
+            <span class="header-avatar" aria-hidden="true">${userInitial}</span>
           </div>
         </header>
 
-        <main class="main-content">
+        <main id="main-content" class="main-content" tabindex="-1">
           <div class="container animate-fade-in">
             ${innerContentHTML}
           </div>
@@ -114,7 +120,7 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
 
         <footer class="footer">
           <div class="container">
-            &copy; 2026 Smart Solar Microgrid Energy Management & Trading System.
+            <span class="footer-brand">SmartMicrogrid</span><span>Connected energy communities</span><span>&copy; ${new Date().getFullYear()}</span>
           </div>
         </footer>
       </div>
@@ -122,7 +128,28 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
     </div>
   `;
 
+  renderPageIntro(document.querySelector('.main-content > .container'), activePage, pageTitle);
   ThemeManager.updateToggleIcon(currentTheme);
+  document.querySelectorAll('.sidebar-link').forEach(link => {
+    if (link.classList.contains('active')) link.setAttribute('aria-current', 'page');
+    if (link.getAttribute('href').startsWith('/')) link.href = getWebAppUrl(link.getAttribute('href').slice(1));
+  });
+  document.getElementById('navigation-search').addEventListener('input', event => {
+    const query = event.target.value.trim().toLowerCase();
+    let count = 0;
+    document.querySelectorAll('.sidebar-nav > div').forEach(section => {
+      let matches = 0;
+      section.querySelectorAll('li').forEach(item => {
+        item.hidden = !item.textContent.toLowerCase().includes(query);
+        if (!item.hidden) matches++;
+      });
+      section.hidden = matches === 0;
+      count += matches;
+    });
+    document.querySelector('.sidebar-no-results').hidden = count > 0;
+  });
+  syncSidebarAccessibility();
+  document.querySelector('.sidebar-link[aria-current="page"]')?.scrollIntoView({ block: 'nearest' });
 }
 
 function getMenuItemsForRole(role, activePage) {
@@ -149,8 +176,8 @@ function getMenuItemsForRole(role, activePage) {
       <div class="sidebar-section-title">Navigation</div>
       <ul class="sidebar-menu">
         <li>
-          <a href="${role === 'MicrogridOperator' ? getWebAppUrl('pages/M3/dashboard.html') : '/dashboard.html'}" class="sidebar-link ${(role === 'MicrogridOperator' ? activePage === 'm3-dashboard' : activePage === 'dashboard') ? 'active' : ''}">
-            ${icons.dashboard} <span>Dashboard Overview</span>
+          <a href="${getWebAppUrl('dashboard.html')}" class="sidebar-link ${activePage === 'dashboard' ? 'active' : ''}">
+            ${icons.dashboard} <span>Overview</span>
           </a>
         </li>
       </ul>
@@ -160,22 +187,14 @@ function getMenuItemsForRole(role, activePage) {
   if (isM3User) {
     sections += `
       <div>
-        <div class="sidebar-section-title">M3 Transactions</div>
+        <div class="sidebar-section-title">Transactions</div>
         <ul class="sidebar-menu">
           ${role === 'MicrogridOperator' ? `
-          <li>
-            <a href="${getWebAppUrl('pages/M3/dashboard.html')}" class="sidebar-link ${activePage === 'm3-dashboard' ? 'active' : ''}">
-              ${icons.dashboard} <span>Transaction Operations</span>
-            </a>
-          </li>` : ''}
+          <li><a href="${getWebAppUrl('pages/M3/dashboard.html')}" class="sidebar-link ${activePage === 'm3-dashboard' ? 'active' : ''}">${icons.dashboard} <span>Transaction Operations</span></a></li>` : ''}
+
           <li>
             <a href="${getWebAppUrl('pages/M3/transactions.html')}" class="sidebar-link ${activePage === 'transactions' ? 'active' : ''}">
               ${icons.trading} <span>${role === 'Admin' ? 'All Transactions' : 'Transactions'}</span>
-            </a>
-          </li>
-          <li>
-            <a href="${getWebAppUrl('pages/M3/transactions.html?view=history')}" class="sidebar-link ${activePage === 'history' ? 'active' : ''}">
-              ${icons.reports} <span>Transaction History</span>
             </a>
           </li>
         </ul>
@@ -213,24 +232,19 @@ function getMenuItemsForRole(role, activePage) {
             ${icons.trading} <span>Energy Availability</span>
           </a>
         </li>
-        <li>
-          <a href="/pages/M1/dashboard.html" class="sidebar-link ${activePage === 'm1-dashboard' ? 'active' : ''}">
-            ${icons.dashboard} <span>Infrastructure Dashboard</span>
-          </a>
-        </li>
       </ul>
     </div>
   `;
 
   // M2 Energy Search & Reservations Section (All Roles)
-  const reservationLabel = role === 'Admin' ? 'All Reservations Monitor' :
+  const reservationLabel = role === 'Admin' ? 'All Reservations' :
                            role === 'MicrogridOperator' ? 'Microgrid Reservations' :
                            role === 'MicrogridOperator' ? 'Reservations & Verification' :
                            'My Reservations & Claims';
 
   sections += `
     <div>
-      <div class="sidebar-section-title">Energy Trading & Reservations</div>
+      <div class="sidebar-section-title">Energy marketplace</div>
       <ul class="sidebar-menu">
         <li>
           <a href="/pages/reservations/reservations.html" class="sidebar-link ${activePage === 'reservations' ? 'active' : ''}">
@@ -296,21 +310,45 @@ function getMenuItemsForRole(role, activePage) {
   return sections;
 }
 
-function toggleSidebar() {
+function setSidebarOpen(open) {
   const sidebar = document.getElementById('sidebar');
-  if (sidebar) {
-    sidebar.classList.toggle('open');
-  }
+  if (!sidebar) return;
+  sidebar.classList.toggle('open', open);
+  document.body.classList.toggle('navigation-open', open);
+  const toggle = document.querySelector('.mobile-toggle-btn');
+  toggle?.setAttribute('aria-expanded', String(open));
+  syncSidebarAccessibility();
+  if (open) sidebar.querySelector('.sidebar-close')?.focus();
+  else toggle?.focus();
 }
 
-// Optional: Close sidebar on mobile when a link is clicked
-document.addEventListener('click', function(event) {
+function toggleSidebar() { setSidebarOpen(!document.getElementById('sidebar')?.classList.contains('open')); }
+
+function syncSidebarAccessibility() {
   const sidebar = document.getElementById('sidebar');
-  const toggleBtn = document.querySelector('.mobile-toggle-btn');
-  
-  if (window.innerWidth <= 992 && sidebar && sidebar.classList.contains('open')) {
-    if (!sidebar.contains(event.target) && (!toggleBtn || !toggleBtn.contains(event.target))) {
-      sidebar.classList.remove('open');
-    }
+  if (!sidebar) return;
+  const mobile = window.matchMedia('(max-width: 992px)').matches;
+  const open = sidebar.classList.contains('open');
+  sidebar.inert = mobile && !open;
+  const main = document.querySelector('.app-main');
+  if (main) main.inert = mobile && open;
+}
+
+document.addEventListener('keydown', event => {
+  const sidebar = document.getElementById('sidebar');
+  if (!sidebar?.classList.contains('open')) return;
+  if (event.key === 'Escape') { setSidebarOpen(false); return; }
+  if (event.key !== 'Tab') return;
+  const controls = Array.from(sidebar.querySelectorAll('button, a[href], input')).filter(el => el.getClientRects().length && !el.disabled);
+  const first = controls[0], last = controls[controls.length - 1];
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+});
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 992) {
+    document.getElementById('sidebar')?.classList.remove('open');
+    document.body.classList.remove('navigation-open');
+    document.querySelector('.mobile-toggle-btn')?.setAttribute('aria-expanded', 'false');
   }
+  syncSidebarAccessibility();
 });

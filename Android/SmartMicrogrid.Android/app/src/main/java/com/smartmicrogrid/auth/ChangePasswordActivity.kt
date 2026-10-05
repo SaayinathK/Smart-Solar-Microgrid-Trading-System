@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.smartmicrogrid.ui.WorkspaceActivity
 import com.smartmicrogrid.databinding.ActivityChangePasswordBinding
 import com.smartmicrogrid.models.ChangePasswordRequest
 
-class ChangePasswordActivity : AppCompatActivity() {
+class ChangePasswordActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityChangePasswordBinding
     private val viewModel: AuthViewModel by viewModels()

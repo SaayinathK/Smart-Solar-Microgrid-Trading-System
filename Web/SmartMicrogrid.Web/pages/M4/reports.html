@@ -10,11 +10,13 @@
   <link rel="stylesheet" href="../../css/dashboard.css">
   <link rel="stylesheet" href="../../css/forms.css">
   <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../css/interface.css">
+  <link rel="stylesheet" href="../../css/admin.css">
 </head>
 <body>
 
   <div id="app-layout-wrapper">
-    <div class="page-header">
+    <div data-page-intro class="page-header">
       <div class="page-title">
         <h1>Administrative Reports</h1>
         <p>User, role, activity and platform statistics</p>
@@ -22,24 +24,24 @@
     </div>
 
     <div class="table-toolbar">
-      <select id="report-type" class="form-select" style="max-width: 260px;">
+      <select id="report-type" class="form-select" style="max-width: 260px;" aria-label="Report type">
         <option value="users">User Summary Report</option>
         <option value="roles">Role Distribution Report</option>
         <option value="activity">System Activity Report</option>
         <option value="platform">Platform Statistics Report</option>
       </select>
 
-      <input type="date" id="from-date" class="form-input" style="max-width: 165px;" title="From date">
-      <input type="date" id="to-date" class="form-input" style="max-width: 165px;" title="To date">
+      <input type="date" id="from-date" class="form-input" style="max-width: 165px;" title="From date" aria-label="Report from date">
+      <input type="date" id="to-date" class="form-input" style="max-width: 165px;" title="To date" aria-label="Report to date">
 
-      <select id="role-filter" class="form-select" style="max-width: 190px;">
+      <select id="role-filter" class="form-select" style="max-width: 190px;" aria-label="Filter report by role">
         <option value="">All Roles</option>
         <option value="Admin">Admin</option>
         <option value="MicrogridOperator">Microgrid Operator</option>
         <option value="Prosumer">Prosumer</option>
       </select>
 
-      <select id="status-filter" class="form-select" style="max-width: 175px;">
+      <select id="status-filter" class="form-select" style="max-width: 175px;" aria-label="Filter report by account status">
         <option value="">All Statuses</option>
         <option value="Active">Active</option>
         <option value="Inactive">Inactive</option>
@@ -62,10 +64,12 @@
   <script src="../../js/common/session.js"></script>
   <script src="../../js/common/theme.js"></script>
   <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js"></script>
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/api/admin-api.js"></script>
   <script src="../../js/common/admin-ui.js"></script>
+  <script src="../../js/m4/reports.js"></script>
   <script>
     renderAppLayout('m4-reports', 'Administrative Reports');
   </script>

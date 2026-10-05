@@ -25,10 +25,19 @@ const AdminUi = {
 
   healthPill(value) {
     const text = String(value || 'Unknown');
-    const cls = /healthy|online|ok/i.test(text) ? 'status-approved'
-      : /degraded/i.test(text) ? 'status-pending'
+    const cls = /^(healthy|online|ok|live|connected)$/i.test(text) ? 'status-approved'
+      : /degraded|warning/i.test(text) ? 'status-pending'
       : 'status-rejected';
     return `<span class="status-badge ${cls}">${escapeHtml(text)}</span>`;
+  },
+
+  setHealthState(element, value) {
+    const card = element?.closest('.alert-item');
+    if (!card) return;
+    const text = String(value || 'Unknown');
+    card.classList.remove('healthy', 'warning', 'critical');
+    card.classList.add(/^(healthy|online|ok|live|connected)$/i.test(text)
+      ? 'healthy' : /degraded|warning/i.test(text) ? 'warning' : 'critical');
   },
 
   formatDateTime(value) {
@@ -47,7 +56,7 @@ const AdminUi = {
 
   formatNumber(value, decimals = 0) {
     const num = Number(value);
-    if (isNaN(num)) return '0';
+    if (!Number.isFinite(num)) return '-';
     return num.toLocaleString(undefined, {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals

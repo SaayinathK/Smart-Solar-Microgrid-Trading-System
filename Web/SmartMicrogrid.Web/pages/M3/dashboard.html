@@ -9,11 +9,12 @@
   <link rel="stylesheet" href="../../css/sidebar.css">
   <link rel="stylesheet" href="../../css/tables.css">
   <link rel="stylesheet" href="../../css/transactions.css">
+  <link rel="stylesheet" href="../../css/interface.css">
 </head>
 <body>
   <div id="app-layout-wrapper">
     <!-- Hero Image Banner -->
-    <div class="hero-image-banner animate-fade-in" style="background-image: url('../../assets/images/bg_web_dashboard.png'); min-height: 160px;">
+    <div data-page-intro class="hero-image-banner animate-fade-in" style="background-image: url('../../assets/images/bg_web_dashboard.png'); min-height: 160px;">
       <div class="hero-image-overlay">
         <div>
           <h1>Operator Verification Hub</h1>
@@ -21,7 +22,6 @@
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <a href="transactions.html" class="btn btn-primary btn-sm">All Transactions</a>
-          <a href="transactions.html?view=history" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3);">History</a>
           <button type="button" id="refresh-verifier-dashboard" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.3);">Refresh</button>
         </div>
       </div>
@@ -59,6 +59,7 @@
   <script src="../../js/common/session.js"></script>
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/common/auth.js"></script>
+  <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js"></script>
   <script src="../../js/api/transaction-api.js"></script>
   <script src="../../js/transactions/dashboard.js"></script>

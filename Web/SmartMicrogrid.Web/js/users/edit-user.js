@@ -3,7 +3,7 @@
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  AuthGuard.requireAuth();
+  if (!AuthGuard.requireAuth()) return;
 
   const urlParams = new URLSearchParams(window.location.search);
   let userId = urlParams.get('id');
@@ -20,10 +20,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const editForm = document.getElementById('edit-user-form');
   const pwdForm = document.getElementById('change-pwd-form');
   const adminFields = document.getElementById('admin-fields-container');
+  let loadedRole = null;
+  let loadedAccountStatus = null;
+
+  if (!userId) {
+    showError('Select a user account before opening this page.');
+    return;
+  }
 
   if (isAdmin) {
     adminFields.style.display = 'grid';
   }
+  pwdForm.closest('.glass-card').hidden = isAdmin && userId !== currentUser?.id;
 
   // Fetch Existing User
   try {
@@ -45,8 +53,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('nic').value = user.nic || '';
 
     if (isAdmin) {
+      loadedRole = user.role;
       document.getElementById('role').value = user.role;
-      document.getElementById('isActive').value = user.isActive ? 'true' : 'false';
+      loadedAccountStatus = user.accountStatus || (user.isActive ? 'Active' : 'Inactive');
+      document.getElementById('isActive').value = loadedAccountStatus;
     }
   }
 
@@ -62,20 +72,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const payload = { firstName, lastName, phoneNumber, nic };
 
-    if (isAdmin) {
-      payload.role = document.getElementById('role').value;
-      payload.isActive = document.getElementById('isActive').value === 'true';
-    }
-
     try {
       let response;
-      if (isAdmin && userId !== currentUser?.id) {
+      if (isAdmin) {
         response = await UserApi.updateUser(userId, payload);
+        const desiredRole = document.getElementById('role').value;
+        const desiredStatus = document.getElementById('isActive').value;
+
+        if (response.success && desiredRole !== loadedRole) {
+          const roleResponse = await UserApi.updateRole(userId, desiredRole);
+          if (!roleResponse.success) {
+            showError(`Profile changes were saved, but the role was not updated: ${roleResponse.message || 'Please retry the role change.'}`);
+            return;
+          }
+          response = roleResponse;
+          loadedRole = desiredRole;
+        }
+
+        if (response.success && desiredStatus !== loadedAccountStatus) {
+          const statusResponse = await UserApi.updateAccountStatus(userId, desiredStatus);
+          if (!statusResponse.success) {
+            showError(`Profile changes were saved, but the account status was not updated: ${statusResponse.message || 'Please retry the status change.'}`);
+            return;
+          }
+          response = statusResponse;
+          loadedAccountStatus = desiredStatus;
+        }
       } else {
         response = await UserApi.updateProfile(payload);
-        if (response.success) {
-          SessionManager.updateUser(response.data);
-        }
+      }
+
+      if (response.success && currentUser?.id === userId) {
+        SessionManager.updateUser(response.data);
       }
 
       if (response.success) {

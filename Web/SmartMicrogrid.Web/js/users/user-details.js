@@ -3,7 +3,7 @@
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  AuthGuard.requireAuth();
+  if (!AuthGuard.requireAuth()) return;
 
   const urlParams = new URLSearchParams(window.location.search);
   let userId = urlParams.get('id');
@@ -22,17 +22,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  editBtn.href = `edit-user.html?id=${userId}`;
+  editBtn.href = `edit-user.html?id=${encodeURIComponent(userId)}`;
 
   try {
     const response = await UserApi.getUserById(userId);
     if (response.success && response.data) {
       renderUserDetails(response.data);
     } else {
-      cardContainer.innerHTML = `<div class="alert alert-danger active">${response.message || 'User not found.'}</div>`;
+      cardContainer.textContent = response.message || 'User not found.';
     }
   } catch (err) {
-    cardContainer.innerHTML = `<div class="alert alert-danger active">${err.message || 'Error fetching user details.'}</div>`;
+    cardContainer.textContent = err.message || 'Error fetching user details.';
   }
 
   function renderUserDetails(user) {
@@ -40,25 +40,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (user.role === 'Admin') roleClass = 'role-admin';
     else if (user.role === 'MicrogridOperator') roleClass = 'role-operator';
 
-    const statusBadge = user.isActive
+    let statusBadge = user.isActive
       ? '<span class="status-badge status-active">● Active Account</span>'
       : '<span class="status-badge status-inactive">○ Deactivated</span>';
+
+    const accountStatus = user.accountStatus || (user.isActive ? 'Active' : 'Inactive');
+    const statusClass = accountStatus === 'Active' ? 'status-active'
+      : accountStatus === 'Pending' ? 'status-pending'
+      : accountStatus === 'Suspended' ? 'status-suspended' : 'status-inactive';
+    statusBadge = `<span class="status-badge ${statusClass}">${escapeUserDetail(accountStatus)}</span>`;
 
     cardContainer.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 1.5rem;">
         <div>
-          <h2 style="font-size: 1.75rem;">${user.firstName} ${user.lastName}</h2>
-          <p style="color: var(--text-secondary); margin-top: 0.2rem;">${user.email}</p>
+          <h2 style="font-size: 1.75rem;">${escapeUserDetail(`${user.firstName || ''} ${user.lastName || ''}`.trim())}</h2>
+          <p style="color: var(--text-secondary); margin-top: 0.2rem;">${escapeUserDetail(user.email)}</p>
         </div>
         <div>
-          <span class="role-pill ${roleClass}" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">${user.role}</span>
+          <span class="role-pill ${roleClass}" style="font-size: 0.85rem; padding: 0.35rem 0.85rem;">${escapeUserDetail(user.role)}</span>
         </div>
       </div>
 
       <div class="details-grid">
         <div class="detail-item">
           <div class="detail-label">MongoDB Document Id</div>
-          <div class="detail-value" style="font-family: monospace; font-size: 0.95rem; color: var(--accent-cyan);">${user.id}</div>
+          <div class="detail-value" style="font-family: monospace; font-size: 0.95rem; color: var(--accent-cyan);">${escapeUserDetail(user.id)}</div>
         </div>
 
         <div class="detail-item">
@@ -68,29 +74,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         <div class="detail-item">
           <div class="detail-label">National Identity Card (NIC)</div>
-          <div class="detail-value" style="font-family: monospace; color: var(--accent-amber, #f59e0b);">${user.nic || 'Not Provided'}</div>
+          <div class="detail-value" style="font-family: monospace; color: var(--accent-amber, #f59e0b);">${escapeUserDetail(user.nic || 'Not Provided')}</div>
         </div>
 
         <div class="detail-item">
           <div class="detail-label">Phone Number</div>
-          <div class="detail-value">${user.phoneNumber || 'Not Provided'}</div>
+          <div class="detail-value">${escapeUserDetail(user.phoneNumber || 'Not Provided')}</div>
         </div>
 
         <div class="detail-item">
           <div class="detail-label">Assigned System Role</div>
-          <div class="detail-value">${user.role}</div>
+          <div class="detail-value">${escapeUserDetail(user.role)}</div>
         </div>
 
         <div class="detail-item">
           <div class="detail-label">Created Timestamp</div>
-          <div class="detail-value" style="font-size: 0.95rem;">${new Date(user.createdAt).toLocaleString()}</div>
+          <div class="detail-value" style="font-size: 0.95rem;">${escapeUserDetail(new Date(user.createdAt).toLocaleString())}</div>
         </div>
 
         <div class="detail-item">
           <div class="detail-label">Last Updated Timestamp</div>
-          <div class="detail-value" style="font-size: 0.95rem;">${new Date(user.updatedAt).toLocaleString()}</div>
+          <div class="detail-value" style="font-size: 0.95rem;">${escapeUserDetail(new Date(user.updatedAt).toLocaleString())}</div>
         </div>
       </div>
     `;
   }
 });
+
+function escapeUserDetail(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
