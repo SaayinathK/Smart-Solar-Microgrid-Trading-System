@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: UpdateAccountStatusDto.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Data transfer object (DTO) representing UpdateAccountStatusDto communication payload.
+// ===========================================================================================================
 using System.ComponentModel.DataAnnotations;
 using SmartMicrogrid.API.Models.Common;
 

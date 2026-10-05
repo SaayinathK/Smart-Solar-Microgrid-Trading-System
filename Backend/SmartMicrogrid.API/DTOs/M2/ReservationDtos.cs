@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: ReservationDtos.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M2 – Marketplace & Reservation Management
+// Section Owned: M2 – Marketplace & Reservation Management
+// Author: J. Shathursini (IT23164062)
+// Description: Data transfer object (DTO) representing ReservationDtos communication payload.
+// ===========================================================================================================
 using System.ComponentModel.DataAnnotations;
 using SmartMicrogrid.API.Models.M2;
 

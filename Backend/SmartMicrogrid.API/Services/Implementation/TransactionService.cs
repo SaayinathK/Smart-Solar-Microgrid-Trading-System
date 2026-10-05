@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: TransactionService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M3 – Transaction & Verification Management
+// Section Owned: M3 – Transaction & Verification Management
+// Author: J. Jathusan (IT23297418)
+// Description: Business logic service implementing TransactionService operations, rules, and workflows.
+// ===========================================================================================================
 using System.Security.Cryptography;
 
 using SmartMicrogrid.API.DTOs.Transactions;
@@ -14,16 +22,23 @@ namespace SmartMicrogrid.API.Services.Implementation
         private readonly ITransactionRepository _transactionRepository;
         private readonly IReservationService _reservationService;
         private readonly IUserRepository _userRepository;
+        /// <summary>
+        /// Initializes a new instance of the TransactionService class.
+        /// </summary>
 
         public TransactionService(
             ITransactionRepository transactionRepository,
             IReservationService reservationService,
             IUserRepository userRepository)
         {
+            // Initialize dependencies and state
             _transactionRepository = transactionRepository;
             _reservationService = reservationService;
             _userRepository = userRepository;
         }
+        /// <summary>
+        /// Creates or registers a new async record.
+        /// </summary>
 
 
         // Create transaction
@@ -32,6 +47,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             string currentUserId,
             string? operatorId = null)
         {
+            // Execute create async operations
             if (string.IsNullOrWhiteSpace(operatorId))
             {
                 throw new UnauthorizedAccessException(
@@ -116,6 +132,9 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return Map(transaction);
         }
+        /// <summary>
+        /// Retrieves all async details.
+        /// </summary>
 
 
         // Get all transactions
@@ -123,6 +142,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             string currentUserId,
             string currentRole)
         {
+            // Execute get all async operations
             List<Transaction> transactions;
 
 
@@ -178,6 +198,9 @@ namespace SmartMicrogrid.API.Services.Implementation
                 .Select(Map)
                 .ToList();
         }
+        /// <summary>
+        /// Retrieves by id async details.
+        /// </summary>
 
 
         // Get transaction by ID
@@ -186,6 +209,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             string currentUserId,
             string currentRole)
         {
+            // Execute get by id async operations
             if (string.IsNullOrWhiteSpace(transactionId))
             {
                 throw new ArgumentException(
@@ -247,6 +271,9 @@ namespace SmartMicrogrid.API.Services.Implementation
 
 
         }
+        /// <summary>
+        /// Performs generate qr async operation.
+        /// </summary>
 
 
         // Generate transaction QR
@@ -254,6 +281,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             string transactionId,
             string currentUserId)
         {
+            // Execute generate qr async operations
             if (string.IsNullOrWhiteSpace(transactionId))
             {
                 throw new ArgumentException(
@@ -317,6 +345,9 @@ namespace SmartMicrogrid.API.Services.Implementation
                 Status = transaction.Status
             };
         }
+        /// <summary>
+        /// Verifies and validates async criteria.
+        /// </summary>
 
 
         // Verify transaction
@@ -326,6 +357,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             string currentUserId,
             string? operatorId = null)
         {
+            // Execute verify async operations
             if (string.IsNullOrWhiteSpace(transactionId))
             {
                 throw new ArgumentException(
@@ -539,6 +571,9 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return Map(transaction);
         }
+        /// <summary>
+        /// Performs complete async operation.
+        /// </summary>
 
 
         // Complete transaction
@@ -547,6 +582,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             CompleteTransactionRequest request,
             string currentUserId)
         {
+            // Execute complete async operations
             if (string.IsNullOrWhiteSpace(transactionId))
             {
                 throw new ArgumentException(
@@ -640,6 +676,9 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return Map(transaction);
         }
+        /// <summary>
+        /// Updates the specified status async record.
+        /// </summary>
 
 
         // Update transaction status
@@ -648,6 +687,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             string status,
             string currentUserId)
         {
+            // Execute update status async operations
             if (string.IsNullOrWhiteSpace(transactionId))
             {
                 throw new ArgumentException(
@@ -723,12 +763,16 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return Map(transaction);
         }
+        /// <summary>
+        /// Seeds and configures default/sample re microgrid operator identity async data.
+        /// </summary>
 
 
         private async Task EnsureMicrogridOperatorIdentityAsync(
             string currentUserId,
             string? operatorId = null)
         {
+            // Execute ensure microgrid operator identity async operations
             if (string.IsNullOrWhiteSpace(currentUserId) ||
                 (!string.IsNullOrWhiteSpace(operatorId) &&
                  !string.Equals(operatorId, currentUserId, StringComparison.Ordinal)))
@@ -744,11 +788,15 @@ namespace SmartMicrogrid.API.Services.Implementation
                     "A valid authenticated MicrogridOperator is required.");
             }
         }
+        /// <summary>
+        /// Seeds and configures default/sample re microgrid operator access async data.
+        /// </summary>
 
         private async Task EnsureMicrogridOperatorAccessAsync(
             string currentUserId,
             string microgridNodeId)
         {
+            // Execute ensure microgrid operator access async operations
             await EnsureMicrogridOperatorIdentityAsync(currentUserId);
 
             var assignedMicrogridIds =
@@ -760,12 +808,16 @@ namespace SmartMicrogrid.API.Services.Implementation
                     "You are not authorized to access transactions for this microgrid.");
             }
         }
+        /// <summary>
+        /// Performs is valid status transition operation.
+        /// </summary>
 
 
         private static bool IsValidStatusTransition(
             string currentStatus,
             string newStatus)
         {
+            // Execute is valid status transition operations
             if (string.IsNullOrWhiteSpace(
                     currentStatus)
                 ||
@@ -880,19 +932,27 @@ namespace SmartMicrogrid.API.Services.Implementation
                     return false;
             }
         }
+        /// <summary>
+        /// Performs generate transaction code operation.
+        /// </summary>
 
 
         private static string GenerateTransactionCode()
         {
+            // Execute generate transaction code operations
             return
                 $"TX-{DateTime.UtcNow:yyyyMMddHHmmss}-" +
                 $"{RandomNumberGenerator.GetInt32(100000, 999999)}";
         }
+        /// <summary>
+        /// Performs map operation.
+        /// </summary>
 
 
         private static TransactionResponse Map(
             Transaction transaction)
         {
+            // Execute map operations
             return new TransactionResponse
             {
                 Id = transaction.Id,

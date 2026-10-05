@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: ReservationService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M2 – Marketplace & Reservation Management
+// Section Owned: M2 – Marketplace & Reservation Management
+// Author: J. Shathursini (IT23164062)
+// Description: Business logic service implementing ReservationService operations, rules, and workflows.
+// ===========================================================================================================
 using MongoDB.Driver;
 using SmartMicrogrid.API.Data;
 using SmartMicrogrid.API.DTOs.M2;
@@ -14,10 +22,19 @@ public class ReservationService : IReservationService
     private readonly IReservationRepository _reservations;
     private readonly MongoDbContext _db;
     private readonly IUserRepository _users;
-    public ReservationService(IReservationRepository reservations, MongoDbContext db, IUserRepository users) { _reservations = reservations; _db = db; _users = users; }
+    /// <summary>
+    /// Initializes a new instance of the ReservationService class.
+    /// </summary>
+    public ReservationService(IReservationRepository reservations, MongoDbContext db, IUserRepository users) { // Initialize dependencies and state
+// Initialize dependencies and state
+_reservations = reservations; _db = db; _users = users; }
+    /// <summary>
+    /// Creates or registers a new async record.
+    /// </summary>
 
     public async Task<ReservationResponseDto> CreateAsync(CreateReservationDto dto, string actorId, bool staff, string? operatorId = null)
     {
+        // Execute create async operations
         var actor = staff ? null : await _users.GetByIdAsync(actorId);
         var prosumerId = (staff ? dto.ProsumerId : actor?.Nic)?.Trim().ToUpperInvariant();
         if (string.IsNullOrWhiteSpace(prosumerId)) throw new ArgumentException("A prosumer NIC is required.");
@@ -49,17 +66,25 @@ public class ReservationService : IReservationService
             await RestoreCapacityAsync(slotId, dto.EnergyAmount); throw;
         }
     }
+    /// <summary>
+    /// Retrieves by id async details.
+    /// </summary>
 
     public async Task<ReservationResponseDto?> GetByIdAsync(string id, string? operatorId = null)
     {
+        // Execute get by id async operations
         var r = await _reservations.GetByIdAsync(id);
         if (r == null) return null;
         if (!string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(r.MicrogridNodeId, r.EnergySlotId, operatorId);
         var enriched = await EnrichAsync(new List<Reservation> { r });
         return enriched.FirstOrDefault();
     }
+    /// <summary>
+    /// Updates the specified async record.
+    /// </summary>
     public async Task<ReservationResponseDto> UpdateAsync(string id, string? energySlotId, double energyAmount, string actorId, bool staff, string? operatorId = null)
     {
+        // Execute update async operations
         var current = await _reservations.GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
         if (!string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(current.MicrogridNodeId, current.EnergySlotId, operatorId);
         if (!staff && (await _users.GetByIdAsync(actorId))?.Nic != current.ProsumerId) throw new UnauthorizedAccessException("You can only change your own reservations.");
@@ -105,23 +130,35 @@ public class ReservationService : IReservationService
         if (movingSlot) await RestoreCapacityAsync(previousSlotId, previousAmount);
         return await GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
     }
+    /// <summary>
+    /// Retrieves async details.
+    /// </summary>
     public async Task<List<ReservationResponseDto>> GetAsync(string? prosumerId, string? status, string? nodeId, int page, int pageSize, string? operatorId = null)
     {
+        // Execute get async operations
         var allowedNodeIds = string.IsNullOrWhiteSpace(operatorId) ? null : await GetOperatorMicrogridIdsAsync(operatorId);
         if (allowedNodeIds is { Count: 0 } || (allowedNodeIds != null && !string.IsNullOrWhiteSpace(nodeId) && !allowedNodeIds.Contains(nodeId))) return new List<ReservationResponseDto>();
         var items = await _reservations.GetAsync(prosumerId, status, nodeId, page, pageSize, allowedNodeIds);
         return await EnrichAsync(items);
     }
+    /// <summary>
+    /// Performs summary async operation.
+    /// </summary>
     public async Task<ReservationSummaryDto> SummaryAsync(string? prosumerId = null, string? operatorId = null)
     {
+        // Execute summary async operations
         var start = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
         var allowedNodeIds = string.IsNullOrWhiteSpace(operatorId) ? null : await GetOperatorMicrogridIdsAsync(operatorId);
         var approved = allowedNodeIds is { Count: 0 } ? new List<Reservation>() : await _reservations.GetAsync(prosumerId, "Approved", null, 1, 10000, allowedNodeIds);
         return new ReservationSummaryDto { PendingCount = allowedNodeIds is { Count: 0 } ? 0 : await _reservations.CountAsync("Pending", prosumerId, allowedNodeIds), ApprovedFutureCount = approved.LongCount(r => r.StartTime > DateTime.UtcNow), CompletedThisMonthCount = allowedNodeIds is { Count: 0 } ? 0 : await _reservations.CountCompletedSinceAsync(start, prosumerId, allowedNodeIds), TotalEnergyReserved = allowedNodeIds is { Count: 0 } ? 0 : await _reservations.SumActiveEnergyAsync(prosumerId, allowedNodeIds) };
     }
+    /// <summary>
+    /// Performs transition async operation.
+    /// </summary>
 
     public async Task<ReservationResponseDto> TransitionAsync(string id, string action, string actorId, bool staff, string? reason = null, string? operatorId = null)
     {
+        // Execute transition async operations
         var current = await _reservations.GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
         if (!string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(current.MicrogridNodeId, current.EnergySlotId, operatorId);
         if (!staff && (await _users.GetByIdAsync(actorId))?.Nic != current.ProsumerId) throw new UnauthorizedAccessException("You can only change your own reservations.");
@@ -142,45 +179,75 @@ public class ReservationService : IReservationService
         if (next is "Rejected" or "Cancelled") await RestoreCapacityAsync(current.EnergySlotId, current.EnergyAmount);
         return await GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
     }
+    /// <summary>
+    /// Performs mark completed async operation.
+    /// </summary>
 
     public async Task<ReservationResponseDto> MarkCompletedAsync(string id, string actorId, string? operatorId = null)
     {
+        // Execute mark completed async operations
         var current = await _reservations.GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
         if (!string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(current.MicrogridNodeId, current.EnergySlotId, operatorId);
         if (current.Status != "Approved") throw new ArgumentException("Only approved reservations can be completed.");
         if (!await _reservations.MarkCompletedAsync(id, actorId)) throw new InvalidOperationException("Reservation was already changed.");
         return await GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
     }
+    /// <summary>
+    /// Performs has active for node async operation.
+    /// </summary>
     public Task<bool> HasActiveForNodeAsync(string nodeId) => _reservations.HasActiveForNodeAsync(nodeId);
+    /// <summary>
+    /// Retrieves assigned microgrid ids async details.
+    /// </summary>
     public Task<List<string>> GetAssignedMicrogridIdsAsync(string operatorId) => GetOperatorMicrogridIdsAsync(operatorId);
+    /// <summary>
+    /// Performs expire overdue async operation.
+    /// </summary>
     public async Task ExpireOverdueAsync(CancellationToken cancellationToken)
     {
+        // Execute expire overdue async operations
         foreach (var reservation in await _reservations.GetApprovedEndedAsync(DateTime.UtcNow))
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (reservation.Id != null) await _reservations.TransitionAsync(reservation.Id, "Approved", "Expired", "reservation-expiry-service");
         }
     }
+    /// <summary>
+    /// Performs restore capacity async operation.
+    /// </summary>
     private async Task RestoreCapacityAsync(string slotId, double amount)
     {
+        // Execute restore capacity async operations
         if (!MongoDB.Bson.ObjectId.TryParse(slotId, out _)) return;
         var update = Builders<EnergySlot>.Update.Inc(s => s.AvailableAmount, amount).Set(s => s.UpdatedAt, DateTime.UtcNow);
         await _db.EnergySlots.UpdateOneAsync(s => s.Id == slotId, update);
     }
+    /// <summary>
+    /// Retrieves operator microgrid ids async details.
+    /// </summary>
     private async Task<List<string>> GetOperatorMicrogridIdsAsync(string operatorId)
     {
+        // Execute get operator microgrid ids async operations
         if (string.IsNullOrWhiteSpace(operatorId)) return new List<string>();
         var nodes = await _db.Microgrids.Find(n => n.OperatorId == operatorId && n.IsActive).Project(n => n.Id!).ToListAsync();
         return nodes;
     }
+    /// <summary>
+    /// Seeds and configures default/sample re operator access async data.
+    /// </summary>
     private async Task EnsureOperatorAccessAsync(string nodeId, string slotId, string operatorId)
     {
+        // Execute ensure operator access async operations
         var allowed = await GetOperatorMicrogridIdsAsync(operatorId);
         if (!allowed.Contains(nodeId))
             throw new UnauthorizedAccessException("You do not manage the microgrid node for this reservation.");
     }
+    /// <summary>
+    /// Performs enrich async operation.
+    /// </summary>
     private async Task<List<ReservationResponseDto>> EnrichAsync(List<Reservation> items)
     {
+        // Execute enrich async operations
         if (items.Count == 0) return new List<ReservationResponseDto>();
         var nics = items.Select(i => i.ProsumerId).Where(n => !string.IsNullOrWhiteSpace(n)).Select(n => n!).Distinct().ToList();
         var nodeIds = items.Select(i => i.MicrogridNodeId).Where(n => !string.IsNullOrWhiteSpace(n)).Select(n => n!).Distinct().ToList();
@@ -197,8 +264,12 @@ public class ReservationService : IReservationService
 
         return items.Select(r => Map(r, userMap, nodeMap, slotMap)).ToList();
     }
+    /// <summary>
+    /// Performs map operation.
+    /// </summary>
     private static ReservationResponseDto Map(Reservation r, Dictionary<string, string>? userMap = null, Dictionary<string, string>? nodeMap = null, Dictionary<string, double>? slotMap = null)
     {
+        // Execute map operations
         var price = slotMap != null && !string.IsNullOrEmpty(r.EnergySlotId) && slotMap.TryGetValue(r.EnergySlotId, out var p) ? p : 0.0;
         var code = r.Id != null && r.Id.Length >= 6 ? $"SMG-RES-{r.Id[^6..].ToUpperInvariant()}" : "SMG-RES-000000";
         var prosumerName = userMap != null && !string.IsNullOrEmpty(r.ProsumerId) && userMap.TryGetValue(r.ProsumerId, out var name) ? name : null;
@@ -231,9 +302,18 @@ public class ReservationExpiryService : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<ReservationExpiryService> _logger;
-    public ReservationExpiryService(IServiceScopeFactory scopeFactory, ILogger<ReservationExpiryService> logger) { _scopeFactory = scopeFactory; _logger = logger; }
+    /// <summary>
+    /// Initializes a new instance of the ReservationExpiryService class.
+    /// </summary>
+    public ReservationExpiryService(IServiceScopeFactory scopeFactory, ILogger<ReservationExpiryService> logger) { // Initialize dependencies and state
+// Initialize dependencies and state
+_scopeFactory = scopeFactory; _logger = logger; }
+    /// <summary>
+    /// Handles execution of async.
+    /// </summary>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        // Execute execute async operations
         using var timer = new PeriodicTimer(TimeSpan.FromMinutes(3));
         try
         {

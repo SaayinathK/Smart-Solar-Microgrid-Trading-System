@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: UserService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Business logic service implementing UserService operations, rules, and workflows.
+// ===========================================================================================================
 using SmartMicrogrid.API.DTOs.Users;
 using SmartMicrogrid.API.Helpers;
 using SmartMicrogrid.API.Models.Common;
@@ -12,22 +20,34 @@ namespace SmartMicrogrid.API.Services.Implementation
     {
         private readonly IUserRepository _userRepository;
         private readonly IAuditService _auditService;
+        /// <summary>
+        /// Initializes a new instance of the UserService class.
+        /// </summary>
 
         public UserService(IUserRepository userRepository, IAuditService auditService)
         {
+            // Initialize dependencies and state
             _userRepository = userRepository;
             _auditService = auditService;
         }
+        /// <summary>
+        /// Retrieves all users async details.
+        /// </summary>
 
         public async Task<ApiResponse<IEnumerable<UserResponseDto>>> GetAllUsersAsync(string? searchTerm = null, Role? roleFilter = null, bool? activeOnly = null, AccountStatus? accountStatus = null)
         {
+            // Execute get all users async operations
             var users = await _userRepository.GetAllAsync(searchTerm, roleFilter, activeOnly, accountStatus);
             var dtos = users.Select(MapToUserResponseDto);
             return ApiResponse<IEnumerable<UserResponseDto>>.SuccessResponse(dtos, "Users retrieved successfully.");
         }
+        /// <summary>
+        /// Retrieves user by id async details.
+        /// </summary>
 
         public async Task<ApiResponse<UserResponseDto>> GetUserByIdAsync(string id)
         {
+            // Execute get user by id async operations
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
@@ -36,9 +56,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return ApiResponse<UserResponseDto>.SuccessResponse(MapToUserResponseDto(user));
         }
+        /// <summary>
+        /// Creates or registers a new user async record.
+        /// </summary>
 
         public async Task<ApiResponse<UserResponseDto>> CreateUserAsync(CreateUserDto dto)
         {
+            // Execute create user async operations
             var normalizedEmail = dto.Email.Trim().ToLower();
 
             if (await _userRepository.ExistsByEmailAsync(normalizedEmail))
@@ -88,9 +112,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return ApiResponse<UserResponseDto>.SuccessResponse(MapToUserResponseDto(createdUser), "User created successfully.");
         }
+        /// <summary>
+        /// Updates the specified user async record.
+        /// </summary>
 
         public async Task<ApiResponse<UserResponseDto>> UpdateUserAsync(string id, UpdateUserDto dto)
         {
+            // Execute update user async operations
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
@@ -136,9 +164,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return ApiResponse<UserResponseDto>.SuccessResponse(MapToUserResponseDto(user), "User updated successfully.");
         }
+        /// <summary>
+        /// Updates the specified own profile async record.
+        /// </summary>
 
         public async Task<ApiResponse<UserResponseDto>> UpdateOwnProfileAsync(string userId, UpdateUserDto dto)
         {
+            // Execute update own profile async operations
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
@@ -162,14 +194,22 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return ApiResponse<UserResponseDto>.SuccessResponse(MapToUserResponseDto(user), "Profile updated successfully.");
         }
+        /// <summary>
+        /// Updates the specified status async record.
+        /// </summary>
 
         public async Task<ApiResponse<UserResponseDto>> UpdateStatusAsync(string id, bool isActive)
         {
+            // Execute update status async operations
             return await UpdateAccountStatusAsync(id, isActive ? AccountStatus.Active : AccountStatus.Inactive);
         }
+        /// <summary>
+        /// Updates the specified account status async record.
+        /// </summary>
 
         public async Task<ApiResponse<UserResponseDto>> UpdateAccountStatusAsync(string id, AccountStatus newStatus)
         {
+            // Execute update account status async operations
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
@@ -233,12 +273,17 @@ namespace SmartMicrogrid.API.Services.Implementation
         /// </summary>
         private async Task<bool> HasOtherActiveAdminAsync(string excludedUserId)
         {
+            // Execute has other active admin async operations
             var activeAdmins = await _userRepository.GetAllAsync(null, Role.Admin, true);
             return activeAdmins.Any(a => a.Id != excludedUserId);
         }
+        /// <summary>
+        /// Performs resolve status action operation.
+        /// </summary>
 
         private static string ResolveStatusAction(AccountStatus previous, AccountStatus current)
         {
+            // Execute resolve status action operations
             if (current == AccountStatus.Active)
             {
                 return previous == AccountStatus.Suspended
@@ -256,9 +301,13 @@ namespace SmartMicrogrid.API.Services.Implementation
                 ? AuditAction.UserDeactivated
                 : AuditAction.UserStatusChanged;
         }
+        /// <summary>
+        /// Updates the specified role async record.
+        /// </summary>
 
         public async Task<ApiResponse<UserResponseDto>> UpdateRoleAsync(string id, Role newRole)
         {
+            // Execute update role async operations
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
@@ -296,9 +345,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return ApiResponse<UserResponseDto>.SuccessResponse(MapToUserResponseDto(user), $"Role updated to {newRole}.");
         }
+        /// <summary>
+        /// Deletes or removes the designated user async record.
+        /// </summary>
 
         public async Task<ApiResponse<bool>> DeleteUserAsync(string id)
         {
+            // Execute delete user async operations
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
@@ -328,9 +381,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return ApiResponse<bool>.SuccessResponse(true, "User deleted successfully.");
         }
+        /// <summary>
+        /// Performs map to user response dto operation.
+        /// </summary>
 
         private static UserResponseDto MapToUserResponseDto(User user)
         {
+            // Execute map to user response dto operations
             return new UserResponseDto
             {
                 Id = user.Id,

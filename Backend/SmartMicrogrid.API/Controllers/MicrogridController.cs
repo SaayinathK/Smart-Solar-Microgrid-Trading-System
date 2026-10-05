@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: MicrogridController.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: API Controller exposing REST endpoints for Microgrid management.
+// ===========================================================================================================
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -14,9 +22,13 @@ namespace SmartMicrogrid.API.Controllers
     public class MicrogridController : ControllerBase
     {
         private readonly IMicrogridService _service;
+        /// <summary>
+        /// Initializes a new instance of the MicrogridController class.
+        /// </summary>
 
         public MicrogridController(IMicrogridService service)
         {
+            // Initialize dependencies and state
             _service = service;
         }
 
@@ -26,6 +38,7 @@ namespace SmartMicrogrid.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] string? status, [FromQuery] bool? isActive, [FromQuery] string? location, [FromQuery] string? search)
         {
+            // Execute get all operations
             var data = await _service.GetAllAsync(status, isActive, location, search);
             return Ok(ApiResponse<object>.SuccessResponse(data, "Microgrids retrieved successfully."));
         }
@@ -36,6 +49,7 @@ namespace SmartMicrogrid.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
+            // Execute get by id operations
             var data = await _service.GetByIdAsync(id);
             if (data == null)
             {
@@ -51,6 +65,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> Create([FromBody] CreateMicrogridDto dto)
         {
+            // Execute create operations
             if (!ModelState.IsValid)
             {
                 return BadRequest(ApiResponse<object>.FailureResponse("Invalid payload data."));
@@ -79,6 +94,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> Update(string id, [FromBody] UpdateMicrogridDto dto)
         {
+            // Execute update operations
             if (!ModelState.IsValid)
             {
                 return BadRequest(ApiResponse<object>.FailureResponse("Invalid payload data."));
@@ -110,6 +126,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> Delete(string id)
         {
+            // Execute delete operations
             var deleted = await _service.DeleteAsync(id);
             if (!deleted)
             {
@@ -125,6 +142,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> UpdateStatus(string id, [FromBody] StatusUpdateDto dto)
         {
+            // Execute update status operations
             if (string.IsNullOrWhiteSpace(dto.Status))
             {
                 return BadRequest(ApiResponse<object>.FailureResponse("Status is required."));

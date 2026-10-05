@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: IAuditService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Service interface defining contract for Audit operations.
+// ===========================================================================================================
 using SmartMicrogrid.API.Models.M4;
 
 namespace SmartMicrogrid.API.Services.Interfaces.M4

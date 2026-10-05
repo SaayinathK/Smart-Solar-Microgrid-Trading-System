@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: AuthController.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: API Controller exposing REST endpoints for Auth management.
+// ===========================================================================================================
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,9 +20,13 @@ namespace SmartMicrogrid.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        /// <summary>
+        /// Initializes a new instance of the AuthController class.
+        /// </summary>
 
         public AuthController(IAuthService authService)
         {
+            // Initialize dependencies and state
             _authService = authService;
         }
 
@@ -25,6 +37,7 @@ namespace SmartMicrogrid.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
+            // Execute register operations
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
@@ -47,6 +60,7 @@ namespace SmartMicrogrid.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
+            // Execute login operations
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
@@ -69,6 +83,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
         {
+            // Execute change password operations
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();

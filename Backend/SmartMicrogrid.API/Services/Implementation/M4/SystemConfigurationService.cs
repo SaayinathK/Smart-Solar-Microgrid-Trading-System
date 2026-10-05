@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: SystemConfigurationService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Business logic service implementing SystemConfigurationService operations, rules, and workflows.
+// ===========================================================================================================
 using System;
 using System.Threading.Tasks;
 using SmartMicrogrid.API.DTOs.M4;
@@ -12,23 +20,35 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
     {
         private readonly ISystemConfigurationRepository _repository;
         private readonly IAuditService _auditService;
+        /// <summary>
+        /// Initializes a new instance of the SystemConfigurationService class.
+        /// </summary>
 
         public SystemConfigurationService(
             ISystemConfigurationRepository repository,
             IAuditService auditService)
         {
+            // Initialize dependencies and state
             _repository = repository;
             _auditService = auditService;
         }
+        /// <summary>
+        /// Retrieves async details.
+        /// </summary>
 
         public async Task<ConfigurationResponseDto> GetAsync()
         {
+            // Execute get async operations
             var configuration = await _repository.GetOrCreateAsync();
             return ToDto(configuration);
         }
+        /// <summary>
+        /// Updates the specified async record.
+        /// </summary>
 
         public async Task<ConfigurationResponseDto> UpdateAsync(UpdateConfigurationDto dto, string updatedBy)
         {
+            // Execute update async operations
             var configuration = await _repository.GetOrCreateAsync();
 
             configuration.PlatformName = dto.PlatformName.Trim();
@@ -59,9 +79,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
 
             return ToDto(saved);
         }
+        /// <summary>
+        /// Performs set maintenance mode async operation.
+        /// </summary>
 
         public async Task<ConfigurationResponseDto> SetMaintenanceModeAsync(MaintenanceModeDto dto, string updatedBy)
         {
+            // Execute set maintenance mode async operations
             var configuration = await _repository.GetOrCreateAsync();
 
             configuration.MaintenanceMode = dto.MaintenanceMode;
@@ -84,9 +108,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
 
             return ToDto(saved);
         }
+        /// <summary>
+        /// Performs set registration mode async operation.
+        /// </summary>
 
         public async Task<ConfigurationResponseDto> SetRegistrationModeAsync(RegistrationModeDto dto, string updatedBy)
         {
+            // Execute set registration mode async operations
             var configuration = await _repository.GetOrCreateAsync();
 
             configuration.AllowRegistration = dto.AllowRegistration;
@@ -106,6 +134,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
 
             return ToDto(saved);
         }
+        /// <summary>
+        /// Performs to dto operation.
+        /// </summary>
 
         internal static ConfigurationResponseDto ToDto(SystemConfiguration configuration) => new()
         {

@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: BatteryService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Business logic service implementing BatteryService operations, rules, and workflows.
+// ===========================================================================================================
 using System;
 using System.Threading.Tasks;
 using SmartMicrogrid.API.DTOs.M1;
@@ -10,14 +18,22 @@ namespace SmartMicrogrid.API.Services.Implementation
     public class BatteryService : IBatteryService
     {
         private readonly IMicrogridRepository _repository;
+        /// <summary>
+        /// Initializes a new instance of the BatteryService class.
+        /// </summary>
 
         public BatteryService(IMicrogridRepository repository)
         {
+            // Initialize dependencies and state
             _repository = repository;
         }
+        /// <summary>
+        /// Retrieves battery async details.
+        /// </summary>
 
         public async Task<BatteryResponseDto?> GetBatteryAsync(string microgridId)
         {
+            // Execute get battery async operations
             var microgrid = await _repository.GetByIdAsync(microgridId);
             if (microgrid == null) return null;
 
@@ -33,9 +49,13 @@ namespace SmartMicrogrid.API.Services.Implementation
                 Status = status
             };
         }
+        /// <summary>
+        /// Updates the specified battery async record.
+        /// </summary>
 
         public async Task<BatteryResponseDto?> UpdateBatteryAsync(string microgridId, UpdateBatteryDto dto)
         {
+            // Execute update battery async operations
             var microgrid = await _repository.GetByIdAsync(microgridId);
             if (microgrid == null) return null;
 

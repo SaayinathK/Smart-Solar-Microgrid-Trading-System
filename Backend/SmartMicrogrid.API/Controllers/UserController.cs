@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: UserController.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: API Controller exposing REST endpoints for User management.
+// ===========================================================================================================
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +21,13 @@ namespace SmartMicrogrid.API.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        /// <summary>
+        /// Initializes a new instance of the UserController class.
+        /// </summary>
 
         public UserController(IUserService userService)
         {
+            // Initialize dependencies and state
             _userService = userService;
         }
 
@@ -25,6 +37,7 @@ namespace SmartMicrogrid.API.Controllers
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUser()
         {
+            // Execute get current user operations
             var userId = GetCurrentUserId();
             if (string.IsNullOrEmpty(userId))
             {
@@ -46,6 +59,7 @@ namespace SmartMicrogrid.API.Controllers
         [HttpPut("me")]
         public async Task<IActionResult> UpdateCurrentUser([FromBody] UpdateUserDto dto)
         {
+            // Execute update current user operations
             var userId = GetCurrentUserId();
             if (string.IsNullOrEmpty(userId))
             {
@@ -74,6 +88,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllUsers([FromQuery] string? search, [FromQuery] Role? role, [FromQuery] bool? activeOnly, [FromQuery] AccountStatus? accountStatus)
         {
+            // Execute get all users operations
             var result = await _userService.GetAllUsersAsync(search, role, activeOnly, accountStatus);
             return Ok(result);
         }
@@ -84,6 +99,7 @@ namespace SmartMicrogrid.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
         {
+            // Execute get user by id operations
             var currentUserId = GetCurrentUserId();
             var currentUserRole = GetCurrentUserRole();
 
@@ -109,6 +125,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
         {
+            // Execute create user operations
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
@@ -131,6 +148,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto dto)
         {
+            // Execute update user operations
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
@@ -153,6 +171,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateStatus(string id, [FromBody] UpdateStatusDto dto)
         {
+            // Execute update status operations
             var result = await _userService.UpdateStatusAsync(id, dto.IsActive);
             if (!result.Success)
             {
@@ -170,6 +189,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateAccountStatus(string id, [FromBody] UpdateAccountStatusDto dto)
         {
+            // Execute update account status operations
             var result = await _userService.UpdateAccountStatusAsync(id, dto.AccountStatus);
             if (!result.Success)
             {
@@ -186,6 +206,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateRole(string id, [FromBody] UpdateRoleDto dto)
         {
+            // Execute update role operations
             var result = await _userService.UpdateRoleAsync(id, dto.Role);
             if (!result.Success)
             {
@@ -202,6 +223,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(string id)
         {
+            // Execute delete user operations
             var result = await _userService.DeleteUserAsync(id);
             if (!result.Success)
             {
@@ -210,14 +232,22 @@ namespace SmartMicrogrid.API.Controllers
 
             return Ok(result);
         }
+        /// <summary>
+        /// Retrieves current user id details.
+        /// </summary>
 
         private string? GetCurrentUserId()
         {
+            // Execute get current user id operations
             return User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
         }
+        /// <summary>
+        /// Retrieves current user role details.
+        /// </summary>
 
         private string? GetCurrentUserRole()
         {
+            // Execute get current user role operations
             return User.FindFirstValue(ClaimTypes.Role) ?? User.FindFirstValue("role");
         }
     }

@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: Reservation.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M2 – Marketplace & Reservation Management
+// Section Owned: M2 – Marketplace & Reservation Management
+// Author: J. Shathursini (IT23164062)
+// Description: Domain entity model representing Reservation in the database.
+// ===========================================================================================================
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 

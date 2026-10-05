@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: M4ServiceTests.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Unit/Integration test suite verifying M4Service operations and validations.
+// ===========================================================================================================
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -20,9 +28,13 @@ namespace SmartMicrogrid.API.Tests
         private readonly Mock<ISystemConfigurationRepository> _repository = new();
         private readonly Mock<IAuditService> _audit = new();
         private readonly SystemConfigurationService _service;
+        /// <summary>
+        /// Initializes a new instance of the SystemConfigurationServiceTests class.
+        /// </summary>
 
         public SystemConfigurationServiceTests()
         {
+            // Initialize dependencies and state
             _repository.Setup(x => x.GetOrCreateAsync())
                 .ReturnsAsync(() => new SystemConfiguration
                 {
@@ -34,10 +46,14 @@ namespace SmartMicrogrid.API.Tests
                 .ReturnsAsync((SystemConfiguration value) => value);
             _service = new SystemConfigurationService(_repository.Object, _audit.Object);
         }
+        /// <summary>
+        /// Updates the specified async_persists trimmed values and stamps the operator record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAsync_PersistsTrimmedValuesAndStampsTheOperator()
         {
+            // Execute update async_persists trimmed values and stamps the operator operations
             var result = await _service.UpdateAsync(new UpdateConfigurationDto
             {
                 PlatformName = "  National Microgrid Platform  ",
@@ -69,6 +85,9 @@ namespace SmartMicrogrid.API.Tests
                 It.IsAny<string?>(),
                 It.IsAny<string>()), Times.Once);
         }
+        /// <summary>
+        /// Updates the specified async_leaves the toggles untouched record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAsync_LeavesTheTogglesUntouched()
@@ -96,10 +115,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.Equal("Existing maintenance notice.", result.MaintenanceMessage);
             Assert.False(result.AllowRegistration);
         }
+        /// <summary>
+        /// Updates the specified async_explicit empty message_clears the banner record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAsync_ExplicitEmptyMessage_ClearsTheBanner()
         {
+            // Execute update async_explicit empty message_clears the banner operations
             _repository.Setup(x => x.GetOrCreateAsync())
                 .ReturnsAsync(() => new SystemConfiguration
                 {
@@ -119,10 +142,14 @@ namespace SmartMicrogrid.API.Tests
 
             Assert.Equal(string.Empty, result.MaintenanceMessage);
         }
+        /// <summary>
+        /// Performs set maintenance mode async_storing the message only while enabled operation.
+        /// </summary>
 
         [Fact]
         public async Task SetMaintenanceModeAsync_StoringTheMessageOnlyWhileEnabled()
         {
+            // Execute set maintenance mode async_storing the message only while enabled operations
             var enabled = await _service.SetMaintenanceModeAsync(
                 new MaintenanceModeDto { MaintenanceMode = true, MaintenanceMessage = "  Grid upgrade  " },
                 "backoffice1");
@@ -149,10 +176,14 @@ namespace SmartMicrogrid.API.Tests
             // A stale banner must not survive once maintenance is switched off.
             Assert.Null(disabled.MaintenanceMessage);
         }
+        /// <summary>
+        /// Performs set registration mode async_updates the flag and audits operation.
+        /// </summary>
 
         [Fact]
         public async Task SetRegistrationModeAsync_UpdatesTheFlagAndAudits()
         {
+            // Execute set registration mode async_updates the flag and audits operations
             var result = await _service.SetRegistrationModeAsync(
                 new RegistrationModeDto { AllowRegistration = false },
                 "backoffice1");
@@ -176,23 +207,35 @@ namespace SmartMicrogrid.API.Tests
     {
         private readonly Mock<ISystemActivityRepository> _repository = new();
         private readonly DefaultHttpContext _httpContext = new();
+        /// <summary>
+        /// Initializes a new instance of the AuditServiceTests class.
+        /// </summary>
 
         public AuditServiceTests()
         {
+            // Initialize dependencies and state
             _repository.Setup(x => x.RecordAsync(It.IsAny<SystemActivity>()))
                 .ReturnsAsync((SystemActivity value) => value);
         }
+        /// <summary>
+        /// Creates or registers a new service record.
+        /// </summary>
 
         private AuditService CreateService()
         {
+            // Execute create service operations
             var accessor = new Mock<IHttpContextAccessor>();
             accessor.Setup(x => x.HttpContext).Returns(_httpContext);
             return new AuditService(_repository.Object, accessor.Object, NullLogger<AuditService>.Instance);
         }
+        /// <summary>
+        /// Performs record async_without explicit actor_resolves from the current principal operation.
+        /// </summary>
 
         [Fact]
         public async Task RecordAsync_WithoutExplicitActor_ResolvesFromTheCurrentPrincipal()
         {
+            // Execute record async_without explicit actor_resolves from the current principal operations
             var identity = new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, "admin1"),
@@ -219,10 +262,14 @@ namespace SmartMicrogrid.API.Tests
                 a.IpAddress == "10.0.0.9" &&
                 a.Timestamp != default)), Times.Once);
         }
+        /// <summary>
+        /// Performs record async_uses the first forwarded address when proxied operation.
+        /// </summary>
 
         [Fact]
         public async Task RecordAsync_UsesTheFirstForwardedAddressWhenProxied()
         {
+            // Execute record async_uses the first forwarded address when proxied operations
             _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity("TestAuth"));
             _httpContext.Request.Headers["X-Forwarded-For"] = "203.0.113.7, 10.0.0.1";
 
@@ -234,10 +281,14 @@ namespace SmartMicrogrid.API.Tests
             _repository.Verify(x => x.RecordAsync(It.Is<SystemActivity>(a =>
                 a.IpAddress == "203.0.113.7")), Times.Once);
         }
+        /// <summary>
+        /// Performs record async_anonymous request_is labelled anonymous operation.
+        /// </summary>
 
         [Fact]
         public async Task RecordAsync_AnonymousRequest_IsLabelledAnonymous()
         {
+            // Execute record async_anonymous request_is labelled anonymous operations
             _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity());
 
             await CreateService().RecordAsync(
@@ -248,6 +299,9 @@ namespace SmartMicrogrid.API.Tests
             _repository.Verify(x => x.RecordAsync(It.Is<SystemActivity>(a =>
                 a.UserName == "Anonymous" && a.UserId == null)), Times.Once);
         }
+        /// <summary>
+        /// Performs record async_repository failure_does not propagate operation.
+        /// </summary>
 
         [Fact]
         public async Task RecordAsync_RepositoryFailure_DoesNotPropagate()
@@ -261,10 +315,14 @@ namespace SmartMicrogrid.API.Tests
                 AuditModule.Authentication,
                 "Signed in.");
         }
+        /// <summary>
+        /// Performs record async_explicit actor wins over the principal operation.
+        /// </summary>
 
         [Fact]
         public async Task RecordAsync_ExplicitActorWinsOverThePrincipal()
         {
+            // Execute record async_explicit actor wins over the principal operations
             _httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, "admin1"),

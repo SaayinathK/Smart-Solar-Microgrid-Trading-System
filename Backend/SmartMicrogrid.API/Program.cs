@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: Program.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Application entry point, service registrations, dependency injection, and HTTP middleware pipeline.
+// ===========================================================================================================
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: EnergyCapacityController.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: API Controller exposing REST endpoints for EnergyCapacity management.
+// ===========================================================================================================
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -13,9 +21,13 @@ namespace SmartMicrogrid.API.Controllers
     public class EnergyCapacityController : ControllerBase
     {
         private readonly IEnergyCapacityService _capacityService;
+        /// <summary>
+        /// Initializes a new instance of the EnergyCapacityController class.
+        /// </summary>
 
         public EnergyCapacityController(IEnergyCapacityService capacityService)
         {
+            // Initialize dependencies and state
             _capacityService = capacityService;
         }
 
@@ -25,6 +37,7 @@ namespace SmartMicrogrid.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCapacity(string id)
         {
+            // Execute get capacity operations
             var capacity = await _capacityService.GetCapacityAsync(id);
             if (capacity == null)
             {
@@ -40,6 +53,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> UpdateCapacity(string id, [FromBody] UpdateCapacityDto dto)
         {
+            // Execute update capacity operations
             if (!ModelState.IsValid)
             {
                 return BadRequest(ApiResponse<object>.FailureResponse("Invalid capacity payload."));

@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: AuthService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Business logic service implementing AuthService operations, rules, and workflows.
+// ===========================================================================================================
 using SmartMicrogrid.API.DTOs.Auth;
 using SmartMicrogrid.API.DTOs.Users;
 using SmartMicrogrid.API.Helpers;
@@ -14,16 +22,24 @@ namespace SmartMicrogrid.API.Services.Implementation
         private readonly IUserRepository _userRepository;
         private readonly JwtHelper _jwtHelper;
         private readonly IAuditService _auditService;
+        /// <summary>
+        /// Initializes a new instance of the AuthService class.
+        /// </summary>
 
         public AuthService(IUserRepository userRepository, JwtHelper jwtHelper, IAuditService auditService)
         {
+            // Initialize dependencies and state
             _userRepository = userRepository;
             _jwtHelper = jwtHelper;
             _auditService = auditService;
         }
+        /// <summary>
+        /// Creates or registers a new er async record.
+        /// </summary>
 
         public async Task<ApiResponse<UserResponseDto>> RegisterAsync(RegisterDto dto)
         {
+            // Execute register async operations
             var normalizedEmail = dto.Email.Trim().ToLower();
 
             // Admin self-registration is strictly disallowed
@@ -68,9 +84,13 @@ namespace SmartMicrogrid.API.Services.Implementation
             var userResponse = MapToUserResponseDto(createdUser);
             return ApiResponse<UserResponseDto>.SuccessResponse(userResponse, $"{user.Role} registration successful.");
         }
+        /// <summary>
+        /// Performs login async operation.
+        /// </summary>
 
         public async Task<ApiResponse<LoginResponseDto>> LoginAsync(LoginDto dto)
         {
+            // Execute login async operations
             var normalizedEmail = dto.Email.Trim().ToLower();
             var user = await _userRepository.GetByEmailAsync(normalizedEmail);
 
@@ -133,9 +153,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return ApiResponse<LoginResponseDto>.SuccessResponse(loginResponse, "Login successful.");
         }
+        /// <summary>
+        /// Performs change password async operation.
+        /// </summary>
 
         public async Task<ApiResponse<bool>> ChangePasswordAsync(string userId, ChangePasswordDto dto)
         {
+            // Execute change password async operations
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
@@ -158,9 +182,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return ApiResponse<bool>.SuccessResponse(true, "Password changed successfully.");
         }
+        /// <summary>
+        /// Performs map to user response dto operation.
+        /// </summary>
 
         private static UserResponseDto MapToUserResponseDto(User user)
         {
+            // Execute map to user response dto operations
             return new UserResponseDto
             {
                 Id = user.Id,

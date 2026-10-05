@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: DbSeeder.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Database seeder populating initial/sample data for Db.
+// ===========================================================================================================
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,13 +19,20 @@ namespace SmartMicrogrid.API.Data
 {
     public static class DbSeeder
     {
+        /// <summary>
+        /// Performs migrate legacy roles async operation.
+        /// </summary>
         public static async Task MigrateLegacyRolesAsync(MongoDbContext context)
         {
+            // Execute migrate legacy roles async operations
             var users = context.GetRawUsersCollection();
             await users.UpdateManyAsync(
                 new MongoDB.Bson.BsonDocument("role", "TransactionVerifier"),
                 new MongoDB.Bson.BsonDocument("$set", new MongoDB.Bson.BsonDocument("role", "MicrogridOperator")));
         }
+        /// <summary>
+        /// Seeds and configures default/sample default users async data.
+        /// </summary>
 
         public static async Task SeedDefaultUsersAsync(MongoDbContext context)
         {
@@ -198,6 +213,9 @@ namespace SmartMicrogrid.API.Data
                 await context.Reservations.InsertManyAsync(reservations);
             }
         }
+        /// <summary>
+        /// Performs make grid operation.
+        /// </summary>
 
         // ── Helper: MicrogridNode ──
         private static MicrogridNode MakeGrid(
@@ -207,6 +225,7 @@ namespace SmartMicrogrid.API.Data
             double batCap, double batLevel, double batPct, int batteryStorageSlots,
             string status, bool isActive, string operatorId, DateTime now)
         {
+            // Execute make grid operations
             return new MicrogridNode
             {
                 Name = name, Location = location, Description = desc,
@@ -220,6 +239,9 @@ namespace SmartMicrogrid.API.Data
                 CreatedAt = now, UpdatedAt = now
             };
         }
+        /// <summary>
+        /// Performs make slot operation.
+        /// </summary>
 
         // ── Helper: EnergySlot ──
         private static EnergySlot MakeSlot(
@@ -227,6 +249,7 @@ namespace SmartMicrogrid.API.Data
             int startHoursFromNow, int endHoursFromNow,
             decimal price, string status, string createdBy, DateTime now)
         {
+            // Execute make slot operations
             return new EnergySlot
             {
                 MicrogridNodeId = nodeId,
@@ -240,6 +263,9 @@ namespace SmartMicrogrid.API.Data
                 CreatedAt = now, UpdatedAt = now
             };
         }
+        /// <summary>
+        /// Performs make reservation operation.
+        /// </summary>
 
         // ── Helper: Reservation ──
         private static Reservation MakeReservation(
@@ -250,6 +276,7 @@ namespace SmartMicrogrid.API.Data
             string? approvedBy = null, string? completedBy = null,
             string? reason = null)
         {
+            // Execute make reservation operations
             var history = new List<ReservationStatusEvent>
             {
                 new() { From = null, To = "Pending", ChangedBy = createdBy, ChangedAt = now }

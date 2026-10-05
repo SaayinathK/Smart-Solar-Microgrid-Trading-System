@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: UserAccountStatusTests.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Unit/Integration test suite verifying UserAccountStatus operations and validations.
+// ===========================================================================================================
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -17,20 +25,31 @@ namespace SmartMicrogrid.API.Tests
         private readonly Mock<IUserRepository> _users = new();
         private readonly Mock<IAuditService> _audit = new();
         private readonly UserService _service;
+        /// <summary>
+        /// Initializes a new instance of the UserAccountStatusTests class.
+        /// </summary>
 
         public UserAccountStatusTests()
         {
+            // Initialize dependencies and state
             _users.Setup(x => x.UpdateAsync(It.IsAny<User>()))
                 .ReturnsAsync(true);
             _service = new UserService(_users.Object, _audit.Object);
         }
+        /// <summary>
+        /// Performs given user operation.
+        /// </summary>
 
         private void GivenUser(User user) =>
             _users.Setup(x => x.GetByIdAsync(user.Id)).ReturnsAsync(user);
+        /// <summary>
+        /// Updates the specified account status async_suspending_mirrors is active and stamps audit record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAccountStatusAsync_Suspending_MirrorsIsActiveAndStampsAudit()
         {
+            // Execute update account status async_suspending_mirrors is active and stamps audit operations
             var user = new User
             {
                 Id = "u1",
@@ -76,10 +95,14 @@ namespace SmartMicrogrid.API.Tests
                 It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<string>()), Times.Never);
         }
+        /// <summary>
+        /// Updates the specified account status async_reactivating suspended user_is logged as reactivated record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAccountStatusAsync_ReactivatingSuspendedUser_IsLoggedAsReactivated()
         {
+            // Execute update account status async_reactivating suspended user_is logged as reactivated operations
             var user = new User
             {
                 Id = "u2",
@@ -109,6 +132,9 @@ namespace SmartMicrogrid.API.Tests
                 It.IsAny<string?>(),
                 It.IsAny<string>()), Times.Once);
         }
+        /// <summary>
+        /// Updates the specified account status async_legacy inactive user_activates record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAccountStatusAsync_LegacyInactiveUser_Activates()
@@ -140,10 +166,14 @@ namespace SmartMicrogrid.API.Tests
                 It.IsAny<string?>(),
                 It.IsAny<string>()), Times.Once);
         }
+        /// <summary>
+        /// Updates the specified account status async_deactivating via legacy boolean endpoint_maps to inactive record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAccountStatusAsync_DeactivatingViaLegacyBooleanEndpoint_MapsToInactive()
         {
+            // Execute update account status async_deactivating via legacy boolean endpoint_maps to inactive operations
             var user = new User
             {
                 Id = "u4",
@@ -160,10 +190,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.Equal("Inactive", result.Data!.AccountStatus);
             Assert.False(result.Data.IsActive);
         }
+        /// <summary>
+        /// Updates the specified account status async_rejects suspending the last active admin record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAccountStatusAsync_RejectsSuspendingTheLastActiveAdmin()
         {
+            // Execute update account status async_rejects suspending the last active admin operations
             var admin = new User
             {
                 Id = "admin1",
@@ -190,10 +224,14 @@ namespace SmartMicrogrid.API.Tests
                 It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>(),
                 It.IsAny<string>()), Times.Never);
         }
+        /// <summary>
+        /// Updates the specified account status async_allows suspending an admin when another remains record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAccountStatusAsync_AllowsSuspendingAnAdminWhenAnotherRemains()
         {
+            // Execute update account status async_allows suspending an admin when another remains operations
             var admin = new User
             {
                 Id = "admin2",
@@ -218,10 +256,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.Equal("Suspended", result.Data!.AccountStatus);
             Assert.False(admin.IsActive);
         }
+        /// <summary>
+        /// Updates the specified role async_demoting the last admin_is refused record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateRoleAsync_DemotingTheLastAdmin_IsRefused()
         {
+            // Execute update role async_demoting the last admin_is refused operations
             var admin = new User
             {
                 Id = "admin1",
@@ -243,10 +285,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.Equal(Role.Admin, admin.Role);
             _users.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never);
         }
+        /// <summary>
+        /// Updates the specified role async_demoting one admin when another remains_is allowed record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateRoleAsync_DemotingOneAdminWhenAnotherRemains_IsAllowed()
         {
+            // Execute update role async_demoting one admin when another remains_is allowed operations
             var admin = new User
             {
                 Id = "admin2",
@@ -268,10 +314,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.True(result.Success);
             Assert.Equal(Role.MicrogridOperator, admin.Role);
         }
+        /// <summary>
+        /// Updates the specified role async_changing anon admin role_is not guarded record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateRoleAsync_ChangingANonAdminRole_IsNotGuarded()
         {
+            // Execute update role async_changing anon admin role_is not guarded operations
             var user = new User
             {
                 Id = "u9",
@@ -288,10 +338,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.Equal(Role.MicrogridOperator, user.Role);
             _users.Verify(x => x.GetAllAsync(null, Role.Admin, true, null), Times.Never);
         }
+        /// <summary>
+        /// Deletes or removes the designated user async_deleting the last admin_is refused record.
+        /// </summary>
 
         [Fact]
         public async Task DeleteUserAsync_DeletingTheLastAdmin_IsRefused()
         {
+            // Execute delete user async_deleting the last admin_is refused operations
             var admin = new User
             {
                 Id = "admin1",
@@ -310,10 +364,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.Contains("last active Backoffice officer", result.Message);
             _users.Verify(x => x.DeleteAsync(It.IsAny<string>()), Times.Never);
         }
+        /// <summary>
+        /// Deletes or removes the designated user async_deleting anon admin_is allowed record.
+        /// </summary>
 
         [Fact]
         public async Task DeleteUserAsync_DeletingANonAdmin_IsAllowed()
         {
+            // Execute delete user async_deleting anon admin_is allowed operations
             var user = new User
             {
                 Id = "u9",
@@ -330,10 +388,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.True(result.Success);
             _users.Verify(x => x.DeleteAsync("u9"), Times.Once);
         }
+        /// <summary>
+        /// Updates the specified account status async_same status_is ano op record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAccountStatusAsync_SameStatus_IsANoOp()
         {
+            // Execute update account status async_same status_is ano op operations
             var user = new User
             {
                 Id = "u5",
@@ -350,10 +412,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.Contains("already Active", result.Message);
             _users.Verify(x => x.UpdateAsync(It.IsAny<User>()), Times.Never);
         }
+        /// <summary>
+        /// Updates the specified account status async_unknown user_fails record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAccountStatusAsync_UnknownUser_Fails()
         {
+            // Execute update account status async_unknown user_fails operations
             _users.Setup(x => x.GetByIdAsync("missing")).ReturnsAsync((User?)null);
 
             var result = await _service.UpdateAccountStatusAsync("missing", AccountStatus.Suspended);
@@ -361,10 +427,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.False(result.Success);
             Assert.Equal("User not found.", result.Message);
         }
+        /// <summary>
+        /// Updates the specified account status async_pending status_mirrors is active record.
+        /// </summary>
 
         [Fact]
         public async Task UpdateAccountStatusAsync_PendingStatus_MirrorsIsActive()
         {
+            // Execute update account status async_pending status_mirrors is active operations
             var user = new User
             {
                 Id = "u6",
