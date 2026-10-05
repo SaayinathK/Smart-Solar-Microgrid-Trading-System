@@ -42,15 +42,18 @@ namespace SmartMicrogrid.API.Services.Implementation
             // Execute register async operations
             var normalizedEmail = dto.Email.Trim().ToLower();
 
-            // Admin self-registration is strictly disallowed
-            if (dto.Role == Role.Admin)
+            // Public self-registration is strictly restricted to Prosumers.
+            // Web portal users (MicrogridOperator and Admin) must be created by Backoffice.
+            if (dto.Role != Role.Prosumer)
             {
-                return ApiResponse<UserResponseDto>.FailureResponse("Self-registration is not allowed for Admin role. Admin accounts must be created by a Backoffice officer.");
+                return ApiResponse<UserResponseDto>.FailureResponse(
+                    "Self-registration is not allowed for web portal accounts. " +
+                    "Grid Operator and Administrator accounts must be created by a Backoffice administrator.");
             }
 
-            // Prosumer role requires NIC as primary key/identifier
+            // Prosumer role requires NIC as natural primary key / identifier
             var nic = dto.Nic?.Trim().ToUpper() ?? string.Empty;
-            if (dto.Role == Role.Prosumer && string.IsNullOrWhiteSpace(nic))
+            if (string.IsNullOrWhiteSpace(nic))
             {
                 return ApiResponse<UserResponseDto>.FailureResponse("National Identity Card (NIC) is required for Prosumer registration.");
             }
