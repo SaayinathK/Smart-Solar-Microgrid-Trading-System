@@ -43,7 +43,7 @@ The tile URL is defined in `assets/map/map.js`. Keep visible attribution and fol
 ## 2. Responsibilities Breakdown
 
 - **Member 2**: Prosumer Mobile Interface (Browse Energy Slots, Create & Track Reservations).
-- **Member 3**: Energy Transaction Verification Interface (Camera QR Code Scanning & Verification).
+- **Member 3 (M3/C3)**: The Android client is part of the platform’s transaction experience. The M3 operational role is `MicrogridOperator`; Prosumer transaction information is intended to be available through the Mobile/Android application. Specific Android M3 screens and camera-scanning behavior are not documented here as verified implementation details.
 
 ---
 
@@ -57,6 +57,9 @@ The database is version 3. Migration `2 -> 3` adds the session table without del
 `SessionManager` restores a memory snapshot from SQLite on a background coroutine. Login navigation and authenticated requests wait for restoration. Successful sign-in and profile changes await database writes; logout awaits deletion before returning to Login. A stale profile response cannot restore a logged-out session. On the first upgrade, the old SharedPreferences session is copied to SQLite before its legacy keys are removed. SharedPreferences remains in use for theme preferences only after that migration.
 
 For a viva/demo: sign in, force-stop and reopen the app, then inspect **App Inspection > Database Inspector > smart_microgrid_db > login_session** in Android Studio. The saved profile and token should survive restart; logging out removes the row. Do not show the token value in screenshots. Run `./gradlew :app:testDebugUnitTest` for session lifecycle tests and `./gradlew :app:connectedDebugAndroidTest` with a device/emulator for SQLite migration and persistence tests.
+- Caching JWT authentication tokens (`SharedPreferences` / `EncryptedSharedPreferences`).
+- Storing client-side session state; transaction cache/draft behavior is not asserted here as an implemented M3 feature.
+- Caching recently viewed energy availability slots.
 
 *MongoDB remains the authoritative server-side database.*
 

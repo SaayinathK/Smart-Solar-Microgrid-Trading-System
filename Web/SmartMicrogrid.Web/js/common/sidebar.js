@@ -2,6 +2,17 @@
    Smart Microgrid Energy System - Dynamic Sidebar Component
    ========================================================================== */
 
+function getWebAppUrl(path) {
+  const sidebarScript = Array.from(document.scripts).find(script =>
+    new URL(script.src, document.baseURI).pathname.endsWith('/js/common/sidebar.js')
+  );
+  const appBase = sidebarScript
+    ? new URL('../../', sidebarScript.src)
+    : new URL('.', window.location.href);
+
+  return new URL(path, appBase).href;
+}
+
 function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
   const layoutContainer = document.getElementById('app-layout-wrapper');
   if (!layoutContainer) return;
@@ -105,6 +116,7 @@ function getMenuItemsForRole(role, activePage) {
   };
 
   let sections = '';
+  const isM3User = ['Admin', 'MicrogridOperator'].includes(role);
 
   // Core Overview Navigation
   sections += `
@@ -112,13 +124,39 @@ function getMenuItemsForRole(role, activePage) {
       <div class="sidebar-section-title">Navigation</div>
       <ul class="sidebar-menu">
         <li>
-          <a href="/dashboard.html" class="sidebar-link ${activePage === 'dashboard' ? 'active' : ''}">
+          <a href="${role === 'MicrogridOperator' ? getWebAppUrl('pages/M3/dashboard.html') : '/dashboard.html'}" class="sidebar-link ${(role === 'MicrogridOperator' ? activePage === 'm3-dashboard' : activePage === 'dashboard') ? 'active' : ''}">
             ${icons.dashboard} <span>Dashboard Overview</span>
           </a>
         </li>
       </ul>
     </div>
   `;
+
+  if (isM3User) {
+    sections += `
+      <div>
+        <div class="sidebar-section-title">M3 Transactions</div>
+        <ul class="sidebar-menu">
+          ${role === 'MicrogridOperator' ? `
+          <li>
+            <a href="${getWebAppUrl('pages/M3/dashboard.html')}" class="sidebar-link ${activePage === 'm3-dashboard' ? 'active' : ''}">
+              ${icons.dashboard} <span>Transaction Operations</span>
+            </a>
+          </li>` : ''}
+          <li>
+            <a href="${getWebAppUrl('pages/M3/transactions.html')}" class="sidebar-link ${activePage === 'transactions' ? 'active' : ''}">
+              ${icons.trading} <span>${role === 'Admin' ? 'All Transactions' : 'Transactions'}</span>
+            </a>
+          </li>
+          <li>
+            <a href="${getWebAppUrl('pages/M3/transactions.html?view=history')}" class="sidebar-link ${activePage === 'history' ? 'active' : ''}">
+              ${icons.reports} <span>Transaction History</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    `;
+  }
 
   // M1 Microgrid Management Menu Section
   sections += `

@@ -16,6 +16,7 @@ Web/
     ├── dashboard.html                 # Main dashboard overview with stat widgets
     │
     ├── pages/
+    │   ├── M3/                         # M3 transaction dashboard, list/history, details, verification, completion
     │   └── users/
     │       ├── users.html             # Admin user list table with search & filters
     │       ├── user-details.html      # Full user BSON record & timestamps
@@ -41,7 +42,9 @@ Web/
     │   ├── api/
     │   │   ├── api-client.js          # Central Fetch client with Bearer token injection
     │   │   ├── auth-api.js            # Auth endpoint functions
-    │   │   └── user-api.js            # User management endpoint functions
+    │   │   ├── user-api.js            # User management endpoint functions
+    │   │   └── transaction-api.js     # M3 transaction endpoint functions
+    │   ├── transactions/              # M3 dashboard, transaction list/history, details, verification, completion
     │   └── users/
     │       ├── users.js               # Users table renderer & filter logic
     │       ├── user-details.js        # User details population script
@@ -92,9 +95,11 @@ const API_CONFIG = {
 ### C. Role-Based Sidebar Navigation (`js/common/sidebar.js`)
 Displays custom navigation options based on the authenticated user's assigned role:
 - **`Admin`**: Dashboard, User Management, Operational Reports.
-- **`MicrogridOperator`**: Dashboard, Solar Nodes, Battery Storage.
-- **`Prosumer`**: Dashboard, Browse Energy Slots, My Reservations.
-- **`MicrogridOperator`**: Dashboard, reservation management, QR/pass verification, and transfer completion.
+- **`MicrogridOperator`**: M1 infrastructure pages and M3 transaction operations, including creating transactions from approved reservations, QR generation, manual QR-payload verification, transfer confirmation/completion, and transaction history for assigned microgrids.
+- **`Admin`**: Transaction monitoring/view access; no M3 verification or completion controls.
+- **`Prosumer`**: M3 transaction visibility is provided through the Mobile/Android application; Prosumer does not verify or complete transactions in the Web application.
+
+M3 Web pages are `pages/M3/dashboard.html`, `transactions.html` (including history view), `transaction-details.html`, `transaction-verify.html`, and `transaction-complete.html`. Their scripts are in `js/transactions/`; API calls are centralized in `js/api/transaction-api.js`. QR verification in Web accepts manually entered QR payload/data and does not use a camera scanner.
 
 ---
 

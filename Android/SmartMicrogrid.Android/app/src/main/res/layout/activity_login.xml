@@ -36,29 +36,23 @@
             android:padding="28dp"
             android:gravity="center">
 
-            <!-- Solar Brand Badge Icon -->
-            <FrameLayout
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:background="@drawable/bg_pill_solar"
-                android:layout_marginBottom="12dp">
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="144dp"
+                android:layout_height="144dp"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="#F8FAFC"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="⚡"
-                    android:textSize="36sp"
-                    android:layout_gravity="center" />
-            </FrameLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Smart Microgrid"
-                android:textSize="30sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_marginBottom="4dp" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/app_name"
+                    android:padding="4dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/smart_micro" />
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="wrap_content"
