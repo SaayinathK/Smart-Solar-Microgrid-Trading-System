@@ -23,12 +23,13 @@ public class ReservationRepository : IReservationRepository
         return await _context.Reservations.Find(r => r.Id == id).FirstOrDefaultAsync();
     }
 
-    public Task<List<Reservation>> GetAsync(string? prosumerId, string? status, string? nodeId, int page, int pageSize)
+    public Task<List<Reservation>> GetAsync(string? prosumerId, string? status, string? nodeId, int page, int pageSize, IReadOnlyCollection<string>? allowedNodeIds = null)
     {
         var f = Builders<Reservation>.Filter; var filter = f.Empty;
         if (!string.IsNullOrWhiteSpace(prosumerId)) filter &= f.Eq(r => r.ProsumerId, prosumerId);
         if (!string.IsNullOrWhiteSpace(status)) filter &= f.Eq(r => r.Status, status);
         if (!string.IsNullOrWhiteSpace(nodeId) && ObjectId.TryParse(nodeId, out _)) filter &= f.Eq(r => r.MicrogridNodeId, nodeId);
+        if (allowedNodeIds != null) filter &= f.In(r => r.MicrogridNodeId, allowedNodeIds);
         return _context.Reservations.Find(filter).SortByDescending(r => r.CreatedAt).Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync();
     }
 
@@ -54,26 +55,29 @@ public class ReservationRepository : IReservationRepository
         var result = await _context.Reservations.UpdateOneAsync(r => r.Id == updated.Id && r.Status == expectedStatus, change);
         return result.ModifiedCount == 1;
     }
-    public Task<long> CountAsync(string? status = null, string? prosumerId = null)
+    public Task<long> CountAsync(string? status = null, string? prosumerId = null, IReadOnlyCollection<string>? allowedNodeIds = null)
     {
         var f = Builders<Reservation>.Filter; var filter = f.Empty;
         if (!string.IsNullOrWhiteSpace(status)) filter &= f.Eq(r => r.Status, status);
         if (!string.IsNullOrWhiteSpace(prosumerId)) filter &= f.Eq(r => r.ProsumerId, prosumerId);
+        if (allowedNodeIds != null) filter &= f.In(r => r.MicrogridNodeId, allowedNodeIds);
         return _context.Reservations.CountDocumentsAsync(filter);
     }
     public Task<List<Reservation>> GetApprovedEndedAsync(DateTime now) => _context.Reservations.Find(r => r.Status == "Approved" && r.EndTime <= now).ToListAsync();
     public Task<bool> HasActiveForNodeAsync(string nodeId) => _context.Reservations.Find(r => r.MicrogridNodeId == nodeId && (r.Status == "Pending" || r.Status == "Approved")).AnyAsync();
     public Task<bool> MarkCompletedAsync(string id, string changedBy) => TransitionAsync(id, "Approved", "Completed", changedBy);
-    public async Task<double> SumActiveEnergyAsync(string? prosumerId = null)
+    public async Task<double> SumActiveEnergyAsync(string? prosumerId = null, IReadOnlyCollection<string>? allowedNodeIds = null)
     {
         var f = Builders<Reservation>.Filter; var filter = f.In(r => r.Status, new[] { "Pending", "Approved" });
         if (!string.IsNullOrWhiteSpace(prosumerId)) filter &= f.Eq(r => r.ProsumerId, prosumerId);
+        if (allowedNodeIds != null) filter &= f.In(r => r.MicrogridNodeId, allowedNodeIds);
         var rows = await _context.Reservations.Find(filter).Project(r => r.EnergyAmount).ToListAsync(); return rows.Sum();
     }
-    public Task<long> CountCompletedSinceAsync(DateTime since, string? prosumerId = null)
+    public Task<long> CountCompletedSinceAsync(DateTime since, string? prosumerId = null, IReadOnlyCollection<string>? allowedNodeIds = null)
     {
         var filter = Builders<Reservation>.Filter.Eq(r => r.Status, "Completed") & Builders<Reservation>.Filter.Gte(r => r.UpdatedAt, since);
         if (!string.IsNullOrWhiteSpace(prosumerId)) filter &= Builders<Reservation>.Filter.Eq(r => r.ProsumerId, prosumerId);
+        if (allowedNodeIds != null) filter &= Builders<Reservation>.Filter.In(r => r.MicrogridNodeId, allowedNodeIds);
         return _context.Reservations.CountDocumentsAsync(filter);
     }
 }

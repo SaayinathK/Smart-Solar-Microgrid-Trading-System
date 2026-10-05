@@ -36,29 +36,23 @@
             android:padding="28dp"
             android:gravity="center">
 
-            <!-- Solar Brand Badge Icon -->
-            <FrameLayout
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:background="@drawable/bg_pill_solar"
-                android:layout_marginBottom="12dp">
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="144dp"
+                android:layout_height="144dp"
+                android:layout_marginBottom="12dp"
+                app:cardBackgroundColor="#F8FAFC"
+                app:cardCornerRadius="22dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="⚡"
-                    android:textSize="36sp"
-                    android:layout_gravity="center" />
-            </FrameLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Smart Microgrid"
-                android:textSize="30sp"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:layout_marginBottom="4dp" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@string/app_name"
+                    android:padding="4dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/smart_micro" />
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -184,26 +178,30 @@
                 android:visibility="gone"
                 android:layout_marginTop="16dp" />
 
-            <!-- Register Link -->
+            <!-- Register Links -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="24dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Don't have an account? "
-                    android:textColor="#94A3B8"
-                    android:textSize="14sp" />
+                android:gravity="center_horizontal"
+                android:layout_marginTop="20dp">
 
                 <TextView
                     android:id="@+id/tv_register_link"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Register Prosumer"
-                    android:textColor="#3B82F6"
+                    android:textColor="#10B981"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="16dp" />
+
+                <TextView
+                    android:id="@+id/tv_register_verifier_link"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Register Verifier"
+                    android:textColor="#A855F7"
                     android:textSize="14sp"
                     android:textStyle="bold" />
             </LinearLayout>

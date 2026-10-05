@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let roleClass = 'role-prosumer';
     if (user.role === 'Admin') roleClass = 'role-admin';
     else if (user.role === 'MicrogridOperator') roleClass = 'role-operator';
-    else if (user.role === 'TransactionVerifier') roleClass = 'role-verifier';
 
     const statusBadge = user.isActive
       ? '<span class="status-badge status-active">● Active Account</span>'
@@ -65,6 +64,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="detail-item">
           <div class="detail-label">Account Status</div>
           <div class="detail-value" style="margin-top: 0.4rem;">${statusBadge}</div>
+        </div>
+
+        <div class="detail-item">
+          <div class="detail-label">National Identity Card (NIC)</div>
+          <div class="detail-value" style="font-family: monospace; color: var(--accent-amber, #f59e0b);">${user.nic || 'Not Provided'}</div>
         </div>
 
         <div class="detail-item">

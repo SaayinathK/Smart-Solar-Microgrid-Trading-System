@@ -1,6 +1,9 @@
 package com.smartmicrogrid.data.remote
 
 import com.smartmicrogrid.utils.Constants
+import com.smartmicrogrid.utils.SessionManager
+import kotlinx.coroutines.runBlocking
+import java.io.IOException
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -9,12 +12,6 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
-    private var jwtToken: String? = null
-
-    fun setJwtToken(token: String?) {
-        jwtToken = token
-    }
-
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
@@ -22,9 +19,12 @@ object RetrofitClient {
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
         .addInterceptor { chain ->
+            // OkHttp runs this on its worker thread, including after process recreation.
+            try { runBlocking { SessionManager.awaitReady() } }
+            catch (error: Exception) { throw IOException("Unable to restore saved login", error) }
             val original = chain.request()
             val requestBuilder = original.newBuilder()
-            jwtToken?.let { token ->
+            SessionManager.getToken()?.let { token ->
                 if (token.isNotEmpty()) {
                     requestBuilder.header("Authorization", "Bearer $token")
                 }

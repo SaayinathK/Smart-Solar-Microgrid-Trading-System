@@ -5,6 +5,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import com.smartmicrogrid.databinding.ActivityEditProfileBinding
 import com.smartmicrogrid.models.UpdateProfileRequest
 import com.smartmicrogrid.utils.SessionManager
@@ -21,9 +24,18 @@ class EditProfileActivity : AppCompatActivity() {
         supportActionBar?.title = "Edit Profile"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        populateFields()
-        setupListeners()
-        observeViewModel()
+        binding.btnSave.isEnabled = false
+        lifecycleScope.launch {
+            try {
+                SessionManager.awaitReady()
+                populateFields()
+                setupListeners()
+                observeViewModel()
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                showError("Unable to restore saved profile. Reopen the app to retry.")
+            }
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

@@ -30,9 +30,9 @@ class MicrogridAdapter(
         val m = items[position]
         holder.nameTv.text = m.name
         holder.locationTv.text = m.location
-        holder.capacityTv.text = "Capacity: ${m.capacity} kWh (Avail: ${m.availableCapacity} kWh)"
+        holder.capacityTv.text = "${m.availableCapacity} kW"
         holder.statusTv.text = m.status
-        holder.batteryTv.text = "Battery: ${m.batteryPercentage.toInt()}% (${m.currentBatteryLevel} kWh)"
+        holder.batteryTv.text = "${m.batteryPercentage.toInt()}%"
 
         holder.itemView.setOnClickListener { onItemClick(m) }
     }

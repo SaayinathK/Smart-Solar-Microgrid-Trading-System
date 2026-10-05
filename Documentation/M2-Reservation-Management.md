@@ -1,6 +1,6 @@
 # M2 Energy Reservation Management
 
-M2 connects prosumer demand to M1 energy slots and exposes approved reservation details to M3. Reservation rules live in the ASP.NET API; the Android and staff web clients call the same endpoints.
+M2 connects prosumer demand to M1 energy slots and owns the reservation lifecycle. It exposes approved reservation information to M3, which consumes it when creating a transaction. Reservation rules live in the ASP.NET API; the Android and staff web clients call the same endpoints.
 
 ## Lifecycle
 
@@ -20,7 +20,7 @@ All routes require a bearer JWT.
 | PATCH | `/api/reservations/{id}/approve` | Admin, MicrogridOperator | Approve a pending request |
 | PATCH | `/api/reservations/{id}/reject` | Admin, MicrogridOperator | Reject a pending request; optional `{ "reason": "..." }` |
 | PATCH | `/api/reservations/{id}/cancel` | Owner or staff | Cancel an eligible pending/approved request |
-| PATCH | `/api/reservations/{id}/complete` | Admin, MicrogridOperator, TransactionVerifier | M3 marks delivery complete |
+| PATCH | `/api/reservations/{id}/complete` | Admin, MicrogridOperator | Completes the reservation lifecycle in M2; transaction QR verification and transaction completion belong to M3 |
 | GET | `/api/reservations/nodes/{nodeId}/has-active` | Admin, MicrogridOperator | M1 integration check before node deactivation |
 
 Create payload:
@@ -32,9 +32,9 @@ Create payload:
 }
 ```
 
-Staff creation also accepts `prosumerId`, which is the prosumer's NIC. NIC is stored on the shared user document with a unique sparse MongoDB index and returned in profile responses. Reservations reference that NIC, while the existing MongoDB ObjectId remains the users collection's internal `_id` to preserve M1 references. Existing accounts need their NIC populated by Backoffice before they can make reservations.
+Staff creation also accepts `prosumerId`, which is the prosumer's NIC. NIC is stored on the shared user document with a unique sparse MongoDB index and returned in profile responses. Reservations reference that NIC, while the existing MongoDB ObjectId remains the users collection's internal `_id` to preserve M1 references. Existing accounts need their NIC populated by an Admin before they can make reservations.
 
-Public assignment-facing roles are `Backoffice`, `GridOperator`, and `Prosumer`. Existing legacy stored role names remain readable and JWTs carry both legacy and assignment-facing role claims so M1 endpoints keep working during migration. New staff account forms use the assignment role names.
+The three system roles are `Admin`, `MicrogridOperator`, and `Prosumer`. JWTs carry the role claim used by all endpoints for authorization. `MicrogridOperator` performs M3 transaction verification, energy transfer confirmation, and transaction completion. M2 owns reservation creation, modification, cancellation, approval, and reservation status; M3 owns the separate transaction lifecycle and history.
 
 ## Rules and reliability
 

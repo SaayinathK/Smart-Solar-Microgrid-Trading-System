@@ -24,8 +24,8 @@
    - Right-click Sites -> Add Website.
    - Site name: `SmartMicrogridAPI`.
    - Physical path: `C:\inetpub\SmartMicrogridAPI`.
-   - Binding: `http`, Port: `5000`, IP: `All Unassigned`.
+   - Binding: `http`, Port: `5050`, IP: `All Unassigned`.
    - Select Application Pool: `SmartMicrogridAppPool`.
 
 4. **Verify Deployment**:
-   Open browser: `http://localhost:5000/swagger`
+   Open browser: `http://localhost:5050/swagger`

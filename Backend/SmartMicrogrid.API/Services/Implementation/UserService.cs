@@ -42,12 +42,24 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return ApiResponse<UserResponseDto>.FailureResponse("An account with this email address already exists.");
             }
 
+            var nic = dto.Nic?.Trim().ToUpper() ?? string.Empty;
+            if (dto.Role == Role.Prosumer && string.IsNullOrWhiteSpace(nic))
+            {
+                return ApiResponse<UserResponseDto>.FailureResponse("National Identity Card (NIC) is required for Prosumer role.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(nic) && await _userRepository.ExistsByNicAsync(nic))
+            {
+                return ApiResponse<UserResponseDto>.FailureResponse("An account with this National Identity Card (NIC) already exists.");
+            }
+
             var user = new User
             {
                 FirstName = dto.FirstName.Trim(),
                 LastName = dto.LastName.Trim(),
                 Email = normalizedEmail,
                 PhoneNumber = dto.PhoneNumber?.Trim() ?? string.Empty,
+                Nic = nic,
                 PasswordHash = PasswordHelper.HashPassword(dto.Password),
                 Role = dto.Role,
                 IsActive = dto.IsActive,
@@ -70,6 +82,11 @@ namespace SmartMicrogrid.API.Services.Implementation
             user.FirstName = dto.FirstName.Trim();
             user.LastName = dto.LastName.Trim();
             user.PhoneNumber = dto.PhoneNumber?.Trim() ?? string.Empty;
+
+            if (dto.Nic != null)
+            {
+                user.Nic = dto.Nic.Trim().ToUpper();
+            }
 
             if (dto.Role.HasValue)
             {
@@ -103,6 +120,10 @@ namespace SmartMicrogrid.API.Services.Implementation
             user.FirstName = dto.FirstName.Trim();
             user.LastName = dto.LastName.Trim();
             user.PhoneNumber = dto.PhoneNumber?.Trim() ?? string.Empty;
+            if (dto.Nic != null)
+            {
+                user.Nic = dto.Nic.Trim().ToUpper();
+            }
             user.UpdatedAt = DateTime.UtcNow;
 
             var updated = await _userRepository.UpdateAsync(user);
@@ -131,7 +152,7 @@ namespace SmartMicrogrid.API.Services.Implementation
                 return ApiResponse<UserResponseDto>.FailureResponse("Failed to update user status.");
             }
 
-            var statusMsg = isActive ? "User account activated successfully." : "User account deactivated successfully.";
+            var statusMsg = isActive ? "User account activated successfully by Backoffice officer." : "User account deactivated successfully.";
             return ApiResponse<UserResponseDto>.SuccessResponse(MapToUserResponseDto(user), statusMsg);
         }
 
@@ -181,6 +202,7 @@ namespace SmartMicrogrid.API.Services.Implementation
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
+                Nic = user.Nic,
                 Role = user.Role.ToString(),
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt,

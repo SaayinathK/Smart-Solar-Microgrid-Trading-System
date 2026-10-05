@@ -44,7 +44,7 @@ The complete system is split into four distinct component responsibilities:
 | :--- | :--- | :--- | :--- |
 | **Member 1 (Lead)** | **User Management**, Microgrid Infrastructure & Energy Capacity Management | **User Management Implemented** | `Backend/`, `Web/`, `Android/` |
 | **Member 2** | Prosumer Energy Trading & Reservation Management | Prepared for integration | `Web/`, `Android/` |
-| **Member 3** | Energy Transaction Verification & Operator Fulfilment (QR Scanning) | Prepared for integration | `Web/`, `Android/` |
+| **Member 3** | Energy Transaction & Verification Management | M3 Web workflow implemented | `Web/`, `Android/` |
 | **Member 4** | Microgrid Operations Administration & Analytics Reports | Prepared for integration | `Web/`, `Backend/` |
 
 ---
@@ -68,17 +68,16 @@ The complete system is split into four distinct component responsibilities:
 - **Repository Architecture**: Clean 4-member shared structure (`Backend/`, `Web/`, `Android/`, `Database/`, `Documentation/`, `Deployment/`).
 - **MongoDB Integration**: `MongoDbContext`, `MongoDbSettings`, indexing for `users` collection.
 - **Authentication**: Registration (Prosumer default), Login with JWT token issuance, Password hashing with BCrypt.
-- **Role Enforcement**: `Admin`, `MicrogridOperator`, `Prosumer`, `TransactionVerifier` backend authorization rules.
+- **Role Enforcement**: `Admin`, `MicrogridOperator`, and `Prosumer` backend authorization rules. `MicrogridOperator` operates the M3 transaction workflow; Admin has transaction monitoring/view access, and Prosumer views their own transaction information through the Mobile/Android application.
 - **User Profile Management**: View profile (`/api/users/me`), update profile, change password.
 - **Admin User Management**: View all users, search/filter, create user, update details, activate/deactivate account, change role, delete user.
-- **Web Frontend Application**: Responsive, high-aesthetic glassmorphism web UI connecting to REST API endpoints.
+- **Web Frontend Application**: Responsive web UI connecting to REST API endpoints, including the M3 operator transaction workflow and transaction history.
 
 ### ⏳ Future Modules (Members 1-4):
 - Microgrid Nodes & Solar Capacity Management
 - Battery Storage Monitoring
 - Energy Time Slot Creation & Browsing
 - Reservation & Cancellation Management
-- Transaction Processing & QR Scanning Verification
 - Administrative Dashboards & Operational Reports
 
 ---
@@ -129,8 +128,8 @@ cd Backend\SmartMicrogrid.API
 dotnet run
 ```
 The Web API will launch at:
-- **HTTP**: `http://localhost:5000`
-- **Swagger Documentation**: `http://localhost:5000/swagger`
+- **HTTP**: `http://localhost:5050`
+- **Swagger Documentation**: `http://localhost:5050/swagger`
 
 ### Step 3: Run Web Application
 You can open `Web\SmartMicrogrid.Web\index.html` directly in any standard browser or use a lightweight local HTTP server (such as VS Code Live Server or `python -m http.server 8080`).
@@ -145,7 +144,7 @@ To run over Wi-Fi / local network for multi-device testing:
 2. Update `Web/SmartMicrogrid.Web/js/config/api-config.js`:
    ```javascript
    const API_CONFIG = {
-     BASE_URL: 'http://192.168.1.50:5000/api'
+     BASE_URL: 'http://192.168.1.50:5050/api'
    };
    ```
 3. Update Android app API base URL similarly.
@@ -168,6 +167,13 @@ To run over Wi-Fi / local network for multi-device testing:
 | `PATCH` | `/api/users/{id}/status` | Admin Only | Activate or deactivate account |
 | `PATCH` | `/api/users/{id}/role` | Admin Only | Change user role assignment |
 | `DELETE`| `/api/users/{id}` | Admin Only | Delete user account |
+| `GET` | `/api/transactions` | Authenticated; results scoped by role | List transactions visible to the current user |
+| `GET` | `/api/transactions/{transactionId}` | Authenticated; access scoped by role | Get a transaction visible to the current user |
+| `POST` | `/api/transactions` | `MicrogridOperator` | Create a transaction from an approved reservation |
+| `POST` | `/api/transactions/{transactionId}/generate-qr` | `MicrogridOperator` | Generate transaction QR data |
+| `POST` | `/api/transactions/{transactionId}/verify` | `MicrogridOperator` | Verify QR and transaction/reservation information |
+| `POST` | `/api/transactions/{transactionId}/complete` | `MicrogridOperator` | Confirm energy transfer and complete the transaction |
+| `PATCH` | `/api/transactions/{transactionId}/status?status=...` | `MicrogridOperator` | Update transaction status |
 
 ---
 
@@ -188,7 +194,7 @@ To run over Wi-Fi / local network for multi-device testing:
 - `develop`: Shared integration branch.
 - `feature/member1-user-management`: User management & infrastructure.
 - `feature/member2-reservation`: Prosumer trading & reservations.
-- `feature/member3-transaction`: Verification & QR scanner.
+- `feature/member3-transaction`: Energy transactions, QR verification & completion.
 - `feature/member4-admin`: Administrative dashboards & analytics.
 
 ### Guidelines for Team Members 2, 3, and 4

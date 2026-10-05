@@ -13,12 +13,19 @@ data class Reservation(
     @SerializedName("endTime") val endTime: String = "",
     @SerializedName("status") val status: String = "Pending",
     @SerializedName("createdAt") val createdAt: String = "",
-    @SerializedName("updatedAt") val updatedAt: String = ""
+    @SerializedName("updatedAt") val updatedAt: String = "",
+    @SerializedName("prosumerName") val prosumerName: String? = null,
+    @SerializedName("microgridName") val microgridName: String? = null,
+    @SerializedName("pricePerUnit") val pricePerUnit: Double = 0.0,
+    @SerializedName("totalEstimatedCost") val totalEstimatedCost: Double = 0.0,
+    @SerializedName("verificationCode") val verificationCode: String? = null
 )
 
 data class CreateReservationRequest(
     @SerializedName("energySlotId") val energySlotId: String,
-    @SerializedName("energyAmount") val energyAmount: Double
+    @SerializedName("energyAmount") val energyAmount: Double,
+    @SerializedName("prosumerId") val prosumerId: String? = null,
+    @SerializedName("reservationDate") val reservationDate: String? = null
 )
 
 data class ReservationSummary(

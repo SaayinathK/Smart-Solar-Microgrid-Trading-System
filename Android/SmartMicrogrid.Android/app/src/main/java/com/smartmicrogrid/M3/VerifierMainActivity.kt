@@ -1,4 +1,4 @@
-package com.smartmicrogrid.M3
+﻿package com.smartmicrogrid.M3
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,7 +7,6 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.smartmicrogrid.R
 import com.smartmicrogrid.auth.LoginActivity
-import com.smartmicrogrid.ui.PlaceholderFragment
 import com.smartmicrogrid.utils.SessionManager
 
 class VerifierMainActivity : AppCompatActivity() {
@@ -31,8 +30,12 @@ class VerifierMainActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> loadFragment(com.smartmicrogrid.ui.HomeFragment())
-                R.id.nav_scan -> loadFragment(com.smartmicrogrid.M1.microgrid.VerifierMicrogridFragment())
-                R.id.nav_pending -> loadFragment(PlaceholderFragment.newInstance("Pending Tasks"))
+                R.id.nav_scan -> {
+                    startActivity(Intent(this, QRScannerActivity::class.java))
+                    true
+                }
+                R.id.nav_pending -> loadFragment(PendingTransactionsFragment())
+                R.id.nav_history -> loadFragment(TransactionHistoryFragment())
                 R.id.nav_profile -> loadFragment(com.smartmicrogrid.ui.ProfileFragment())
                 else -> false
             }
@@ -40,7 +43,11 @@ class VerifierMainActivity : AppCompatActivity() {
 
         // Load default fragment
         if (savedInstanceState == null) {
-            bottomNav.selectedItemId = R.id.nav_home
+            bottomNav.selectedItemId = if (intent.getBooleanExtra(EXTRA_OPEN_HISTORY, false)) {
+                R.id.nav_history
+            } else {
+                R.id.nav_home
+            }
         }
     }
 
@@ -49,5 +56,9 @@ class VerifierMainActivity : AppCompatActivity() {
             .replace(R.id.fragment_container, fragment)
             .commit()
         return true
+    }
+
+    companion object {
+        const val EXTRA_OPEN_HISTORY = "OPEN_TRANSACTION_HISTORY"
     }
 }

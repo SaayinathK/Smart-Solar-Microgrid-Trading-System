@@ -24,6 +24,9 @@ namespace SmartMicrogrid.API.DTOs.M1
         [Range(0.0, 1000000.0, ErrorMessage = "Battery capacity cannot be negative.")]
         public double BatteryCapacity { get; set; }
 
+        [Range(0, 100000, ErrorMessage = "Battery storage slots cannot be negative.")]
+        public int BatteryStorageSlots { get; set; }
+
         public string Status { get; set; } = "Active";
 
         public bool IsActive { get; set; } = true;

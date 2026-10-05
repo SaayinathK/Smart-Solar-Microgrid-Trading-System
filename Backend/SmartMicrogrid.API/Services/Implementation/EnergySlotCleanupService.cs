@@ -25,18 +25,29 @@ namespace SmartMicrogrid.API.Services.Implementation
         {
             _logger.LogInformation("EnergySlotCleanupService starting.");
 
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                try
+                while (!stoppingToken.IsCancellationRequested)
                 {
-                    await CleanupExpiredSlotsAsync();
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error occurred executing slot cleanup.");
-                }
+                    try
+                    {
+                        await CleanupExpiredSlotsAsync();
+                    }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error occurred executing slot cleanup.");
+                    }
 
-                await Task.Delay(_checkInterval, stoppingToken);
+                    await Task.Delay(_checkInterval, stoppingToken);
+                }
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                // Shutdown also cancels the delay when API startup fails.
             }
         }
 

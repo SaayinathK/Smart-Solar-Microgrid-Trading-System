@@ -75,16 +75,25 @@ class ProfileFragment : Fragment() {
         }
 
         binding.btnLogout.setOnClickListener {
+            binding.btnLogout.isEnabled = false
             viewModel.logout()
-            // Navigate back to Login and clear task stack
-            val intent = Intent(requireActivity(), LoginActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-            requireActivity().finish()
         }
     }
 
     private fun observeViewModel() {
+        viewModel.logoutResult.observe(viewLifecycleOwner) { result ->
+            result ?: return@observe
+            if (result.isSuccess) {
+                // Navigate only after the SQLite session has been deleted.
+                val intent = Intent(requireActivity(), LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                requireActivity().finish()
+            } else {
+                binding.btnLogout.isEnabled = true
+                Toast.makeText(requireContext(), "Unable to clear saved login. Please try again.", Toast.LENGTH_LONG).show()
+            }
+        }
         viewModel.isLoading.observe(viewLifecycleOwner) { loading ->
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         }

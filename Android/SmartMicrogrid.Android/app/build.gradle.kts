@@ -14,7 +14,6 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -45,6 +44,9 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
+    // QR scanning
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     // Retrofit & Gson
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
