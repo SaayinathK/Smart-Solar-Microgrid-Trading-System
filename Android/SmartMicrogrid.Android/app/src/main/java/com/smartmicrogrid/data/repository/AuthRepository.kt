@@ -15,7 +15,12 @@ class AuthRepository(private val apiService: ApiService) {
                 if (response.isSuccessful && response.body()?.success == true && response.body()?.data != null) {
                     val loginData = response.body()!!.data!!
                     // Save session (JWT + User)
-                    SessionManager.setSession(loginData.token, loginData.user)
+                    try {
+                        SessionManager.setSession(loginData.token, loginData.user)
+                    } catch (error: Exception) {
+                        if (error is kotlinx.coroutines.CancellationException) throw error
+                        return@withContext Result.failure(Exception("Signed in, but unable to save login details on this device. Please try again."))
+                    }
                     Result.success(loginData)
                 } else {
                     val msg = response.body()?.message ?: "Login failed. Check your credentials."
@@ -46,10 +51,12 @@ class AuthRepository(private val apiService: ApiService) {
     suspend fun getProfile(): Result<User> {
         return withContext(Dispatchers.IO) {
             try {
+                SessionManager.awaitReady()
+                val token = SessionManager.getToken()
                 val response = apiService.getCurrentUser()
                 if (response.isSuccessful && response.body()?.success == true && response.body()?.data != null) {
                     val user = response.body()!!.data!!
-                    SessionManager.updateUser(user)
+                    SessionManager.updateUser(user, token)
                     Result.success(user)
                 } else {
                     Result.failure(Exception(response.body()?.message ?: "Failed to load profile."))
@@ -66,10 +73,12 @@ class AuthRepository(private val apiService: ApiService) {
     suspend fun updateProfile(request: UpdateProfileRequest): Result<User> {
         return withContext(Dispatchers.IO) {
             try {
+                SessionManager.awaitReady()
+                val token = SessionManager.getToken()
                 val response = apiService.updateCurrentUser(request)
                 if (response.isSuccessful && response.body()?.success == true && response.body()?.data != null) {
                     val user = response.body()!!.data!!
-                    SessionManager.updateUser(user)
+                    SessionManager.updateUser(user, token)
                     Result.success(user)
                 } else {
                     Result.failure(Exception(response.body()?.message ?: "Update failed."))
@@ -95,7 +104,7 @@ class AuthRepository(private val apiService: ApiService) {
         }
     }
 
-    fun logout() {
+    suspend fun logout() {
         SessionManager.logout()
     }
 }

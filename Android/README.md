@@ -49,9 +49,14 @@ The tile URL is defined in `assets/map/map.js`. Keep visible attribution and fol
 
 ## 3. SQLite Role
 SQLite is used strictly for **Android local persistence**:
-- Caching JWT authentication tokens (`SharedPreferences` / `EncryptedSharedPreferences`).
-- Storing offline transaction drafts & session state.
-- Caching recently viewed energy availability slots.
+- Persisting login details in Room's `login_session` SQLite table: JWT, user ID, email, role, display name, and user profile JSON. Passwords are never stored.
+- Caching microgrids, energy availability slots, and reservations in the same `smart_microgrid_db` database.
+
+The database is version 3. Migration `2 -> 3` adds the session table without deleting cached records; version 1 upgrades through `1 -> 2 -> 3`. Destructive migration fallback is disabled now that the database holds login details.
+
+`SessionManager` restores a memory snapshot from SQLite on a background coroutine. Login navigation and authenticated requests wait for restoration. Successful sign-in and profile changes await database writes; logout awaits deletion before returning to Login. A stale profile response cannot restore a logged-out session. On the first upgrade, the old SharedPreferences session is copied to SQLite before its legacy keys are removed. SharedPreferences remains in use for theme preferences only after that migration.
+
+For a viva/demo: sign in, force-stop and reopen the app, then inspect **App Inspection > Database Inspector > smart_microgrid_db > login_session** in Android Studio. The saved profile and token should survive restart; logging out removes the row. Do not show the token value in screenshots. Run `./gradlew :app:testDebugUnitTest` for session lifecycle tests and `./gradlew :app:connectedDebugAndroidTest` with a device/emulator for SQLite migration and persistence tests.
 
 *MongoDB remains the authoritative server-side database.*
 

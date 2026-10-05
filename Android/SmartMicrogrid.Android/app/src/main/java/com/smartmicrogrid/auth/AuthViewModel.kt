@@ -8,6 +8,7 @@ import com.smartmicrogrid.data.remote.RetrofitClient
 import com.smartmicrogrid.data.repository.AuthRepository
 import com.smartmicrogrid.models.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 
 class AuthViewModel : ViewModel() {
 
@@ -33,6 +34,9 @@ class AuthViewModel : ViewModel() {
 
     private val _passwordResult = MutableLiveData<Result<Boolean>?>()
     val passwordResult: LiveData<Result<Boolean>?> = _passwordResult
+
+    private val _logoutResult = MutableLiveData<Result<Unit>?>()
+    val logoutResult: LiveData<Result<Unit>?> = _logoutResult
 
     fun login(email: String, password: String) {
         _isLoading.value = true
@@ -75,6 +79,14 @@ class AuthViewModel : ViewModel() {
     }
 
     fun logout() {
-        repository.logout()
+        viewModelScope.launch {
+            try {
+                repository.logout()
+                _logoutResult.value = Result.success(Unit)
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                _logoutResult.value = Result.failure(error)
+            }
+        }
     }
 }

@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import com.smartmicrogrid.MainActivity
 import com.smartmicrogrid.databinding.ActivityLoginBinding
 import com.smartmicrogrid.utils.SessionManager
@@ -20,24 +23,28 @@ class LoginActivity : AppCompatActivity() {
         // Initialize session manager
         SessionManager.init(this)
 
-        // If already logged in, skip to correct main
-        if (SessionManager.isLoggedIn()) {
-            val role = SessionManager.getUserRole()
-            when (role) {
-                "Prosumer" -> startActivity(Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java))
-                "MicrogridOperator" -> startActivity(Intent(this, com.smartmicrogrid.M3.MicrogridOperatorMainActivity::class.java))
-                else -> startActivity(Intent(this, MainActivity::class.java))
-            }
-            finish()
-            return
-        }
-
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
         supportActionBar?.hide()
 
-        setupListeners()
-        observeViewModel()
+        binding.btnLogin.isEnabled = false
+        binding.progressBar.visibility = View.VISIBLE
+        lifecycleScope.launch {
+            try {
+                SessionManager.awaitReady()
+                if (SessionManager.isLoggedIn()) {
+                    navigateToMain()
+                } else {
+                    setupListeners()
+                    observeViewModel()
+                }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+                showError("Unable to restore saved login details. Close and reopen the app to retry.")
+            } finally {
+                binding.progressBar.visibility = View.GONE
+            }
+        }
     }
 
     private fun setupListeners() {
@@ -114,7 +121,12 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun navigateToMain() {
-        startActivity(Intent(this, MainActivity::class.java))
+        val destination = when (SessionManager.getUserRole()) {
+            "Prosumer" -> com.smartmicrogrid.M2.ProsumerMainActivity::class.java
+            "MicrogridOperator" -> com.smartmicrogrid.M3.MicrogridOperatorMainActivity::class.java
+            else -> MainActivity::class.java
+        }
+        startActivity(Intent(this, destination))
         finish()
     }
 }

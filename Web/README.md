@@ -52,9 +52,15 @@ Web/
 
 ---
 
-## OpenStreetMap maps and location picker
+## Dashboard maps and location picker
 
-Both dashboards and the create/edit location picker use the locally bundled **Leaflet 1.9.4** library with OpenStreetMap tiles. No map key or billing configuration is required. Library files and their BSD license are in `SmartMicrogrid.Web/vendor/leaflet`; tiles still need an internet connection.
+The main overview (`dashboard.html`) uses the **Google Maps Embed API**, opted in with `data-map-provider="google"`. Selecting a microgrid displays a standard light Google roadmap at its saved coordinates in either app theme. Only this page loads `google-embed-map.js`; it does not use the Maps JavaScript, Places, or Google Geocoding APIs. The infrastructure dashboard (`pages/M1/dashboard.html`), create/edit location picker, and Android maps continue using **Leaflet with OpenStreetMap**.
+
+`GOOGLE_MAPS_EMBED_KEY` in `js/config/api-config.js` is the browser key for the main dashboard. Enable **Maps Embed API** in its Google Cloud project and restrict the key to that API and the deployed website/localhost referrers. The iframe sends an origin referrer for those restrictions. Google documents [Embed API usage as no charge](https://developers.google.com/maps/documentation/embed/usage-and-billing), but its [setup still requires a valid key and billing account](https://developers.google.com/maps/documentation/embed/quickstart). A JavaScript API billing error does not establish whether the Embed API works. Test the dashboard on the actual deployment origin after changing key restrictions.
+
+If Google displays an error, choose **Google Maps unavailable? Use OpenStreetMap** beneath the dashboard map. The selected node is preserved, and **Use Google Maps** switches back. This fallback is explicit because browsers cannot inspect Google's cross-origin iframe for key/billing errors; an iframe load event does not prove the map rendered successfully. Empty lists and nodes without valid coordinates do not request a Google map.
+
+OpenStreetMap needs no map key or billing configuration. The locally bundled Leaflet 1.9.4 library and its BSD license are in `SmartMicrogrid.Web/vendor/leaflet`; map tiles still need an internet connection.
 
 Select a dashboard microgrid to move the marker to its saved coordinates. In create/edit forms, click the map, drag the pin, choose **Use my current location**, or type the address and leave the field / press Enter / choose **Find typed address**. Address edits fill coordinates through `GET /api/geocoding?address=...`; map selection uses `GET /api/geocoding/reverse?latitude=...&longitude=...`. Both endpoints require an Admin or MicrogridOperator session. Address searches do not run on every keystroke.
 

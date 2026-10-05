@@ -4,11 +4,13 @@ class MicrogridMap {
     this.container = container;
     this.nodes = [];
     this.selectedId = null;
+    this.googleEnabled = container.dataset.mapProvider === 'google';
+    this.provider = this.googleEnabled ? 'google' : 'openstreetmap';
     container.innerHTML = `
       <div class="grid-map-heading"><div><h2>Microgrid locations</h2><p data-map-summary role="status">Loading active microgrids...</p></div></div>
       <div class="grid-map-layout">
         <div class="grid-map-canvas">
-          <div data-map-frame aria-label="Selected microgrid location on OpenStreetMap" hidden></div>
+          <div data-map-frame aria-label="Selected microgrid location" hidden></div>
           <p data-map-message class="grid-map-message" role="status">Loading locations...</p>
         </div>
         <aside class="grid-map-panel" aria-label="Select microgrid">
@@ -16,10 +18,23 @@ class MicrogridMap {
           <div data-map-list class="grid-map-list"></div>
         </aside>
       </div>
-      <p data-map-selection class="grid-map-selection" aria-live="polite">Select a microgrid to view its location.</p>`;
+      <p data-map-selection class="grid-map-selection" aria-live="polite">Select a microgrid to view its location.</p>
+      ${this.googleEnabled ? '<div class="grid-map-provider-tools"><button type="button" class="btn btn-secondary btn-sm" data-switch-map>Google Maps unavailable? Use OpenStreetMap</button></div>' : ''}`;
     this.frame = container.querySelector('[data-map-frame]');
     this.message = container.querySelector('[data-map-message]');
     this.list = container.querySelector('[data-map-list]');
+    this.providerButton = container.querySelector('[data-switch-map]');
+    this.providerButton?.addEventListener('click', () => this.switchProvider());
+  }
+
+  switchProvider() {
+    this.mapView?.destroy();
+    this.mapView = null;
+    this.provider = this.provider === 'google' ? 'openstreetmap' : 'google';
+    this.providerButton.textContent = this.provider === 'google'
+      ? 'Google Maps unavailable? Use OpenStreetMap' : 'Use Google Maps';
+    const selected = this.nodes.find(node => node.id === this.selectedId);
+    if (selected) this.select(selected);
   }
 
   static hasLocation(node) {
@@ -105,9 +120,12 @@ class MicrogridMap {
       return;
     }
     this.frame.hidden = false;
+    this.frame.setAttribute('aria-label', `Selected microgrid location on ${this.provider === 'google' ? 'Google Maps' : 'OpenStreetMap'}`);
     this.message.hidden = true;
     try {
-      if (!this.mapView) this.mapView = new OpenStreetMapView(this.frame, {
+      if (!this.mapView) this.mapView = this.provider === 'google'
+        ? new GoogleEmbedMapView(this.frame)
+        : new OpenStreetMapView(this.frame, {
         onTileError: () => {
           this.container.querySelector('[data-map-selection]').textContent =
             'Map tiles could not load. Check your connection and select a microgrid to retry.';
@@ -115,7 +133,9 @@ class MicrogridMap {
       });
       this.mapView.setLocation(node.latitude, node.longitude, node.name);
     } catch (error) {
-      this.showMessage('The map could not load. Refresh the page to try again.');
+      this.showMessage(this.provider === 'google'
+        ? 'Google Maps is unavailable. Use OpenStreetMap below to view this location.'
+        : 'The map could not load. Refresh the page to try again.');
     }
   }
 }

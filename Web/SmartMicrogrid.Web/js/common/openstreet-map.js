@@ -29,4 +29,5 @@ class OpenStreetMapView {
   }
 
   clear() { this.marker.remove(); }
+  destroy() { this.map.remove(); }
 }

@@ -31,13 +31,6 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
         
-        // Personalize the greeting
-        val user = SessionManager.getUser()
-        val nameView = view.findViewById<TextView>(R.id.tv_greeting_name)
-        if (user != null) {
-            nameView.text = getString(R.string.solar_greeting, user.firstName)
-        }
-
         view.findViewById<View>(R.id.btn_view_bookings).setOnClickListener {
             startActivity(android.content.Intent(requireContext(), ReservationsActivity::class.java))
         }
@@ -47,6 +40,16 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                SessionManager.awaitReady()
+                SessionManager.getUser()?.let { user ->
+                    view.findViewById<TextView>(R.id.tv_greeting_name).text = getString(R.string.solar_greeting, user.firstName)
+                }
+            } catch (error: Exception) {
+                if (error is CancellationException) throw error
+            }
+        }
         selectedNodeId = savedInstanceState?.getString("selected_grid_id") ?: selectedNodeId
         map = OpenStreetMapView(requireContext()).also {
             view.findViewById<FrameLayout>(R.id.map_container).addView(it,
