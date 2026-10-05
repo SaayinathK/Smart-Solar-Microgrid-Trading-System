@@ -39,6 +39,11 @@ namespace SmartMicrogrid.API.Data
         public static async Task SeedAsync(MongoDbContext context)
         {
             // Execute seed async operations
+            var txCount = await context.Transactions.CountDocumentsAsync(Builders<Transaction>.Filter.Empty);
+            if (txCount > 0)
+            {
+                return;
+            }
             await SeedLifecycleUsersAsync(context);
             await SeedTransactionsAsync(context);
             await SeedAuditTrailAsync(context);

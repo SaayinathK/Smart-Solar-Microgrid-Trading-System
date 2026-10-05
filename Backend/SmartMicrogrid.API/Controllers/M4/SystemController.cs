@@ -151,9 +151,24 @@ namespace SmartMicrogrid.API.Controllers.M4
                     : "Public registration disabled."));
         }
         /// <summary>
+        /// Reseeds all database collections with interrelated test datasets across all models.
+        /// </summary>
+        [HttpPost("reseed")]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> ReseedDatabase([FromServices] SmartMicrogrid.API.Data.MongoDbContext context)
+        {
+            // Execute database reseed operation
+            await SmartMicrogrid.API.Data.DbSeeder.ReseedAllAsync(context);
+            return Ok(ApiResponse<string>.SuccessResponse(
+                "Database successfully wiped and reseeded with interrelated datasets for all models.",
+                "Database reseeded successfully."));
+        }
+
+        /// <summary>
         /// Performs validation failure operation.
         /// </summary>
-
         private ApiResponse<object> ValidationFailure()
         {
             // Execute validation failure operations

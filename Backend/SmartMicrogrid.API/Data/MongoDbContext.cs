@@ -29,7 +29,15 @@ namespace SmartMicrogrid.API.Data
             // Initialize dependencies and state
             var client = new MongoClient(settings.Value.ConnectionString);
             _database = client.GetDatabase(settings.Value.DatabaseName);
+            EnsureIndexes();
+        }
 
+        /// <summary>
+        /// Ensures all required database indexes are created across all collections.
+        /// </summary>
+        public void EnsureIndexes()
+        {
+            // Execute index creation operations
             try
             {
                 EnsureUniqueReservationIndex();
