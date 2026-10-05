@@ -13,12 +13,26 @@
 <body>
 
   <div id="app-layout-wrapper">
-    <div class="card" style="margin-bottom: 1.5rem;">
+    <!-- Hero Image Banner -->
+    <div class="hero-image-banner animate-fade-in" style="background-image: url('../../assets/images/img_solar_farm.jpg');">
+      <div class="hero-image-overlay">
+        <div>
+          <h1>Solar Microgrid Infrastructure</h1>
+          <p>Real-time distributed generation monitoring, battery storage reserves, and operational capacity across regional nodes in Sri Lanka.</p>
+        </div>
+        <div style="text-align: right; display: flex; flex-direction: column; gap: 6px;">
+          <span class="header-live-badge" style="background: rgba(16,185,129,0.2);"><span class="status-dot-pulse"></span> 10 Regional Nodes</span>
+          <span style="font-size: 0.82rem; color: #cbd5e1; font-weight: 600;">Total Generation: 3,760 kW</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card animate-slide-up delay-1" style="margin-bottom: 1.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <div>
-          <h2>Solar Microgrid Nodes</h2>
+          <h2>Solar Microgrid Directory & Filters</h2>
           <p style="color: var(--text-secondary); margin-top: 0.25rem;">
-            Manage microgrid generators, locations, capacities, and operational statuses.
+            Filter and inspect microgrid generators, locations, available capacities, and battery states.
           </p>
         </div>
         <div id="operator-actions" style="display: none;">

@@ -63,58 +63,78 @@
 
     <section class="grid-map-card" data-microgrid-map aria-label="Microgrid locations"></section>
 
-    <!-- System Modules Status -->
-    <h2 style="font-size: 1.35rem; margin-bottom: 1.25rem;">System Modules Breakdown</h2>
+    <!-- System Modules Showcase with Rich Energy Imagery -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <div>
+        <h2 style="font-size: 1.35rem; margin: 0;">Platform Trading & Operational Modules</h2>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px;">Direct access to core energy generation, marketplace reservation, and transaction verification systems.</p>
+      </div>
+      <span class="header-live-badge"><span class="status-dot-pulse"></span> All Modules Active</span>
+    </div>
     
-    <div class="modules-grid">
-      <div class="module-card">
-        <span class="tag tag-ready">READY & OPERATIONAL</span>
-        <h3>User Management</h3>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
-          Authentication, JWT token security, password hashing, roles, and administrator user CRUD operations.
-        </p>
-        <div style="margin-top: auto;">
-          <a href="pages/users/users.html" class="btn btn-secondary btn-sm" id="btn-view-users" style="display: none; width: 100%;">
-            Manage Users
-          </a>
+    <div class="modules-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+      <div class="card card-interactive animate-slide-up delay-1" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <div style="height: 120px; background-image: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.75) 100%), url('assets/images/img_solar_farm.jpg'); background-size: cover; background-position: center; position: relative; padding: 12px;">
+          <span class="tag tag-ready" style="position: absolute; top: 12px; right: 12px;">M1 INFRASTRUCTURE</span>
+          <div style="position: absolute; bottom: 10px; left: 14px; color: #fff; font-weight: 700; font-size: 1.05rem;">Solar Microgrids & Assets</div>
+        </div>
+        <div style="padding: 1.25rem; display: flex; flex-direction: column; flex: 1;">
+          <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1rem;">
+            Real-time telemetry, 10 generation hubs across Sri Lanka, battery reserve capacity, and energy slot generation.
+          </p>
+          <div style="margin-top: auto; display: flex; gap: 8px;">
+            <a href="pages/M1/microgrids.html" class="btn btn-primary btn-sm" style="flex: 1; text-align: center;">View Grids</a>
+            <a href="pages/M1/battery-storage.html" class="btn btn-secondary btn-sm">Storage</a>
+          </div>
         </div>
       </div>
 
-      <div class="module-card">
-        <span class="tag tag-ready">READY & OPERATIONAL</span>
-        <h3>Microgrid Infrastructure & Capacity</h3>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
-          Solar nodes, battery storage monitoring, energy availability, capacity slots, and operational status management.
-        </p>
-        <div style="margin-top: auto;">
-          <a href="pages/M1/microgrids.html" class="btn btn-secondary btn-sm" style="width: 100%;">
-            Explore Microgrids
-          </a>
+      <div class="card card-interactive animate-slide-up delay-2" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <div style="height: 120px; background-image: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.75) 100%), url('assets/images/bg_energy_home.jpg'); background-size: cover; background-position: center; position: relative; padding: 12px;">
+          <span class="tag tag-ready" style="position: absolute; top: 12px; right: 12px; background: rgba(16,185,129,0.2); color: #10b981; border-color: rgba(16,185,129,0.3);">M2 MARKETPLACE</span>
+          <div style="position: absolute; bottom: 10px; left: 14px; color: #fff; font-weight: 700; font-size: 1.05rem;">Energy Trading & Booking</div>
+        </div>
+        <div style="padding: 1.25rem; display: flex; flex-direction: column; flex: 1;">
+          <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1rem;">
+            Prosumer clean energy booking, dynamic slot pricing in LKR, capacity reservation queue, and lifecycle changes.
+          </p>
+          <div style="margin-top: auto; display: flex; gap: 8px;">
+            <a href="pages/reservations/reservations.html" class="btn btn-primary btn-sm" style="flex: 1; text-align: center;">Reservations</a>
+            <a href="pages/M1/energy-availability.html" class="btn btn-secondary btn-sm">Availability</a>
+          </div>
         </div>
       </div>
 
-      <div class="module-card">
-        <span class="tag tag-future">FUTURE - MEMBER 2</span>
-        <h3>Prosumer Energy Trading</h3>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
-          Energy searching, slot browsing, reservation management, and tracking.
-        </p>
+      <div class="card card-interactive animate-slide-up delay-3" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <div style="height: 120px; background-image: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.75) 100%), url('assets/images/bg_web_dashboard.png'); background-size: cover; background-position: center; position: relative; padding: 12px;">
+          <span class="tag tag-ready" style="position: absolute; top: 12px; right: 12px; background: rgba(59,130,246,0.2); color: #3b82f6; border-color: rgba(59,130,246,0.3);">M3 VERIFICATION</span>
+          <div style="position: absolute; bottom: 10px; left: 14px; color: #fff; font-weight: 700; font-size: 1.05rem;">Transaction Ledger & QR</div>
+        </div>
+        <div style="padding: 1.25rem; display: flex; flex-direction: column; flex: 1;">
+          <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1rem;">
+            Digital QR code tokens, operator handoff verification, physical energy transfer logging, and settlement.
+          </p>
+          <div style="margin-top: auto; display: flex; gap: 8px;">
+            <a href="pages/M3/transactions.html" class="btn btn-primary btn-sm" style="flex: 1; text-align: center;">Transactions</a>
+            <a href="pages/M3/dashboard.html" class="btn btn-secondary btn-sm">Operator Hub</a>
+          </div>
+        </div>
       </div>
 
-      <div class="module-card">
-        <span class="tag tag-future">FUTURE - MEMBER 3</span>
-        <h3>Transaction Verification & QR</h3>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
-          Transaction processing, QR code scanning, verification, and transfer confirmation.
-        </p>
-      </div>
-
-      <div class="module-card">
-        <span class="tag tag-future">FUTURE - MEMBER 4</span>
-        <h3>Operations & Administration</h3>
-        <p style="color: var(--text-secondary); font-size: 0.9rem;">
-          System monitoring, operational analytics dashboards, and compliance reports.
-        </p>
+      <div class="card card-interactive animate-slide-up delay-4" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        <div style="height: 120px; background-image: linear-gradient(180deg, rgba(15,23,42,0.2) 0%, rgba(15,23,42,0.75) 100%), url('assets/images/img_battery_storage.jpg'); background-size: cover; background-position: center; position: relative; padding: 12px;">
+          <span class="tag tag-ready" style="position: absolute; top: 12px; right: 12px; background: rgba(217,119,6,0.2); color: #d97706; border-color: rgba(217,119,6,0.3);">M4 BACKOFFICE</span>
+          <div style="position: absolute; bottom: 10px; left: 14px; color: #fff; font-weight: 700; font-size: 1.05rem;">Administration & Audit</div>
+        </div>
+        <div style="padding: 1.25rem; display: flex; flex-direction: column; flex: 1;">
+          <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1rem;">
+            User lifecycle management, system activity audit trails, platform configuration, and administrative reports.
+          </p>
+          <div style="margin-top: auto; display: flex; gap: 8px;">
+            <a href="pages/users/users.html" class="btn btn-primary btn-sm" style="flex: 1; text-align: center;">User Admin</a>
+            <a href="pages/M4/dashboard.html" class="btn btn-secondary btn-sm">Analytics</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -28,9 +28,10 @@
         <item name="android:textColorPrimary">@color/text_dark_primary</item>
         <item name="android:textColorSecondary">@color/text_dark_secondary</item>
         
-        <!-- Glass Card Style -->
+        <!-- Glass Card & Navigation Styles -->
         <item name="materialCardViewStyle">@style/Widget.SmartMicrogrid.CardView.Glass</item>
         <item name="materialButtonStyle">@style/Widget.SmartMicrogrid.Button</item>
+        <item name="bottomNavigationStyle">@style/Widget.SmartMicrogrid.BottomNavigationView</item>
     </style>
 
     <style name="Widget.SmartMicrogrid.CardView.Glass" parent="Widget.Material3.CardView.Elevated">
@@ -39,5 +40,22 @@
         <item name="strokeWidth">1dp</item>
         <item name="cardElevation">1dp</item>
         <item name="cardCornerRadius">20dp</item>
+    </style>
+
+    <style name="Widget.SmartMicrogrid.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@drawable/bg_bottom_navigation</item>
+        <item name="elevation">12dp</item>
+        <item name="itemIconTint">@color/nav_item_tint_selector</item>
+        <item name="itemTextColor">@color/nav_item_tint_selector</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.SmartMicrogrid.BottomNavigationView.ActiveIndicator</item>
+        <item name="itemRippleColor">#263B82F6</item>
+        <item name="labelVisibilityMode">labeled</item>
+        <item name="itemIconSize">22dp</item>
+    </style>
+
+    <style name="Widget.SmartMicrogrid.BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">#263B82F6</item>
+        <item name="android:width">48dp</item>
+        <item name="android:height">32dp</item>
     </style>
 </resources>

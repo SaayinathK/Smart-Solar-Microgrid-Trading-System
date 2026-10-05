@@ -471,3 +471,119 @@ a:hover {
   font-weight: 600;
   color: var(--text-primary);
 }
+
+/* ==========================================================================
+   Micro-Animations & Modern Interactive Polish
+   ========================================================================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 6px rgba(37, 99, 235, 0);
+  }
+}
+
+@keyframes pulseEmerald {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-up {
+  animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.delay-1 { animation-delay: 0.08s; }
+.delay-2 { animation-delay: 0.16s; }
+.delay-3 { animation-delay: 0.24s; }
+.delay-4 { animation-delay: 0.32s; }
+
+/* Enhanced Interactive Cards with Smooth Lift */
+.card-interactive, .stat-card, .grid-card, .table-card {
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth) !important;
+}
+
+.card-interactive:hover, .stat-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08), 0 0 0 1px var(--accent-primary) !important;
+}
+
+[data-theme="dark"] .card-interactive:hover, [data-theme="dark"] .stat-card:hover {
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent-primary) !important;
+}
+
+.status-dot-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  animation: pulseEmerald 2s infinite;
+}
+
+/* Image Banner & Layout Utilities */
+.hero-image-banner {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  min-height: 180px;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 1.5rem;
+}
+
+.hero-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.6) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2rem 2.5rem;
+  color: #ffffff;
+}
+
+.hero-image-overlay h1, .hero-image-overlay h2 {
+  color: #ffffff !important;
+  margin: 0 0 0.4rem 0;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+}
+
+.hero-image-overlay p {
+  color: #cbd5e1 !important;
+  margin: 0;
+  font-size: 0.95rem;
+  max-width: 600px;
+}
