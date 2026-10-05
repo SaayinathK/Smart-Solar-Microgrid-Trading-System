@@ -68,13 +68,42 @@ class AdminUsersFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) = loadUsers(spinner.selectedItem?.toString())
         })
 
+        val chipGroup = view.findViewById<com.google.android.material.chip.ChipGroup>(R.id.m4_user_filter_chip_group)
+        chipGroup?.setOnCheckedStateChangeListener { _, checkedIds ->
+            val checkedId = checkedIds.firstOrNull() ?: R.id.chip_filter_all
+            val targetStatus = when (checkedId) {
+                R.id.chip_filter_pending -> "Pending"
+                R.id.chip_filter_active -> "Active"
+                R.id.chip_filter_inactive -> "Inactive"
+                R.id.chip_filter_suspended -> "Suspended"
+                else -> "All"
+            }
+            val targetIdx = statusOptions.indexOf(targetStatus)
+            if (targetIdx >= 0 && spinner.selectedItemPosition != targetIdx) {
+                spinner.setSelection(targetIdx)
+            }
+        }
+
         spinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: android.widget.AdapterView<*>?,
                 view: View?,
                 position: Int,
                 id: Long
-            ) = loadUsers(statusOptions[position])
+            ) {
+                val status = statusOptions[position]
+                val chipId = when (status) {
+                    "Pending" -> R.id.chip_filter_pending
+                    "Active" -> R.id.chip_filter_active
+                    "Inactive" -> R.id.chip_filter_inactive
+                    "Suspended" -> R.id.chip_filter_suspended
+                    else -> R.id.chip_filter_all
+                }
+                if (chipGroup?.checkedChipId != chipId) {
+                    chipGroup?.check(chipId)
+                }
+                loadUsers(status)
+            }
 
             override fun onNothingSelected(parent: android.widget.AdapterView<*>?) = Unit
         }

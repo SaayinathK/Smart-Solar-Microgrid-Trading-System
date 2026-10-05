@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: UserAccountStatusTests.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -450,6 +450,74 @@ namespace SmartMicrogrid.API.Tests
             Assert.True(result.Success);
             Assert.Equal("Pending", result.Data!.AccountStatus);
             Assert.False(result.Data.IsActive);
+        }
+
+        /// <summary>
+        /// Verifies that DeactivateSelfAsync deactivates account, sets Inactive, and records audit log.
+        /// </summary>
+        [Fact]
+        public async Task DeactivateSelfAsync_ValidUser_SetsInactiveAndAudits()
+        {
+            var user = new User
+            {
+                Id = "u7",
+                Email = "prosumer@smartmicrogrid.lk",
+                FirstName = "Kasun",
+                LastName = "Silva",
+                Role = Role.Prosumer,
+                IsActive = true,
+                AccountStatus = AccountStatus.Active
+            };
+            GivenUser(user);
+
+            var result = await _service.DeactivateSelfAsync("u7", "No longer using solar panels");
+
+            Assert.True(result.Success);
+            Assert.False(result.Data!.IsActive);
+            Assert.Equal("Inactive", result.Data.AccountStatus);
+            Assert.False(user.IsActive);
+            Assert.Equal(AccountStatus.Inactive, user.AccountStatus);
+            Assert.Equal("Kasun Silva (Self)", user.StatusChangedBy);
+            _users.Verify(x => x.UpdateAsync(user), Times.Once);
+            _audit.Verify(x => x.RecordAsync(
+                AuditAction.UserDeactivated,
+                AuditModule.UserManagement,
+                It.Is<string>(d => d.Contains("prosumer@smartmicrogrid.lk") && d.Contains("No longer using solar panels")),
+                "u7",
+                "Kasun Silva",
+                "Prosumer",
+                "User",
+                "u7",
+                It.IsAny<string?>(),
+                It.IsAny<string>()), Times.Once);
+        }
+
+        /// <summary>
+        /// Verifies that DeactivateSelfAsync fails when the last active admin attempts to deactivate their own account.
+        /// </summary>
+        [Fact]
+        public async Task DeactivateSelfAsync_LastAdmin_ReturnsFailure()
+        {
+            var admin = new User
+            {
+                Id = "admin1",
+                Email = "admin@smartmicrogrid.lk",
+                FirstName = "Admin",
+                LastName = "User",
+                Role = Role.Admin,
+                IsActive = true,
+                AccountStatus = AccountStatus.Active
+            };
+            GivenUser(admin);
+            _users.Setup(x => x.GetAllAsync(null, Role.Admin, true, null))
+                .ReturnsAsync(new List<User> { admin });
+
+            var result = await _service.DeactivateSelfAsync("admin1");
+
+            Assert.False(result.Success);
+            Assert.Contains("cannot be deactivated", result.Message);
+            Assert.True(admin.IsActive);
+            _users.Verify(x => x.UpdateAsync(admin), Times.Never);
         }
     }
 }

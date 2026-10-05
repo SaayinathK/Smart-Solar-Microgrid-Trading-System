@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: UserController.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -80,6 +80,43 @@ namespace SmartMicrogrid.API.Controllers
 
             return Ok(result);
         }
+
+        /// <summary>
+        /// Self-service account operations (Prosumer and authenticated users)
+        /// </summary>
+
+        /// <summary>
+        /// Request and execute self-service account deactivation (Prosumer deactivation flow).
+        /// </summary>
+        [HttpPost("me/deactivate")]
+        public async Task<IActionResult> DeactivateSelf([FromBody] DeactivateRequestDto? dto)
+        {
+            // Execute self-deactivation operations
+            var userId = GetCurrentUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(ApiResponse<object>.FailureResponse("Invalid authorization context."));
+            }
+
+            var result = await _userService.DeactivateSelfAsync(userId, dto?.Reason);
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Request deactivation endpoint alias.
+        /// </summary>
+        [HttpPost("me/request-deactivation")]
+        public async Task<IActionResult> RequestDeactivationSelf([FromBody] DeactivateRequestDto? dto)
+        {
+            // Execute request deactivation alias operations
+            return await DeactivateSelf(dto);
+        }
+
 
         /// <summary>
         /// Get all users (Admin only)

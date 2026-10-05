@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: AuthService.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -74,7 +74,8 @@ namespace SmartMicrogrid.API.Services.Implementation
                 Nic = nic,
                 PasswordHash = PasswordHelper.HashPassword(dto.Password),
                 Role = dto.Role,
-                IsActive = true,
+                IsActive = false,
+                AccountStatus = AccountStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -82,7 +83,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             var createdUser = await _userRepository.CreateAsync(user);
 
             var userResponse = MapToUserResponseDto(createdUser);
-            return ApiResponse<UserResponseDto>.SuccessResponse(userResponse, $"{user.Role} registration successful.");
+            return ApiResponse<UserResponseDto>.SuccessResponse(userResponse, $"{user.Role} registration successful. Your account is pending activation by a Backoffice administrator.");
         }
         /// <summary>
         /// Performs login async operation.
@@ -126,6 +127,17 @@ namespace SmartMicrogrid.API.Services.Implementation
                     entityType: nameof(User),
                     entityId: user.Id,
                     status: AuditStatus.Failure);
+
+                var resolvedStatus = M4.DashboardService.ResolveStatus(user);
+                if (resolvedStatus == AccountStatus.Pending)
+                {
+                    return ApiResponse<LoginResponseDto>.FailureResponse("Your account is pending activation by a Backoffice administrator. Please wait for approval before logging in.");
+                }
+
+                if (resolvedStatus == AccountStatus.Suspended)
+                {
+                    return ApiResponse<LoginResponseDto>.FailureResponse("Your account has been suspended by an administrator. Please contact support.");
+                }
 
                 return ApiResponse<LoginResponseDto>.FailureResponse("Your account has been deactivated. Deactivated accounts can only be reactivated by a Backoffice officer.");
             }

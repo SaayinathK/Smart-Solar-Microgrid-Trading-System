@@ -215,7 +215,7 @@
         });
 
         if (response.success) {
-          ApiClient.showToast('Registration successful! Please sign in.', 'success');
+          ApiClient.showToast(response.message || 'Registration successful! Your account is pending activation by an administrator.', 'success');
           setTimeout(() => { window.location.href = 'login.html'; }, 1200);
         } else {
           showError(response.message || 'Registration failed.');

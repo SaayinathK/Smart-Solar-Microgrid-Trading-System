@@ -27,6 +27,56 @@
             android:imeOptions="actionSearch" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:scrollbars="none">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/m4_user_filter_chip_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_filter_all"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="All Accounts" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_filter_pending"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⏳ Pending Activations" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_filter_active"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Active" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_filter_inactive"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Inactive" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_filter_suspended"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Suspended" />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
+
     <Spinner
         android:id="@+id/m4_user_status_filter"
         android:layout_width="match_parent"

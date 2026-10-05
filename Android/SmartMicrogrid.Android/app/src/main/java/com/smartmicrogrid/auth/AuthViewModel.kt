@@ -74,6 +74,18 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    // ── Deactivate State ──
+    private val _deactivateResult = MutableLiveData<Result<User>?>()
+    val deactivateResult: LiveData<Result<User>?> = _deactivateResult
+
+    fun deactivateAccount(reason: String? = null) {
+        _isLoading.value = true
+        viewModelScope.launch {
+            _deactivateResult.value = repository.deactivateAccount(reason)
+            _isLoading.value = false
+        }
+    }
+
     fun logout() {
         repository.logout()
     }

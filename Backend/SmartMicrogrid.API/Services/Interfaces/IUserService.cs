@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: IUserService.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -45,6 +45,10 @@ namespace SmartMicrogrid.API.Services.Interfaces
         /// Updates the specified role async record.
         /// </summary>
         Task<ApiResponse<UserResponseDto>> UpdateRoleAsync(string id, Role newRole);
+        /// <summary>
+        /// Deactivates own user account (self-service deactivation for Prosumer/User).
+        /// </summary>
+        Task<ApiResponse<UserResponseDto>> DeactivateSelfAsync(string userId, string? reason = null);
         /// <summary>
         /// Deletes or removes the designated user async record.
         /// </summary>

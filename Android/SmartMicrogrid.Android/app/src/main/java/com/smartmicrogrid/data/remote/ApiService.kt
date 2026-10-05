@@ -178,6 +178,16 @@ interface ApiService {
         @Body request: UpdateProfileRequest
     ): Response<ApiResponse<User>>
 
+    @POST("users/me/deactivate")
+    suspend fun deactivateAccount(
+        @Body request: Map<String, String> = emptyMap()
+    ): Response<ApiResponse<User>>
+
+    @POST("users/me/request-deactivation")
+    suspend fun requestDeactivation(
+        @Body request: Map<String, String> = emptyMap()
+    ): Response<ApiResponse<User>>
+
     // ── M4 Platform Administration Endpoints (Admin only) ──
 
     @GET("admin/dashboard")

@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: UserService.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -271,6 +271,60 @@ namespace SmartMicrogrid.API.Services.Implementation
         /// is currently active, i.e. the platform still has a backoffice officer
         /// if <paramref name="excludedUserId"/> is stood down.
         /// </summary>
+        /// <summary>
+        /// Deactivates the authenticated user's own account (self-service Prosumer deactivation).
+        /// </summary>
+        public async Task<ApiResponse<UserResponseDto>> DeactivateSelfAsync(string userId, string? reason = null)
+        {
+            // Execute self-deactivation async operations
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return ApiResponse<UserResponseDto>.FailureResponse("User not found.");
+            }
+
+            var previousStatus = M4.DashboardService.ResolveStatus(user);
+            if (previousStatus == AccountStatus.Inactive)
+            {
+                return ApiResponse<UserResponseDto>.SuccessResponse(
+                    MapToUserResponseDto(user),
+                    "Your account is already deactivated.");
+            }
+
+            // Suspending or deactivating the last remaining active Admin is refused
+            if (user.Role == Role.Admin && !await HasOtherActiveAdminAsync(user.Id))
+            {
+                return ApiResponse<UserResponseDto>.FailureResponse(
+                    "The last active Backoffice officer account cannot be deactivated.");
+            }
+
+            user.IsActive = false;
+            user.AccountStatus = AccountStatus.Inactive;
+            user.StatusChangedAt = DateTime.UtcNow;
+            user.StatusChangedBy = $"{user.FirstName} {user.LastName} (Self)";
+            user.UpdatedAt = DateTime.UtcNow;
+
+            var updated = await _userRepository.UpdateAsync(user);
+            if (!updated)
+            {
+                return ApiResponse<UserResponseDto>.FailureResponse("Failed to deactivate account.");
+            }
+
+            await _auditService.RecordAsync(
+                AuditAction.UserDeactivated,
+                AuditModule.UserManagement,
+                $"User {user.Email} ({user.FirstName} {user.LastName}) requested and confirmed account deactivation. Reason: {reason ?? "Self-service deactivation"}",
+                userId: user.Id,
+                userName: $"{user.FirstName} {user.LastName}",
+                role: user.Role.ToString(),
+                entityType: nameof(User),
+                entityId: user.Id);
+
+            return ApiResponse<UserResponseDto>.SuccessResponse(
+                MapToUserResponseDto(user),
+                "Your account has been deactivated successfully. You can contact an administrator if you wish to reactivate in the future.");
+        }
+
         private async Task<bool> HasOtherActiveAdminAsync(string excludedUserId)
         {
             // Execute has other active admin async operations
