@@ -27,6 +27,10 @@ const UserApi = {
     return ApiClient.get(`/users/${id}`);
   },
 
+  getUserByNic(nic) {
+    return ApiClient.get(`/users/nic/${encodeURIComponent(nic)}`);
+  },
+
   createUser(userData) {
     return ApiClient.post('/users', userData);
   },

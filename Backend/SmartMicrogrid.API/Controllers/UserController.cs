@@ -141,15 +141,46 @@ namespace SmartMicrogrid.API.Controllers
             var currentUserRole = GetCurrentUserRole();
 
             // Only Admin or the user themselves can view user details
-            if (currentUserRole != "Admin" && currentUserId != id)
+            var userRes = await _userService.GetUserByIdAsync(id);
+            if (!userRes.Success)
+            {
+                return NotFound(userRes);
+            }
+
+            if (currentUserRole != "Admin" && currentUserId != userRes.Data!.Id && currentUserId != userRes.Data!.Nic)
             {
                 return StatusCode(StatusCodes.Status403Forbidden, ApiResponse<object>.FailureResponse("Forbidden: You do not have permission to access another user's details."));
             }
 
-            var result = await _userService.GetUserByIdAsync(id);
+
+
+
+
+
+
+            return Ok(userRes);
+        }
+
+        /// <summary>
+        /// Get prosumer profile by National Identity Card (NIC natural primary key)
+        /// </summary>
+        [HttpGet("nic/{nic}")]
+        public async Task<IActionResult> GetUserByNic(string nic)
+        {
+            // Execute get user by nic operations
+            var currentUserId = GetCurrentUserId();
+            var currentUserRole = GetCurrentUserRole();
+
+            var result = await _userService.GetUserByNicAsync(nic);
             if (!result.Success)
             {
                 return NotFound(result);
+            }
+
+            // Only Admin or the user themselves can view user details
+            if (currentUserRole != "Admin" && currentUserId != result.Data!.Id && currentUserId != result.Data!.Nic)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, ApiResponse<object>.FailureResponse("Forbidden: You do not have permission to access another user's details."));
             }
 
             return Ok(result);

@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: MongoDbContext.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -49,8 +49,8 @@ namespace SmartMicrogrid.API.Data
                     }));
 
                 // Index on Nic for Users collection
-                var userNicIndexKeys = Builders<User>.IndexKeys.Ascending(u => u.Nic);
-                Users.Indexes.CreateOne(new CreateIndexModel<User>(userNicIndexKeys));
+
+                // Note: Prosumer NIC uniqueness is enforced above via ux_users_nic_sparse.
 
                 // Indexes for Microgrids collection
                 Microgrids.Indexes.CreateOne(new CreateIndexModel<MicrogridNode>(

@@ -22,6 +22,10 @@ namespace SmartMicrogrid.API.Services.Interfaces
         /// </summary>
         Task<ApiResponse<UserResponseDto>> GetUserByIdAsync(string id);
         /// <summary>
+        /// Retrieves prosumer user details by National Identity Card (NIC natural primary key).
+        /// </summary>
+        Task<ApiResponse<UserResponseDto>> GetUserByNicAsync(string nic);
+        /// <summary>
         /// Creates or registers a new user async record.
         /// </summary>
         Task<ApiResponse<UserResponseDto>> CreateUserAsync(CreateUserDto dto);

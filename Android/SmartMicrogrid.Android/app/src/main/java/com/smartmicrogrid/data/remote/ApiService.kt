@@ -178,6 +178,16 @@ interface ApiService {
         @Body request: UpdateProfileRequest
     ): Response<ApiResponse<User>>
 
+    @GET("users/nic/{nic}")
+    suspend fun getUserByNic(
+        @Path("nic") nic: String
+    ): Response<ApiResponse<User>>
+
+    @GET("users/{idOrNic}")
+    suspend fun getUserById(
+        @Path("idOrNic") idOrNic: String
+    ): Response<ApiResponse<User>>
+
     @POST("users/me/deactivate")
     suspend fun deactivateAccount(
         @Body request: Map<String, String> = emptyMap()

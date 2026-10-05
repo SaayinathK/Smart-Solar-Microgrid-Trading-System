@@ -56,6 +56,26 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return ApiResponse<UserResponseDto>.SuccessResponse(MapToUserResponseDto(user));
         }
+
+        /// <summary>
+        /// Retrieves prosumer user details by National Identity Card (NIC natural primary key).
+        /// </summary>
+        public async Task<ApiResponse<UserResponseDto>> GetUserByNicAsync(string nic)
+        {
+            // Execute get user by nic async operations
+            if (string.IsNullOrWhiteSpace(nic))
+            {
+                return ApiResponse<UserResponseDto>.FailureResponse("National Identity Card (NIC) is required.");
+            }
+
+            var user = await _userRepository.GetByNicAsync(nic);
+            if (user == null)
+            {
+                return ApiResponse<UserResponseDto>.FailureResponse($"User with National Identity Card (NIC) '{nic.Trim().ToUpper()}' not found.");
+            }
+
+            return ApiResponse<UserResponseDto>.SuccessResponse(MapToUserResponseDto(user));
+        }
         /// <summary>
         /// Creates or registers a new user async record.
         /// </summary>

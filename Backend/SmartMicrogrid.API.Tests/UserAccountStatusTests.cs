@@ -519,5 +519,42 @@ namespace SmartMicrogrid.API.Tests
             Assert.True(admin.IsActive);
             _users.Verify(x => x.UpdateAsync(admin), Times.Never);
         }
+
+        /// <summary>
+        /// Verifies that GetUserByNicAsync retrieves prosumer by NIC natural key.
+        /// </summary>
+        [Fact]
+        public async Task GetUserByNicAsync_ExistingNic_ReturnsUser()
+        {
+            var user = new User
+            {
+                Id = "u8",
+                Nic = "200012345678",
+                Email = "prosumer_nic@smartmicrogrid.lk",
+                Role = Role.Prosumer,
+                IsActive = true
+            };
+            _users.Setup(x => x.GetByNicAsync("200012345678")).ReturnsAsync(user);
+
+            var result = await _service.GetUserByNicAsync("200012345678");
+
+            Assert.True(result.Success);
+            Assert.Equal("200012345678", result.Data!.Nic);
+            Assert.Equal("u8", result.Data.Id);
+        }
+
+        /// <summary>
+        /// Verifies that GetUserByNicAsync fails when NIC is not found.
+        /// </summary>
+        [Fact]
+        public async Task GetUserByNicAsync_NonExistingNic_ReturnsFailure()
+        {
+            _users.Setup(x => x.GetByNicAsync("NONEXISTENT")).ReturnsAsync((User?)null);
+
+            var result = await _service.GetUserByNicAsync("NONEXISTENT");
+
+            Assert.False(result.Success);
+            Assert.Contains("not found", result.Message);
+        }
     }
 }

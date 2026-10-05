@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: UserRepository.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -91,9 +91,10 @@ namespace SmartMicrogrid.API.Repositories.Implementation
         {
             // Execute get by id async operations
             if (!ObjectId.TryParse(id, out _))
-                return null;
+                return await GetByNicAsync(id);
 
-            return await _context.Users.Find(u => u.Id == id).FirstOrDefaultAsync();
+            var user = await _context.Users.Find(u => u.Id == id).FirstOrDefaultAsync();
+            return user ?? await GetByNicAsync(id);
         }
         /// <summary>
         /// Retrieves by email async details.
