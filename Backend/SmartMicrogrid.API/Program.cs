@@ -183,6 +183,10 @@ using (var scope = app.Services.CreateScope())
     }
 
     await DbSeeder.SeedDefaultUsersAsync(mongoContext);
+
+    // Demonstration data for the modules the base seeder does not cover:
+    // M3 transactions and the M4 lifecycle/audit views.
+    await SampleDataSeeder.SeedAsync(mongoContext);
 }
 
 // Global Exception Handler Middleware
