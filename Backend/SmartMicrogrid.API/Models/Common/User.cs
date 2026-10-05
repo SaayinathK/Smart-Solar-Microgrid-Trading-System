@@ -1,3 +1,11 @@
+// ===========================================================================================================
+// File: User.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Domain entity model representing User in the database.
+// ===========================================================================================================
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -21,6 +29,13 @@ namespace SmartMicrogrid.API.Models.Common
         [BsonElement("phoneNumber")]
         public string PhoneNumber { get; set; } = string.Empty;
 
+        /// <summary>
+        /// National Identity Card (NIC).
+        /// Serves as the Natural Primary Key / Candidate Key for Prosumers per project specification.
+        /// Mandatory for all Prosumer accounts, enforced by registration and creation validators.
+        /// Uniqueness is strictly enforced at database engine level via unique sparse index ux_users_nic_sparse.
+        /// Cross-module domain models (M2 Reservations, M3 Transactions) reference Prosumers via this NIC.
+        /// </summary>
         [BsonElement("nic")]
         public string? Nic { get; set; }
 

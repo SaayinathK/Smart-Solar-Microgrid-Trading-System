@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: M4Mappings.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Defines M4Mappings components for the Smart Microgrid system.
+// ===========================================================================================================
 using System;
 using SmartMicrogrid.API.DTOs.M4;
 using SmartMicrogrid.API.Models.Common;
@@ -7,6 +15,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
 {
     public static class ActivityMapper
     {
+        /// <summary>
+        /// Performs to dto operation.
+        /// </summary>
         public static SystemActivityDto ToDto(SystemActivity activity) => new()
         {
             Id = activity.Id,
@@ -26,6 +37,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
 
     public static class RoleDescriptions
     {
+        /// <summary>
+        /// Performs describe operation.
+        /// </summary>
         public static string Describe(Role role) => role switch
         {
             Role.Admin =>

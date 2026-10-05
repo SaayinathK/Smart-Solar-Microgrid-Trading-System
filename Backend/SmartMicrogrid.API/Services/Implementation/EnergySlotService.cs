@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: EnergySlotService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Business logic service implementing EnergySlotService operations, rules, and workflows.
+// ===========================================================================================================
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,32 +22,48 @@ namespace SmartMicrogrid.API.Services.Implementation
     {
         private readonly IEnergySlotRepository _slotRepository;
         private readonly IMicrogridRepository _microgridRepository;
+        /// <summary>
+        /// Initializes a new instance of the EnergySlotService class.
+        /// </summary>
 
         public EnergySlotService(IEnergySlotRepository slotRepository, IMicrogridRepository microgridRepository)
         {
+            // Initialize dependencies and state
             _slotRepository = slotRepository;
             _microgridRepository = microgridRepository;
         }
+        /// <summary>
+        /// Retrieves all async details.
+        /// </summary>
 
         public async Task<IEnumerable<EnergySlotResponseDto>> GetAllAsync(string? microgridId = null, string? status = null, DateTime? startTime = null, DateTime? endTime = null, double? minEnergy = null)
         {
+            // Execute get all async operations
             var slots = await _slotRepository.GetAllAsync(microgridId, status, startTime, endTime, minEnergy);
             var microgridDict = await GetMicrogridDictionaryAsync(slots.Select(s => s.MicrogridNodeId));
 
             return slots.Select(s => MapToResponseDto(s, microgridDict.GetValueOrDefault(s.MicrogridNodeId)));
         }
+        /// <summary>
+        /// Retrieves by id async details.
+        /// </summary>
 
         public async Task<EnergySlotResponseDto?> GetByIdAsync(string id)
         {
+            // Execute get by id async operations
             var slot = await _slotRepository.GetByIdAsync(id);
             if (slot == null) return null;
 
             var microgrid = await _microgridRepository.GetByIdAsync(slot.MicrogridNodeId);
             return MapToResponseDto(slot, microgrid);
         }
+        /// <summary>
+        /// Creates or registers a new async record.
+        /// </summary>
 
         public async Task<EnergySlotResponseDto> CreateAsync(CreateEnergySlotDto dto, string createdBy)
         {
+            // Execute create async operations
             var microgrid = await _microgridRepository.GetByIdAsync(dto.MicrogridNodeId);
             var (isValid, errorMessage) = EnergySlotValidator.ValidateCreateSlot(dto, microgrid);
             if (!isValid)
@@ -76,9 +100,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return MapToResponseDto(created, microgrid);
         }
+        /// <summary>
+        /// Updates the specified async record.
+        /// </summary>
 
         public async Task<EnergySlotResponseDto?> UpdateAsync(string id, UpdateEnergySlotDto dto)
         {
+            // Execute update async operations
             var existing = await _slotRepository.GetByIdAsync(id);
             if (existing == null) return null;
 
@@ -100,14 +128,22 @@ namespace SmartMicrogrid.API.Services.Implementation
             var success = await _slotRepository.UpdateAsync(id, existing);
             return success ? MapToResponseDto(existing, microgrid) : null;
         }
+        /// <summary>
+        /// Deletes or removes the designated async record.
+        /// </summary>
 
         public async Task<bool> DeleteAsync(string id)
         {
+            // Execute delete async operations
             return await _slotRepository.DeleteAsync(id);
         }
+        /// <summary>
+        /// Updates the specified status async record.
+        /// </summary>
 
         public async Task<bool> UpdateStatusAsync(string id, string status)
         {
+            // Execute update status async operations
             var validStatuses = new[] { "Available", "PartiallyReserved", "FullyReserved", "Expired", "Cancelled" };
             if (!validStatuses.Contains(status, StringComparer.OrdinalIgnoreCase))
             {
@@ -116,9 +152,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return await _slotRepository.UpdateStatusAsync(id, status);
         }
+        /// <summary>
+        /// Retrieves energy availability async details.
+        /// </summary>
 
         public async Task<IEnumerable<EnergyAvailabilityResponseDto>> GetEnergyAvailabilityAsync(EnergyAvailabilityQueryDto query)
         {
+            // Execute get energy availability async operations
             var slots = await _slotRepository.GetAllAsync(
                 query.MicrogridId,
                 query.Status ?? "Available",
@@ -167,9 +207,13 @@ namespace SmartMicrogrid.API.Services.Implementation
                 };
             });
         }
+        /// <summary>
+        /// Retrieves microgrid dictionary async details.
+        /// </summary>
 
         private async Task<Dictionary<string, MicrogridNode>> GetMicrogridDictionaryAsync(IEnumerable<string> microgridIds)
         {
+            // Execute get microgrid dictionary async operations
             var distinctIds = microgridIds.Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
             var result = new Dictionary<string, MicrogridNode>();
 
@@ -184,9 +228,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return result;
         }
+        /// <summary>
+        /// Performs map to response dto operation.
+        /// </summary>
 
         private static EnergySlotResponseDto MapToResponseDto(EnergySlot slot, MicrogridNode? microgrid)
         {
+            // Execute map to response dto operations
             return new EnergySlotResponseDto
             {
                 Id = slot.Id ?? string.Empty,

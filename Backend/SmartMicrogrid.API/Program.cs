@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: Program.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Application entry point, service registrations, dependency injection, and HTTP middleware pipeline.
+// ===========================================================================================================
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -174,19 +182,15 @@ using (var scope = app.Services.CreateScope())
     // Drop and reseed if --reseed flag is passed
     if (args.Contains("--reseed"))
     {
-        Console.WriteLine("🔄 --reseed flag detected. Dropping SmartMicrogridDB...");
-        var client = new MongoDB.Driver.MongoClient(
-            builder.Configuration.GetSection("MongoDB")["ConnectionString"] ?? "mongodb://localhost:27017");
-        client.DropDatabase(
-            builder.Configuration.GetSection("MongoDB")["DatabaseName"] ?? "SmartMicrogridDB");
-        Console.WriteLine("✅ Database dropped. Re-seeding...");
+        Console.WriteLine("🔄 --reseed flag detected. Dropping SmartMicrogridDB and reseeding all models...");
+        await DbSeeder.ReseedAllAsync(mongoContext);
+        Console.WriteLine("✅ Database dropped and cleanly reseeded with all models.");
     }
-
-    await DbSeeder.SeedDefaultUsersAsync(mongoContext);
-
-    // Demonstration data for the modules the base seeder does not cover:
-    // M3 transactions and the M4 lifecycle/audit views.
-    await SampleDataSeeder.SeedAsync(mongoContext);
+    else
+    {
+        await DbSeeder.SeedDefaultUsersAsync(mongoContext);
+        await SampleDataSeeder.SeedAsync(mongoContext);
+    }
 }
 
 // Global Exception Handler Middleware

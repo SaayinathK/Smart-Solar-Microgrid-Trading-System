@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: Reservation.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M2 – Marketplace & Reservation Management
+// Section Owned: M2 – Marketplace & Reservation Management
+// Author: J. Shathursini (IT23164062)
+// Description: Domain entity model representing Reservation in the database.
+// ===========================================================================================================
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -7,8 +15,25 @@ public class Reservation
 {
     [BsonId, BsonRepresentation(BsonType.ObjectId)] public string? Id { get; set; }
     [BsonElement("prosumerId")] public string ProsumerId { get; set; } = string.Empty;
-    [BsonElement("microgridNodeId"), BsonRepresentation(BsonType.ObjectId)] public string MicrogridNodeId { get; set; } = string.Empty;
-    [BsonElement("energySlotId"), BsonRepresentation(BsonType.ObjectId)] public string EnergySlotId { get; set; } = string.Empty;
+    private string _microgridNodeId = ObjectId.GenerateNewId().ToString();
+    [BsonElement("microgridNodeId"), BsonRepresentation(BsonType.ObjectId)]
+    public string MicrogridNodeId
+    {
+        get => _microgridNodeId;
+        set => _microgridNodeId = string.IsNullOrWhiteSpace(value) || !ObjectId.TryParse(value, out _)
+            ? ObjectId.GenerateNewId().ToString()
+            : value;
+    }
+
+    private string _energySlotId = ObjectId.GenerateNewId().ToString();
+    [BsonElement("energySlotId"), BsonRepresentation(BsonType.ObjectId)]
+    public string EnergySlotId
+    {
+        get => _energySlotId;
+        set => _energySlotId = string.IsNullOrWhiteSpace(value) || !ObjectId.TryParse(value, out _)
+            ? ObjectId.GenerateNewId().ToString()
+            : value;
+    }
     [BsonElement("energyAmount")] public double EnergyAmount { get; set; }
     [BsonElement("reservationDate")] public DateTime ReservationDate { get; set; }
     [BsonElement("startTime")] public DateTime StartTime { get; set; }

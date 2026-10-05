@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: ActivityDto.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Data transfer object (DTO) representing ActivityDto communication payload.
+// ===========================================================================================================
 using System;
 using System.Collections.Generic;
 

@@ -90,3 +90,15 @@ interface AdminActivityDao {
         insertAll(rows)
     }
 }
+
+@Dao
+interface UserSessionDao {
+    @Query("SELECT * FROM room_user_session ORDER BY id DESC LIMIT 1")
+    suspend fun getActiveSession(): UserSessionEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(session: UserSessionEntity)
+
+    @Query("DELETE FROM room_user_session")
+    suspend fun clear()
+}

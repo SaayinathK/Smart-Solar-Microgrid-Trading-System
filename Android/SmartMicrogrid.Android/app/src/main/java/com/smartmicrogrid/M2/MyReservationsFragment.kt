@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -218,20 +219,176 @@ ${ReservationTime.display(row.startTime)} to ${ReservationTime.display(row.endTi
             }.show()
     }
     private fun modify(row: Reservation) {
-        val input = android.widget.EditText(requireContext()).apply { inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL; setText(row.energyAmount.toString()) }
-        AlertDialog.Builder(requireContext()).setTitle("Modify energy amount").setMessage("Changes are allowed at least 12 hours before delivery.").setView(input)
-            .setNegativeButton("Back", null).setPositiveButton("Review") { _, _ ->
-                val amount = input.text.toString().toDoubleOrNull()
-                if (amount == null || amount <= 0) { Toast.makeText(requireContext(), "Enter an amount above zero", Toast.LENGTH_LONG).show(); return@setPositiveButton }
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        val response = RetrofitClient.apiService.updateReservation(row.id, com.smartmicrogrid.models.CreateReservationRequest(row.energySlotId, amount))
-                        if (!response.isSuccessful || response.body()?.success != true) throw Exception(response.body()?.message ?: "Update failed")
-                        AlertDialog.Builder(requireContext()).setTitle("Reservation summary").setMessage("Updated request\n$amount kWh\n${ReservationTime.display(row.startTime)}\nStatus: ${row.status}").setPositiveButton("Done", null).show(); refresh()
-                    } catch (e: Exception) { Toast.makeText(requireContext(), e.message ?: "Unable to update reservation", Toast.LENGTH_LONG).show() }
+        val dialogView = LayoutInflater.from(requireContext()).inflate(com.smartmicrogrid.R.layout.dialog_modify_reservation, null)
+        val tvCurrentSlot = dialogView.findViewById<android.widget.TextView>(com.smartmicrogrid.R.id.tv_current_slot_info)
+        val tvCurrentTime = dialogView.findViewById<android.widget.TextView>(com.smartmicrogrid.R.id.tv_current_time_info)
+        val tvCurrentAmount = dialogView.findViewById<android.widget.TextView>(com.smartmicrogrid.R.id.tv_current_amount_info)
+        val etAmount = dialogView.findViewById<android.widget.EditText>(com.smartmicrogrid.R.id.et_modify_energy_amount)
+        val spinnerSlots = dialogView.findViewById<android.widget.Spinner>(com.smartmicrogrid.R.id.spinner_modify_slot)
+        val tvSlotHint = dialogView.findViewById<android.widget.TextView>(com.smartmicrogrid.R.id.tv_slot_status_hint)
+        val tvSelectedTime = dialogView.findViewById<android.widget.TextView>(com.smartmicrogrid.R.id.tv_selected_start_time)
+        val btnPickTime = dialogView.findViewById<View>(com.smartmicrogrid.R.id.btn_pick_time)
+        val tvCostEstimate = dialogView.findViewById<android.widget.TextView>(com.smartmicrogrid.R.id.tv_estimated_cost)
+        val btnCancel = dialogView.findViewById<android.widget.Button>(com.smartmicrogrid.R.id.btn_dialog_cancel)
+        val btnSave = dialogView.findViewById<android.widget.Button>(com.smartmicrogrid.R.id.btn_dialog_save)
+
+        tvCurrentSlot.text = "Slot: ${row.energySlotId}"
+        tvCurrentTime.text = "Delivery: ${ReservationTime.display(row.startTime)}"
+        tvCurrentAmount.text = "Allocated: ${row.energyAmount} kWh"
+        etAmount.setText(row.energyAmount.toString())
+        tvSelectedTime.text = ReservationTime.display(row.startTime)
+
+        var selectedSlotId = row.energySlotId
+        var selectedStartTimeUtc: String? = null
+        var unitPrice = row.pricePerUnit
+
+        fun updateCost() {
+            val amt = etAmount.text.toString().toDoubleOrNull() ?: 0.0
+            val total = amt * unitPrice
+            tvCostEstimate.text = if (total > 0) "LKR %.2f".format(total) else "Market rate"
+        }
+        updateCost()
+        etAmount.addTextChangedListener(TextWatcherAdapter { updateCost() })
+
+        // Load available slots
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val slotsRes = RetrofitClient.apiService.getEnergySlots(microgridId = row.microgridNodeId, status = "Available")
+                val slotList = slotsRes.body()?.data.orEmpty()
+                val slots = if (slotList.isNotEmpty()) slotList else {
+                    val availRes = RetrofitClient.apiService.getEnergyAvailability()
+                    availRes.body()?.data.orEmpty().filter { it.microgridNodeId == row.microgridNodeId }.map { a ->
+                        com.smartmicrogrid.models.EnergySlot(
+                            id = a.energySlotId,
+                            microgridNodeId = a.microgridNodeId,
+                            microgridName = a.microgridName,
+                            location = a.location,
+                            energyAmount = a.energyAmount,
+                            availableAmount = a.availableAmount,
+                            startTime = a.startTime,
+                            endTime = a.endTime,
+                            pricePerUnit = a.pricePerUnit
+                        )
+                    }
                 }
-            }.show()
+
+                val options = mutableListOf<String>()
+                options.add("Keep Current Slot (${ReservationTime.display(row.startTime)})")
+
+                val alternateSlots = slots.filter { it.id != row.energySlotId }
+                alternateSlots.forEach { s ->
+                    options.add("${ReservationTime.display(s.startTime)} • ${s.availableAmount} kWh avail (LKR ${s.pricePerUnit}/kWh)")
+                }
+
+                val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, options)
+                spinnerSlots.adapter = spinnerAdapter
+
+                spinnerSlots.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+                    override fun onItemSelected(p0: android.widget.AdapterView<*>?, p1: View?, position: Int, id: Long) {
+                        if (position == 0) {
+                            selectedSlotId = row.energySlotId
+                            unitPrice = row.pricePerUnit
+                            if (selectedStartTimeUtc == null) {
+                                tvSelectedTime.text = ReservationTime.display(row.startTime)
+                            }
+                        } else {
+                            val chosen = alternateSlots[position - 1]
+                            selectedSlotId = chosen.id
+                            unitPrice = chosen.pricePerUnit
+                            selectedStartTimeUtc = chosen.startTime
+                            tvSelectedTime.text = ReservationTime.display(chosen.startTime)
+                        }
+                        updateCost()
+                    }
+                    override fun onNothingSelected(p0: android.widget.AdapterView<*>?) {}
+                }
+
+                if (alternateSlots.isNotEmpty()) {
+                    tvSlotHint.text = "${alternateSlots.size} alternate slot(s) available on this microgrid."
+                } else {
+                    tvSlotHint.text = "No alternate slots currently published for this microgrid."
+                }
+            } catch (e: Exception) {
+                tvSlotHint.text = "Using default slot options."
+            }
+        }
+
+        // Custom Time picker
+        btnPickTime.setOnClickListener {
+            val now = java.util.Calendar.getInstance()
+            android.app.DatePickerDialog(
+                requireContext(),
+                { _, year, month, day ->
+                    android.app.TimePickerDialog(
+                        requireContext(),
+                        { _, hour, minute ->
+                            val cal = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"))
+                            cal.set(year, month, day, hour, minute, 0)
+                            cal.set(java.util.Calendar.MILLISECOND, 0)
+                            val instant = cal.toInstant()
+                            selectedStartTimeUtc = instant.toString()
+                            tvSelectedTime.text = ReservationTime.display(selectedStartTimeUtc!!)
+                        },
+                        now.get(java.util.Calendar.HOUR_OF_DAY),
+                        now.get(java.util.Calendar.MINUTE),
+                        false
+                    ).show()
+                },
+                now.get(java.util.Calendar.YEAR),
+                now.get(java.util.Calendar.MONTH),
+                now.get(java.util.Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+
+        btnSave.setOnClickListener {
+            val amount = etAmount.text.toString().toDoubleOrNull()
+            if (amount == null || amount <= 0) {
+                Toast.makeText(requireContext(), "Enter an energy amount greater than zero.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            btnSave.isEnabled = false
+            btnSave.text = "Updating..."
+
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val req = com.smartmicrogrid.models.UpdateReservationRequest(
+                        energySlotId = selectedSlotId,
+                        energyAmount = amount,
+                        startTime = selectedStartTimeUtc
+                    )
+                    val response = RetrofitClient.apiService.updateReservation(row.id, req)
+                    if (!response.isSuccessful || response.body()?.success != true) {
+                        throw Exception(response.body()?.message ?: "Update failed")
+                    }
+
+                    dialog.dismiss()
+
+                    val updatedTime = selectedStartTimeUtc ?: row.startTime
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Reservation Updated")
+                        .setMessage("Your reservation has been modified:\n\n• Energy Amount: $amount kWh\n• Delivery Time: ${ReservationTime.display(updatedTime)}\n• Slot ID: $selectedSlotId\n\nStatus: ${row.status}")
+                        .setPositiveButton("Done", null)
+                        .show()
+
+                    refresh()
+                } catch (e: Exception) {
+                    btnSave.isEnabled = true
+                    btnSave.text = "Update Reservation"
+                    Toast.makeText(requireContext(), e.message ?: "Unable to update reservation", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
+        dialog.show()
     }
+
     override fun onDestroyView() { super.onDestroyView(); _binding = null }
 }
 

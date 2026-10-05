@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: MicrogridResponseDto.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Data transfer object (DTO) representing MicrogridResponseDto communication payload.
+// ===========================================================================================================
 using System;
 
 namespace SmartMicrogrid.API.DTOs.M1

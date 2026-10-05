@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: DashboardService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Business logic service implementing DashboardService operations, rules, and workflows.
+// ===========================================================================================================
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +28,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
         private readonly IReservationMonitorService _reservationMonitor;
         private readonly ITransactionMonitorService _transactionMonitor;
         private readonly ISystemHealthService _healthService;
+        /// <summary>
+        /// Initializes a new instance of the DashboardService class.
+        /// </summary>
 
         public DashboardService(
             IUserRepository userRepository,
@@ -30,6 +41,7 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
             ITransactionMonitorService transactionMonitor,
             ISystemHealthService healthService)
         {
+            // Initialize dependencies and state
             _userRepository = userRepository;
             _activityRepository = activityRepository;
             _configurationRepository = configurationRepository;
@@ -38,9 +50,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
             _transactionMonitor = transactionMonitor;
             _healthService = healthService;
         }
+        /// <summary>
+        /// Performs build async operation.
+        /// </summary>
 
         public async Task<AdminDashboardDto> BuildAsync()
         {
+            // Execute build async operations
             var configuration = await _configurationRepository.GetOrCreateAsync();
 
             // M1/M2/M3 are optional inputs. Gather them in parallel and let each one
@@ -110,6 +126,7 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
         /// </summary>
         private static async Task<T> SafeAsync<T>(Func<Task<T>> fetch, Func<T> fallback)
         {
+            // Execute safe async operations
             try
             {
                 return await fetch();
@@ -119,6 +136,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 return fallback();
             }
         }
+        /// <summary>
+        /// Performs safe stat async operation.
+        /// </summary>
 
         private static Task<ComponentStatDto> SafeStatAsync(Func<Task<ComponentStatDto>> fetch, string component) =>
             SafeAsync(fetch, () => new ComponentStatDto
@@ -126,6 +146,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 Status = DataSourceStatus.Unavailable,
                 Note = $"{component} data is not reachable."
             });
+        /// <summary>
+        /// Performs unavailable health operation.
+        /// </summary>
 
         private static SystemHealthDto UnavailableHealth() => new()
         {
@@ -135,6 +158,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
             Server = "Online",
             ServerTime = DateTime.UtcNow
         };
+        /// <summary>
+        /// Performs build user summary operation.
+        /// </summary>
 
         private static DashboardSummaryDto BuildUserSummary(List<User> users) => new()
         {
@@ -144,6 +170,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
             SuspendedUsers = users.Count(u => ResolveStatus(u) == AccountStatus.Suspended),
             PendingUsers = users.Count(u => ResolveStatus(u) == AccountStatus.Pending)
         };
+        /// <summary>
+        /// Performs build role distribution operation.
+        /// </summary>
 
         private static List<RoleDistributionDto> BuildRoleDistribution(List<User> users) =>
             Enum.GetValues<Role>()
@@ -163,6 +192,7 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
         /// </summary>
         internal static AccountStatus ResolveStatus(User user)
         {
+            // Execute resolve status operations
             if (user.AccountStatus != AccountStatus.Active)
                 return user.AccountStatus;
 

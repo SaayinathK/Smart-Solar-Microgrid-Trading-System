@@ -11,12 +11,24 @@ const UserApi = {
     return ApiClient.put('/users/me', profileData);
   },
 
+  deactivateSelf(reason = null) {
+    return ApiClient.post('/users/me/deactivate', reason ? { reason } : {});
+  },
+
+  requestDeactivation(reason = null) {
+    return ApiClient.post('/users/me/request-deactivation', reason ? { reason } : {});
+  },
+
   getAllUsers(params = {}) {
     return ApiClient.get('/users', params);
   },
 
   getUserById(id) {
     return ApiClient.get(`/users/${id}`);
+  },
+
+  getUserByNic(nic) {
+    return ApiClient.get(`/users/nic/${encodeURIComponent(nic)}`);
   },
 
   createUser(userData) {

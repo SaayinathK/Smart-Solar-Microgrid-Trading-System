@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: ActivityController.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: API Controller exposing REST endpoints for Activity management.
+// ===========================================================================================================
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -18,9 +26,13 @@ namespace SmartMicrogrid.API.Controllers.M4
     public class ActivityController : ControllerBase
     {
         private readonly IActivityService _activityService;
+        /// <summary>
+        /// Initializes a new instance of the ActivityController class.
+        /// </summary>
 
         public ActivityController(IActivityService activityService)
         {
+            // Initialize dependencies and state
             _activityService = activityService;
         }
 
@@ -34,6 +46,7 @@ namespace SmartMicrogrid.API.Controllers.M4
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetActivity([FromQuery] ActivityQueryDto query)
         {
+            // Execute get activity operations
             if (!ModelState.IsValid)
             {
                 var errors = ModelState.Values
@@ -67,6 +80,7 @@ namespace SmartMicrogrid.API.Controllers.M4
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetActivityById(string id)
         {
+            // Execute get activity by id operations
             var activity = await _activityService.GetByIdAsync(id);
 
             if (activity == null)

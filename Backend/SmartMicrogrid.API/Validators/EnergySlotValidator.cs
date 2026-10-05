@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: EnergySlotValidator.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: FluentValidation rules for EnergySlot data integrity.
+// ===========================================================================================================
 using System;
 using SmartMicrogrid.API.DTOs.M1;
 using SmartMicrogrid.API.Models.M1;
@@ -6,8 +14,12 @@ namespace SmartMicrogrid.API.Validators
 {
     public static class EnergySlotValidator
     {
+        /// <summary>
+        /// Verifies and validates te create slot criteria.
+        /// </summary>
         public static (bool isValid, string? errorMessage) ValidateCreateSlot(CreateEnergySlotDto dto, MicrogridNode? microgrid)
         {
+            // Execute validate create slot operations
             if (microgrid == null)
                 return (false, "Target microgrid does not exist.");
 
@@ -35,9 +47,13 @@ namespace SmartMicrogrid.API.Validators
 
             return (true, null);
         }
+        /// <summary>
+        /// Verifies and validates te update slot criteria.
+        /// </summary>
 
         public static (bool isValid, string? errorMessage) ValidateUpdateSlot(UpdateEnergySlotDto dto, MicrogridNode? microgrid)
         {
+            // Execute validate update slot operations
             if (dto.EnergyAmount <= 0)
                 return (false, "Energy amount must be greater than zero.");
 

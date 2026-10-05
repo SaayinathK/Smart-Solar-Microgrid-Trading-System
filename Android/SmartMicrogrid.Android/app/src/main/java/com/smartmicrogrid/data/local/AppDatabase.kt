@@ -14,9 +14,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         ReservationEntity::class,
         AdminDashboardCache::class,
         AdminConfigurationCache::class,
-        AdminActivityCache::class
+        AdminActivityCache::class,
+        UserSessionEntity::class
     ],
-    version = 3,
+    version = 5,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -27,6 +28,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun adminDashboardDao(): AdminDashboardDao
     abstract fun adminConfigurationDao(): AdminConfigurationDao
     abstract fun adminActivityDao(): AdminActivityDao
+    abstract fun userSessionDao(): UserSessionDao
 
     companion object {
         private val MIGRATION_1_2 = object : Migration(1, 2) {

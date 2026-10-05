@@ -127,7 +127,7 @@ interface ApiService {
     @PUT("reservations/{id}")
     suspend fun updateReservation(
         @Path("id") id: String,
-        @Body request: CreateReservationRequest
+        @Body request: com.smartmicrogrid.models.UpdateReservationRequest
     ): Response<ApiResponse<Reservation>>
 
     @PATCH("reservations/{id}/cancel")
@@ -176,6 +176,26 @@ interface ApiService {
     @PUT("users/me")
     suspend fun updateCurrentUser(
         @Body request: UpdateProfileRequest
+    ): Response<ApiResponse<User>>
+
+    @GET("users/nic/{nic}")
+    suspend fun getUserByNic(
+        @Path("nic") nic: String
+    ): Response<ApiResponse<User>>
+
+    @GET("users/{idOrNic}")
+    suspend fun getUserById(
+        @Path("idOrNic") idOrNic: String
+    ): Response<ApiResponse<User>>
+
+    @POST("users/me/deactivate")
+    suspend fun deactivateAccount(
+        @Body request: Map<String, String> = emptyMap()
+    ): Response<ApiResponse<User>>
+
+    @POST("users/me/request-deactivation")
+    suspend fun requestDeactivation(
+        @Body request: Map<String, String> = emptyMap()
     ): Response<ApiResponse<User>>
 
     // ── M4 Platform Administration Endpoints (Admin only) ──

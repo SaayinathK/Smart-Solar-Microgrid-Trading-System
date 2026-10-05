@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: SystemController.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: API Controller exposing REST endpoints for System management.
+// ===========================================================================================================
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,12 +27,16 @@ namespace SmartMicrogrid.API.Controllers.M4
         private readonly ISystemHealthService _healthService;
         private readonly ISystemConfigurationService _configurationService;
         private readonly IAuditService _auditService;
+        /// <summary>
+        /// Initializes a new instance of the SystemController class.
+        /// </summary>
 
         public SystemController(
             ISystemHealthService healthService,
             ISystemConfigurationService configurationService,
             IAuditService auditService)
         {
+            // Initialize dependencies and state
             _healthService = healthService;
             _configurationService = configurationService;
             _auditService = auditService;
@@ -40,6 +52,7 @@ namespace SmartMicrogrid.API.Controllers.M4
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetHealth()
         {
+            // Execute get health operations
             var health = await _healthService.GetHealthAsync();
             return Ok(ApiResponse<SystemHealthDto>.SuccessResponse(
                 health,
@@ -55,6 +68,7 @@ namespace SmartMicrogrid.API.Controllers.M4
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetConfiguration()
         {
+            // Execute get configuration operations
             var configuration = await _configurationService.GetAsync();
             return Ok(ApiResponse<ConfigurationResponseDto>.SuccessResponse(
                 configuration,
@@ -71,6 +85,7 @@ namespace SmartMicrogrid.API.Controllers.M4
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> UpdateConfiguration([FromBody] UpdateConfigurationDto dto)
         {
+            // Execute update configuration operations
             if (!ModelState.IsValid)
             {
                 return BadRequest(ValidationFailure());
@@ -94,6 +109,7 @@ namespace SmartMicrogrid.API.Controllers.M4
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> UpdateMaintenanceMode([FromBody] MaintenanceModeDto dto)
         {
+            // Execute update maintenance mode operations
             if (!ModelState.IsValid)
             {
                 return BadRequest(ValidationFailure());
@@ -119,6 +135,7 @@ namespace SmartMicrogrid.API.Controllers.M4
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> UpdateRegistrationMode([FromBody] RegistrationModeDto dto)
         {
+            // Execute update registration mode operations
             if (!ModelState.IsValid)
             {
                 return BadRequest(ValidationFailure());
@@ -133,9 +150,28 @@ namespace SmartMicrogrid.API.Controllers.M4
                     ? "Public registration enabled."
                     : "Public registration disabled."));
         }
+        /// <summary>
+        /// Reseeds all database collections with interrelated test datasets across all models.
+        /// </summary>
+        [HttpPost("reseed")]
+        [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> ReseedDatabase([FromServices] SmartMicrogrid.API.Data.MongoDbContext context)
+        {
+            // Execute database reseed operation
+            await SmartMicrogrid.API.Data.DbSeeder.ReseedAllAsync(context);
+            return Ok(ApiResponse<string>.SuccessResponse(
+                "Database successfully wiped and reseeded with interrelated datasets for all models.",
+                "Database reseeded successfully."));
+        }
 
+        /// <summary>
+        /// Performs validation failure operation.
+        /// </summary>
         private ApiResponse<object> ValidationFailure()
         {
+            // Execute validation failure operations
             var errors = ModelState.Values
                 .SelectMany(v => v.Errors)
                 .Select(e => e.ErrorMessage)

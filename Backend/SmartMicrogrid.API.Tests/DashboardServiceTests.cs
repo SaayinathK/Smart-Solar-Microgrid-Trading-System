@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: DashboardServiceTests.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Unit/Integration test suite verifying DashboardService operations and validations.
+// ===========================================================================================================
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,9 +32,13 @@ namespace SmartMicrogrid.API.Tests
         private readonly Mock<IReservationMonitorService> _reservations = new();
         private readonly Mock<ITransactionMonitorService> _transactions = new();
         private readonly Mock<ISystemHealthService> _health = new();
+        /// <summary>
+        /// Initializes a new instance of the DashboardServiceTests class.
+        /// </summary>
 
         public DashboardServiceTests()
         {
+            // Initialize dependencies and state
             _configuration.Setup(x => x.GetOrCreateAsync())
                 .ReturnsAsync(new SystemConfiguration { PlatformName = "Smart Microgrid" });
 
@@ -38,9 +50,13 @@ namespace SmartMicrogrid.API.Tests
 
             SetupHealthyMonitors();
         }
+        /// <summary>
+        /// Performs setup healthy monitors operation.
+        /// </summary>
 
         private void SetupHealthyMonitors()
         {
+            // Execute setup healthy monitors operations
             _microgrids.Setup(x => x.GetCountAsync())
                 .ReturnsAsync(new ComponentStatDto { Count = 4, Status = DataSourceStatus.Available });
             _microgrids.Setup(x => x.GetCapacitySummaryAsync())
@@ -62,6 +78,9 @@ namespace SmartMicrogrid.API.Tests
             _transactions.Setup(x => x.GetCompletedCountAsync())
                 .ReturnsAsync(new ComponentStatDto { Count = 5, Status = DataSourceStatus.Available });
         }
+        /// <summary>
+        /// Creates or registers a new service record.
+        /// </summary>
 
         private DashboardService CreateService() => new(
             _users.Object,
@@ -71,10 +90,14 @@ namespace SmartMicrogrid.API.Tests
             _reservations.Object,
             _transactions.Object,
             _health.Object);
+        /// <summary>
+        /// Performs build async_aggregates m1m2m3statistics operation.
+        /// </summary>
 
         [Fact]
         public async Task BuildAsync_AggregatesM1M2M3Statistics()
         {
+            // Execute build async_aggregates m1m2m3statistics operations
             _users.Setup(x => x.GetAllAsync(null, null, null, null))
                 .ReturnsAsync(new List<User>());
 
@@ -88,10 +111,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.Equal(7, dashboard.Platform.TransactionCount);
             Assert.Equal(5, dashboard.Platform.CompletedTransactionCount);
         }
+        /// <summary>
+        /// Performs build async_counts every account status including legacy records operation.
+        /// </summary>
 
         [Fact]
         public async Task BuildAsync_CountsEveryAccountStatusIncludingLegacyRecords()
         {
+            // Execute build async_counts every account status including legacy records operations
             _users.Setup(x => x.GetAllAsync(null, null, null, null))
                 .ReturnsAsync(new List<User>
                 {
@@ -112,10 +139,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.Equal(1, dashboard.Users.SuspendedUsers);
             Assert.Equal(1, dashboard.Users.PendingUsers);
         }
+        /// <summary>
+        /// Performs build async_derives role distribution for every role operation.
+        /// </summary>
 
         [Fact]
         public async Task BuildAsync_DerivesRoleDistributionForEveryRole()
         {
+            // Execute build async_derives role distribution for every role operations
             _users.Setup(x => x.GetAllAsync(null, null, null, null))
                 .ReturnsAsync(new List<User>
                 {
@@ -136,10 +167,14 @@ namespace SmartMicrogrid.API.Tests
             var operatorRole = dashboard.RoleDistribution.Single(r => r.Role == nameof(Role.MicrogridOperator));
             Assert.Equal(0, operatorRole.UserCount);
         }
+        /// <summary>
+        /// Performs build async_degrades when amonitor throws operation.
+        /// </summary>
 
         [Fact]
         public async Task BuildAsync_DegradesWhenAMonitorThrows()
         {
+            // Execute build async_degrades when amonitor throws operations
             _users.Setup(x => x.GetAllAsync(null, null, null, null))
                 .ReturnsAsync(new List<User>());
 
@@ -157,6 +192,9 @@ namespace SmartMicrogrid.API.Tests
             Assert.Equal(DataSourceStatus.Available, dashboard.Platform.Reservations.Status);
             Assert.Equal(12, dashboard.Platform.ReservationCount);
         }
+        /// <summary>
+        /// Performs build async_degrades when the health check throws operation.
+        /// </summary>
 
         [Fact]
         public async Task BuildAsync_DegradesWhenTheHealthCheckThrows()
@@ -183,10 +221,14 @@ namespace SmartMicrogrid.API.Tests
             Assert.Equal(1, dashboard.Users.TotalUsers);
             Assert.Equal(4, dashboard.Platform.MicrogridCount);
         }
+        /// <summary>
+        /// Performs build async_surfaces maintenance mode from configuration operation.
+        /// </summary>
 
         [Fact]
         public async Task BuildAsync_SurfacesMaintenanceModeFromConfiguration()
         {
+            // Execute build async_surfaces maintenance mode from configuration operations
             _users.Setup(x => x.GetAllAsync(null, null, null, null))
                 .ReturnsAsync(new List<User>());
 

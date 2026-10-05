@@ -1,3 +1,11 @@
+// ===========================================================================================================
+// File: MongoDbContext.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: MongoDB database context configuring collections and database indexes.
+// ===========================================================================================================
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -12,12 +20,24 @@ namespace SmartMicrogrid.API.Data
     public class MongoDbContext
     {
         private readonly IMongoDatabase _database;
+        /// <summary>
+        /// Initializes a new instance of the MongoDbContext class.
+        /// </summary>
 
         public MongoDbContext(IOptions<MongoDbSettings> settings)
         {
+            // Initialize dependencies and state
             var client = new MongoClient(settings.Value.ConnectionString);
             _database = client.GetDatabase(settings.Value.DatabaseName);
+            EnsureIndexes();
+        }
 
+        /// <summary>
+        /// Ensures all required database indexes are created across all collections.
+        /// </summary>
+        public void EnsureIndexes()
+        {
+            // Execute index creation operations
             try
             {
                 EnsureUniqueReservationIndex();
@@ -37,8 +57,8 @@ namespace SmartMicrogrid.API.Data
                     }));
 
                 // Index on Nic for Users collection
-                var userNicIndexKeys = Builders<User>.IndexKeys.Ascending(u => u.Nic);
-                Users.Indexes.CreateOne(new CreateIndexModel<User>(userNicIndexKeys));
+
+                // Note: Prosumer NIC uniqueness is enforced above via ux_users_nic_sparse.
 
                 // Indexes for Microgrids collection
                 Microgrids.Indexes.CreateOne(new CreateIndexModel<MicrogridNode>(
@@ -116,9 +136,13 @@ namespace SmartMicrogrid.API.Data
                 // Ignore index creation errors if MongoDB is offline during initial build setup
             }
         }
+        /// <summary>
+        /// Seeds and configures default/sample re unique reservation index data.
+        /// </summary>
 
         private void EnsureUniqueReservationIndex()
         {
+            // Execute ensure unique reservation index operations
             var duplicates = Transactions.Aggregate()
                 .Group(t => t.ReservationId, group => new
                 {
@@ -167,6 +191,9 @@ namespace SmartMicrogrid.API.Data
 
         public IMongoCollection<User> Users =>
             _database.GetCollection<User>(MongoCollections.Users);
+        /// <summary>
+        /// Retrieves raw users collection details.
+        /// </summary>
 
         public IMongoCollection<BsonDocument> GetRawUsersCollection() =>
             _database.GetCollection<BsonDocument>(MongoCollections.Users);

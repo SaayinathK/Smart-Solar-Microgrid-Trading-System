@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: EnergySlotCleanupService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Business logic service implementing EnergySlotCleanupService operations, rules, and workflows.
+// ===========================================================================================================
 using System;
 using System.Linq;
 using System.Threading;
@@ -14,15 +22,23 @@ namespace SmartMicrogrid.API.Services.Implementation
         private readonly ILogger<EnergySlotCleanupService> _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly TimeSpan _checkInterval = TimeSpan.FromMinutes(1);
+        /// <summary>
+        /// Initializes a new instance of the EnergySlotCleanupService class.
+        /// </summary>
 
         public EnergySlotCleanupService(ILogger<EnergySlotCleanupService> logger, IServiceProvider serviceProvider)
         {
+            // Initialize dependencies and state
             _logger = logger;
             _serviceProvider = serviceProvider;
         }
+        /// <summary>
+        /// Handles execution of async.
+        /// </summary>
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            // Execute execute async operations
             _logger.LogInformation("EnergySlotCleanupService starting.");
 
             try
@@ -50,9 +66,13 @@ namespace SmartMicrogrid.API.Services.Implementation
                 // Shutdown also cancels the delay when API startup fails.
             }
         }
+        /// <summary>
+        /// Performs cleanup expired slots async operation.
+        /// </summary>
 
         private async Task CleanupExpiredSlotsAsync()
         {
+            // Execute cleanup expired slots async operations
             using var scope = _serviceProvider.CreateScope();
             var slotRepository = scope.ServiceProvider.GetRequiredService<IEnergySlotRepository>();
             var microgridRepository = scope.ServiceProvider.GetRequiredService<IMicrogridRepository>();

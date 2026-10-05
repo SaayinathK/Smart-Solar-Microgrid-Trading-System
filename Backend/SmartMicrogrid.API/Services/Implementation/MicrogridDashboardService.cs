@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: MicrogridDashboardService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Business logic service implementing MicrogridDashboardService operations, rules, and workflows.
+// ===========================================================================================================
 using System.Linq;
 using System.Threading.Tasks;
 using SmartMicrogrid.API.DTOs.M1;
@@ -10,15 +18,23 @@ namespace SmartMicrogrid.API.Services.Implementation
     {
         private readonly IMicrogridRepository _microgridRepository;
         private readonly IEnergySlotRepository _slotRepository;
+        /// <summary>
+        /// Initializes a new instance of the MicrogridDashboardService class.
+        /// </summary>
 
         public MicrogridDashboardService(IMicrogridRepository microgridRepository, IEnergySlotRepository slotRepository)
         {
+            // Initialize dependencies and state
             _microgridRepository = microgridRepository;
             _slotRepository = slotRepository;
         }
+        /// <summary>
+        /// Retrieves dashboard stats async details.
+        /// </summary>
 
         public async Task<MicrogridDashboardDto> GetDashboardStatsAsync()
         {
+            // Execute get dashboard stats async operations
             var nodes = (await _microgridRepository.GetAllAsync()).ToList();
 
             var totalCount = nodes.Count;

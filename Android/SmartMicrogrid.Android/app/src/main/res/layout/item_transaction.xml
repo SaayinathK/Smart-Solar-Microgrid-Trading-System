@@ -30,9 +30,11 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
-                android:breakStrategy="simple" />
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:fontFamily="monospace" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/tv_status"

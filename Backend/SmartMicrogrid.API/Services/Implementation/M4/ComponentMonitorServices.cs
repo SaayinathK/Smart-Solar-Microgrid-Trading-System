@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: ComponentMonitorServices.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Defines ComponentMonitorServices components for the Smart Microgrid system.
+// ===========================================================================================================
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,14 +24,22 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
     public class MicrogridMonitorService : IMicrogridMonitorService
     {
         private readonly IMicrogridRepository _microgridRepository;
+        /// <summary>
+        /// Initializes a new instance of the MicrogridMonitorService class.
+        /// </summary>
 
         public MicrogridMonitorService(IMicrogridRepository microgridRepository)
         {
+            // Initialize dependencies and state
             _microgridRepository = microgridRepository;
         }
+        /// <summary>
+        /// Retrieves count async details.
+        /// </summary>
 
         public async Task<ComponentStatDto> GetCountAsync()
         {
+            // Execute get count async operations
             var nodes = await SafeFetchAsync();
             if (nodes == null)
                 return Unavailable("M1 microgrid data is not reachable.");
@@ -40,9 +56,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 Note = $"{active} active of {nodes.Count} registered."
             };
         }
+        /// <summary>
+        /// Retrieves capacity summary async details.
+        /// </summary>
 
         public async Task<ComponentStatDto> GetCapacitySummaryAsync()
         {
+            // Execute get capacity summary async operations
             var nodes = await SafeFetchAsync();
             if (nodes == null)
                 return Unavailable("M1 capacity data is not reachable.");
@@ -57,9 +77,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 Note = $"Total capacity {nodes.Sum(n => n.Capacity):0.#} kWh."
             };
         }
+        /// <summary>
+        /// Performs safe fetch async operation.
+        /// </summary>
 
         private async Task<List<MicrogridNode>?> SafeFetchAsync()
         {
+            // Execute safe fetch async operations
             try
             {
                 return (await _microgridRepository.GetAllAsync()).ToList();
@@ -69,6 +93,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 return null;
             }
         }
+        /// <summary>
+        /// Performs unavailable operation.
+        /// </summary>
 
         private static ComponentStatDto Unavailable(string note) => new()
         {
@@ -86,14 +113,22 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
     public class ReservationMonitorService : IReservationMonitorService
     {
         private readonly IReservationRepository _reservationRepository;
+        /// <summary>
+        /// Initializes a new instance of the ReservationMonitorService class.
+        /// </summary>
 
         public ReservationMonitorService(IReservationRepository reservationRepository)
         {
+            // Initialize dependencies and state
             _reservationRepository = reservationRepository;
         }
+        /// <summary>
+        /// Retrieves count async details.
+        /// </summary>
 
         public async Task<ComponentStatDto> GetCountAsync()
         {
+            // Execute get count async operations
             try
             {
                 var count = await _reservationRepository.CountAsync();
@@ -111,9 +146,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 return Unavailable();
             }
         }
+        /// <summary>
+        /// Retrieves pending count async details.
+        /// </summary>
 
         public async Task<ComponentStatDto> GetPendingCountAsync()
         {
+            // Execute get pending count async operations
             try
             {
                 var count = await _reservationRepository.CountAsync("Pending");
@@ -131,6 +170,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 return Unavailable();
             }
         }
+        /// <summary>
+        /// Performs unavailable operation.
+        /// </summary>
 
         private static ComponentStatDto Unavailable() => new()
         {
@@ -148,14 +190,22 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
     public class TransactionMonitorService : ITransactionMonitorService
     {
         private readonly ITransactionRepository _transactionRepository;
+        /// <summary>
+        /// Initializes a new instance of the TransactionMonitorService class.
+        /// </summary>
 
         public TransactionMonitorService(ITransactionRepository transactionRepository)
         {
+            // Initialize dependencies and state
             _transactionRepository = transactionRepository;
         }
+        /// <summary>
+        /// Retrieves count async details.
+        /// </summary>
 
         public async Task<ComponentStatDto> GetCountAsync()
         {
+            // Execute get count async operations
             var transactions = await SafeFetchAsync();
             if (transactions == null)
                 return Unavailable();
@@ -169,9 +219,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 Note = "M3 transaction ledger."
             };
         }
+        /// <summary>
+        /// Retrieves completed count async details.
+        /// </summary>
 
         public async Task<ComponentStatDto> GetCompletedCountAsync()
         {
+            // Execute get completed count async operations
             var transactions = await SafeFetchAsync();
             if (transactions == null)
                 return Unavailable();
@@ -186,9 +240,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 Note = "Transactions with energy transfer verified."
             };
         }
+        /// <summary>
+        /// Performs safe fetch async operation.
+        /// </summary>
 
         private async Task<List<SmartMicrogrid.API.Models.Transactions.Transaction>?> SafeFetchAsync()
         {
+            // Execute safe fetch async operations
             try
             {
                 return await _transactionRepository.GetAllAsync();
@@ -198,11 +256,18 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 return null;
             }
         }
+        /// <summary>
+        /// Performs is completed operation.
+        /// </summary>
 
         private static bool IsCompleted(SmartMicrogrid.API.Models.Transactions.Transaction transaction)
         {
+            // Execute is completed operations
             return string.Equals(transaction.Status, "Completed", StringComparison.OrdinalIgnoreCase);
         }
+        /// <summary>
+        /// Performs unavailable operation.
+        /// </summary>
 
         private static ComponentStatDto Unavailable() => new()
         {

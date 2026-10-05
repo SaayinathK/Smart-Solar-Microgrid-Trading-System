@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: ReportService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Business logic service implementing ReportService operations, rules, and workflows.
+// ===========================================================================================================
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +30,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
         private readonly IReservationMonitorService _reservationMonitor;
         private readonly ITransactionMonitorService _transactionMonitor;
         private readonly IAuditService _auditService;
+        /// <summary>
+        /// Initializes a new instance of the ReportService class.
+        /// </summary>
 
         public ReportService(
             IUserRepository userRepository,
@@ -32,6 +43,7 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
             ITransactionMonitorService transactionMonitor,
             IAuditService auditService)
         {
+            // Initialize dependencies and state
             _userRepository = userRepository;
             _activityRepository = activityRepository;
             _configurationRepository = configurationRepository;
@@ -40,9 +52,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
             _transactionMonitor = transactionMonitor;
             _auditService = auditService;
         }
+        /// <summary>
+        /// Retrieves user report async details.
+        /// </summary>
 
         public async Task<UserReportDto> GetUserReportAsync(DateTime? from, DateTime? to, string? role, string? status)
         {
+            // Execute get user report async operations
             ValidateRange(from, to);
 
             var users = (await _userRepository.GetAllAsync()).ToList();
@@ -94,9 +110,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
 
             return report;
         }
+        /// <summary>
+        /// Retrieves role report async details.
+        /// </summary>
 
         public async Task<List<RoleDistributionDto>> GetRoleReportAsync()
         {
+            // Execute get role report async operations
             var users = (await _userRepository.GetAllAsync()).ToList();
 
             var report = Enum.GetValues<Role>()
@@ -117,9 +137,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
 
             return report;
         }
+        /// <summary>
+        /// Retrieves activity report async details.
+        /// </summary>
 
         public async Task<ActivityReportDto> GetActivityReportAsync(DateTime? from, DateTime? to)
         {
+            // Execute get activity report async operations
             ValidateRange(from, to);
 
             var byAction = await _activityRepository.GetActionCountsAsync(from, to);
@@ -146,9 +170,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
 
             return report;
         }
+        /// <summary>
+        /// Retrieves platform report async details.
+        /// </summary>
 
         public async Task<PlatformReportDto> GetPlatformReportAsync(DateTime? from, DateTime? to)
         {
+            // Execute get platform report async operations
             ValidateRange(from, to);
 
             var users = (await _userRepository.GetAllAsync()).ToList();
@@ -206,19 +234,30 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 Activity = activityTask.Result
             };
         }
+        /// <summary>
+        /// Performs count by status async operation.
+        /// </summary>
 
         private async Task<long> CountByStatusAsync(string status, DateTime? from, DateTime? to)
         {
+            // Execute count by status async operations
             return await _activityRepository.CountAsync(null, null, null, status, from, to);
         }
+        /// <summary>
+        /// Verifies and validates te range criteria.
+        /// </summary>
 
         private static void ValidateRange(DateTime? from, DateTime? to)
         {
+            // Execute validate range operations
             if (from.HasValue && to.HasValue && from > to)
             {
                 throw new ArgumentException("The 'from' date must not be later than the 'to' date.");
             }
         }
+        /// <summary>
+        /// Performs resolve status operation.
+        /// </summary>
 
         private static AccountStatus ResolveStatus(User user) => DashboardService.ResolveStatus(user);
     }
