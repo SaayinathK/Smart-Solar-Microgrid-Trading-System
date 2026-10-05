@@ -221,6 +221,38 @@ namespace SmartMicrogrid.API.Data
                 .Find(Builders<EnergySlot>.Filter.Empty)
                 .ToListAsync();
 
+            if (slots.Count == 0)
+            {
+                var newSlots = new List<EnergySlot>();
+                foreach (var mg in microgrids)
+                {
+                    if (string.IsNullOrEmpty(mg.Id) || !MongoDB.Bson.ObjectId.TryParse(mg.Id, out _))
+                        continue;
+
+                    newSlots.Add(new EnergySlot
+                    {
+                        MicrogridNodeId = mg.Id,
+                        CreatedBy = mg.OperatorId,
+                        EnergyAmount = 100,
+                        AvailableAmount = 80,
+                        StartTime = now.AddHours(1),
+                        EndTime = now.AddHours(5),
+                        PricePerUnit = 25.00m,
+                        Status = "Available",
+                        CreatedAt = now,
+                        UpdatedAt = now
+                    });
+                }
+
+                if (newSlots.Count > 0)
+                {
+                    await context.EnergySlots.InsertManyAsync(newSlots);
+                    slots = await context.EnergySlots
+                        .Find(Builders<EnergySlot>.Filter.Empty)
+                        .ToListAsync();
+                }
+            }
+
             var created = new List<Reservation>();
 
             // One reservation per microgrid, cycling if there are more
@@ -234,7 +266,17 @@ namespace SmartMicrogrid.API.Data
 
                 var slot = nodeSlots.Count > 0
                     ? nodeSlots[i % nodeSlots.Count]
-                    : null;
+                    : (slots.Count > 0 ? slots[i % slots.Count] : null);
+
+                var slotId = slot?.Id;
+                if (string.IsNullOrWhiteSpace(slotId) || !MongoDB.Bson.ObjectId.TryParse(slotId, out _))
+                {
+                    slotId = MongoDB.Bson.ObjectId.GenerateNewId().ToString();
+                }
+
+                var nodeId = !string.IsNullOrWhiteSpace(slot?.MicrogridNodeId) && MongoDB.Bson.ObjectId.TryParse(slot.MicrogridNodeId, out _)
+                    ? slot.MicrogridNodeId
+                    : (!string.IsNullOrWhiteSpace(node.Id) && MongoDB.Bson.ObjectId.TryParse(node.Id, out _) ? node.Id : MongoDB.Bson.ObjectId.GenerateNewId().ToString());
 
                 var status = TransactionStatusPlan[i];
                 var start = now.AddHours(2 + (i % 8));
@@ -242,8 +284,8 @@ namespace SmartMicrogrid.API.Data
                 created.Add(new Reservation
                 {
                     ProsumerId = marker,
-                    MicrogridNodeId = node.Id ?? string.Empty,
-                    EnergySlotId = slot?.Id ?? string.Empty,
+                    MicrogridNodeId = nodeId,
+                    EnergySlotId = slotId,
                     EnergyAmount = 5 + (i * 2.5),
                     ReservationDate = start.Date,
                     StartTime = start,

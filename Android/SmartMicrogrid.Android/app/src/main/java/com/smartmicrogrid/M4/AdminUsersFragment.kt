@@ -87,7 +87,7 @@ class AdminUsersFragment : Fragment() {
         loadUsers("All")
     }
 
-    private fun loadUsers(status: String) {
+    private fun loadUsers(status: String? = "All") {
         val view = view ?: return
         view.findViewById<ProgressBar>(R.id.m4_user_loading).visibility = View.VISIBLE
 

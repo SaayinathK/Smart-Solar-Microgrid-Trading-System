@@ -65,6 +65,11 @@ class LoginActivity : AppCompatActivity() {
         binding.tvRegisterVerifierLink.setOnClickListener {
             startActivity(Intent(this, RegisterVerifierActivity::class.java))
         }
+
+        updateServerDisplay()
+        binding.tvServerConfig.setOnClickListener {
+            showServerConfigDialog()
+        }
     }
 
     private fun observeViewModel() {
@@ -106,8 +111,45 @@ class LoginActivity : AppCompatActivity() {
         binding.tvError.visibility = View.GONE
     }
 
-    private fun navigateToMain() {
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
+    private fun updateServerDisplay() {
+        val current = SessionManager.getBaseUrl()
+        val cleaned = current.removePrefix("http://").removePrefix("https://").removeSuffix("/api/").removeSuffix("/")
+        binding.tvServerConfig.text = "Server: $cleaned (Tap to change)"
+    }
+
+    private fun showServerConfigDialog() {
+        val input = android.widget.EditText(this).apply {
+            val current = SessionManager.getBaseUrl()
+            val cleaned = current.removePrefix("http://").removePrefix("https://").removeSuffix("/api/").removeSuffix("/")
+            setText(cleaned)
+            hint = "192.168.1.6:5050"
+            setSelection(text.length)
+        }
+
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(60, 20, 60, 0)
+            addView(input)
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("Server Connection")
+            .setMessage("Enter the server laptop's IP address and port (e.g. 192.168.1.6:5050):")
+            .setView(container)
+            .setPositiveButton("Save") { _, _ ->
+                var text = input.text.toString().trim()
+                if (text.isNotEmpty()) {
+                    if (!text.startsWith("http://") && !text.startsWith("https://")) {
+                        text = "http://$text"
+                    }
+                    if (!text.endsWith("/api/")) {
+                        text = text.removeSuffix("/") + "/api/"
+                    }
+                    SessionManager.setBaseUrl(text)
+                    updateServerDisplay()
+                    android.widget.Toast.makeText(this, "Server URL updated.", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }

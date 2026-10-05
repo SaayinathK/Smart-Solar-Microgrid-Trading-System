@@ -206,6 +206,21 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
+            <!-- Server Connection Configuration -->
+            <TextView
+                android:id="@+id/tv_server_config"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="28dp"
+                android:background="@drawable/bg_glass_input"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:textColor="#94A3B8"
+                android:textSize="12sp"
+                android:text="Server: 192.168.1.6:5050 (Tap to change)" />
+
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

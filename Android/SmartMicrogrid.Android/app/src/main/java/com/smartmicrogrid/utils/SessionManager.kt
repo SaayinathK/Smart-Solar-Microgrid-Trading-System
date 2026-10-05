@@ -17,11 +17,31 @@ object SessionManager {
 
     fun init(context: Context) {
         prefs = context.getSharedPreferences(Constants.PREF_NAME, Context.MODE_PRIVATE)
+        // Restore custom API Base URL if configured
+        val customUrl = getBaseUrl()
+        RetrofitClient.updateBaseUrl(customUrl)
+
         // Restore JWT token into RetrofitClient if a session already exists
         val token = getToken()
         if (!token.isNullOrEmpty()) {
             RetrofitClient.setJwtToken(token)
         }
+    }
+
+    fun getBaseUrl(): String {
+        return if (::prefs.isInitialized) {
+            prefs.getString("custom_api_base_url", Constants.API_BASE_URL) ?: Constants.API_BASE_URL
+        } else {
+            Constants.API_BASE_URL
+        }
+    }
+
+    fun setBaseUrl(url: String) {
+        val formatted = if (!url.endsWith("/")) "$url/" else url
+        if (::prefs.isInitialized) {
+            prefs.edit().putString("custom_api_base_url", formatted).apply()
+        }
+        RetrofitClient.updateBaseUrl(formatted)
     }
 
     fun setSession(token: String, user: User) {
