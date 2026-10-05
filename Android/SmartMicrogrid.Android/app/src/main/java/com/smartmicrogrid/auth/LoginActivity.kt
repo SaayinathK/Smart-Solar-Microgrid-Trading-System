@@ -62,10 +62,6 @@ class LoginActivity : AppCompatActivity() {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
 
-        binding.tvRegisterVerifierLink.setOnClickListener {
-            startActivity(Intent(this, RegisterVerifierActivity::class.java))
-        }
-
         updateServerDisplay()
         binding.tvServerConfig.setOnClickListener {
             showServerConfigDialog()

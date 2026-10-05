@@ -28,12 +28,10 @@
 
         <activity android:name=".MainActivity" />
         <activity android:name=".auth.RegisterActivity" />
-        <activity android:name=".auth.RegisterVerifierActivity" />
         <activity android:name=".auth.EditProfileActivity" />
         <activity android:name=".auth.ChangePasswordActivity" />
 
         <activity android:name=".M2.ProsumerMainActivity" />
-        <activity android:name=".M3.VerifierMainActivity" />
         <activity android:name=".M3.TransactionDetailsActivity" />
         <activity android:name=".M3.EnergyTransferConfirmationActivity" />
         <activity android:name=".M3.TransactionCompletionActivity" />

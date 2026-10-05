@@ -29,9 +29,6 @@
             <div class="auth-feature-item">
               <span>⚡</span> <strong>Operator:</strong> Grid node & capacity management
             </div>
-            <div class="auth-feature-item">
-              <span>🔍</span> <strong>Verifier:</strong> Transaction & settlement verification
-            </div>
           </div>
         </div>
       </div>
@@ -52,10 +49,6 @@
           <button type="button" class="role-tab-btn" data-role="MicrogridOperator" id="tab-operator">
             <span class="role-icon">⚡</span>
             <span>Operator</span>
-          </button>
-          <button type="button" class="role-tab-btn" data-role="TransactionVerifier" id="tab-verifier">
-            <span class="role-icon">🔍</span>
-            <span>Verifier</span>
           </button>
         </div>
 
@@ -168,11 +161,6 @@
         nicGroup.style.display = 'block';
         nicInput.required = false;
         btnSubmit.textContent = 'Register Operator';
-      } else if (role === 'TransactionVerifier') {
-        roleHintText.textContent = 'Field officer account for transaction verification.';
-        nicGroup.style.display = 'block';
-        nicInput.required = false;
-        btnSubmit.textContent = 'Register Verifier';
       }
     }
 

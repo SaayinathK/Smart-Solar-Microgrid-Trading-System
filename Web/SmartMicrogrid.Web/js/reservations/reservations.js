@@ -517,7 +517,7 @@
     });
   }
 
-  // Quick Verify Dialog (for Verifier & Admin)
+  // Quick Verify Dialog (for Operator & Admin)
   if (btnQuickVerify) {
     btnQuickVerify.addEventListener('click', () => {
       document.getElementById('input-verify-code').value = '';
