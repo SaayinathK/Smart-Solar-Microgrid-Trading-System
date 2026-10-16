@@ -1,0 +1,84 @@
+/* Registration stays in the native modal top layer, above the workspace and map. */
+.microgrid-registration-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(1020px, calc(100% - 40px));
+  max-width: none;
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  box-shadow: 0 28px 90px rgba(15, 23, 42, .25);
+}
+.microgrid-registration-dialog::backdrop { background: rgba(15, 23, 42, .48); backdrop-filter: blur(4px); }
+body:has(.microgrid-registration-dialog[open]) { overflow: hidden; }
+.microgrid-registration-dialog form { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; max-height: calc(100vh - 42px); max-height: calc(100dvh - 42px); }
+.registration-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 24px 28px; border-bottom: 1px solid var(--border-color); }
+.registration-heading { display: flex; align-items: center; gap: 16px; }
+.registration-icon { display: grid; place-items: center; width: 48px; height: 48px; flex-shrink: 0; border-radius: 14px; color: var(--accent-primary); background: var(--accent-light); }
+.registration-icon svg { width: 26px; height: 26px; }
+.registration-eyebrow { font-size: .64rem; font-weight: 700; letter-spacing: .13em; color: var(--accent-primary); }
+.registration-header h2 { margin: 4px 0 6px; font-size: clamp(1.3rem, 3vw, 1.65rem); line-height: 1.2; }
+.registration-header p { margin: 0; color: var(--text-secondary); font-size: .8rem; line-height: 1.6; }
+.registration-close { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-secondary); background: var(--bg-primary); cursor: pointer; font-size: 1.5rem; }
+.registration-close:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+.registration-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 22px 28px; }
+.registration-body fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.registration-body legend { float: none; width: auto; margin: 0 0 14px; padding: 0; font-size: .92rem; font-weight: 700; }
+.registration-identity-fields { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 16px; }
+.registration-columns { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--border-color); }
+.registration-step { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 6px; border-radius: 8px; color: var(--accent-primary); background: var(--accent-light); font-size: .67rem; }
+.registration-section legend { margin-bottom: 7px; }
+.registration-section-note { margin: 0 0 18px; color: var(--text-secondary); font-size: .76rem; line-height: 1.6; }
+.registration-field-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; }
+.microgrid-registration-dialog .form-group { min-width: 0; margin: 0; }
+.microgrid-registration-dialog label { display: block; margin-bottom: 7px; color: var(--text-primary); font-size: .76rem; font-weight: 600; }
+.microgrid-registration-dialog label > span:not(.registration-optional) { color: var(--accent-primary); }
+.microgrid-registration-dialog .form-control { display: block; width: 100%; min-width: 0; min-height: 42px; padding: 10px 12px; font: inherit; font-size: .8rem; border: 1px solid var(--border-color); border-radius: 9px; background: var(--bg-secondary); color: var(--text-primary); }
+.microgrid-registration-dialog textarea.form-control { resize: vertical; min-height: 105px; }
+.microgrid-registration-dialog .form-control:focus { outline: 2px solid var(--accent-primary); outline-offset: 1px; }
+.registration-unit-input { position: relative; }
+.registration-unit-input input { padding-right: 48px !important; }
+.registration-unit-input > span { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; font-size: .7rem; }
+.registration-help, .microgrid-registration-dialog .location-address-status { display: block; margin: 8px 0 14px; color: var(--text-secondary); font-size: .69rem; line-height: 1.6; }
+.registration-description-field { margin-top: 20px !important; }
+.registration-optional { float: right; font-size: .68rem; font-weight: 400; color: var(--text-secondary); }
+.registration-note { margin-top: 18px; padding: 14px; background: var(--accent-light); border-radius: 10px; font-size: .73rem; line-height: 1.65; }
+.registration-note strong { color: var(--accent-primary); }
+.registration-note p { margin: 4px 0 0; color: var(--text-secondary); }
+.microgrid-registration-dialog .location-picker { margin-top: 12px; }
+.microgrid-registration-dialog .location-picker-heading { display: none; }
+.microgrid-registration-dialog .location-picker-map { height: 215px; }
+.microgrid-registration-dialog .location-picker-tools { gap: 8px; }
+.microgrid-registration-dialog .location-picker-tools .btn { font-size: .7rem; min-height: 36px; padding: 8px 10px; }
+.microgrid-registration-dialog .location-picker-message { font-size: .7rem; line-height: 1.6; margin-bottom: 4px; }
+.microgrid-registration-dialog .location-map-attribution { margin: 0; font-size: .65rem; }
+.registration-error { margin: 0 0 18px; padding: 12px 14px; border: 1px solid var(--accent-rose); border-radius: 9px; background: var(--bg-primary); color: var(--accent-rose); font-size: .82rem; overflow-wrap: anywhere; }
+.microgrid-registration-dialog [hidden] { display: none; }
+.registration-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 28px; border-top: 1px solid var(--border-color); background: var(--bg-primary); }
+.registration-footer small { font-size: .7rem; color: var(--text-secondary); }
+.registration-footer > div { display: flex; gap: 10px; }
+.registration-footer .btn { min-height: 44px; font-size: .82rem; }
+.microgrid-registration-dialog button:focus-visible { outline: 3px solid var(--accent-primary); outline-offset: 2px; }
+.microgrid-registration-dialog button:disabled { opacity: .6; cursor: wait; }
+@media (max-width: 700px) {
+  .microgrid-registration-dialog { width: calc(100% - 24px); max-height: calc(100dvh - 24px); border-radius: 16px; }
+  .microgrid-registration-dialog form { max-height: calc(100dvh - 26px); }
+  .registration-header { padding: 18px; gap: 10px; }
+  .registration-heading { gap: 0; }
+  .registration-icon { display: none; }
+  .registration-body { padding: 18px; }
+  .registration-identity-fields, .registration-columns { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .registration-columns { margin-top: 18px; padding-top: 18px; }
+  .registration-columns > fieldset + fieldset { border-top: 1px solid var(--border-color); padding-top: 18px; }
+  .registration-footer { padding: 12px 18px; }
+  .registration-footer > small { display: none; }
+  .registration-footer > div { width: 100%; }
+  .registration-footer .btn-primary { flex: 1; }
+  .microgrid-registration-dialog .location-picker-tools .btn { width: auto; flex: 1; }
+}

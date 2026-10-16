@@ -6,10 +6,15 @@
   <title>Energy Slots Management - Smart Microgrid Platform</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../../css/style.css">
-  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/sidebar.css?v=20261016-search-1">
   <link rel="stylesheet" href="../../css/tables.css">
   <link rel="stylesheet" href="../../css/forms.css">
   <link rel="stylesheet" href="../../css/interface.css">
+  <link rel="stylesheet" href="../../css/energy-slots.css?v=20261016-1">
+  <link rel="stylesheet" href="../../css/spacing.css?v=20261016-1">
+  <link rel="icon" type="image/png" href="../../assets/images/smart_micro.png">
+  <link rel="apple-touch-icon" href="../../assets/images/smart_micro.png">
+  <link rel="stylesheet" href="../../css/brand.css?v=20261016-1">
 </head>
 <body>
 
@@ -22,11 +27,14 @@
             Publish, update, and manage generation energy slots available for trading.
           </p>
         </div>
-        <div id="operator-actions" style="display: none;">
-          <button onclick="showCreateSlotModal()" class="btn btn-primary">+ Publish New Energy Slot</button>
-        </div>
       </div>
     </div>
+
+    <section class="card slot-toolbar" aria-labelledby="slot-list-title">
+      <div><h2 id="slot-list-title">Published energy slots</h2><p id="slot-summary" role="status">Loading delivery windows...</p></div>
+      <div class="slot-toolbar-actions"><button id="refresh-slots" type="button" class="btn btn-secondary">Refresh</button><button id="publish-slot" type="button" class="btn btn-primary" aria-haspopup="dialog" aria-controls="publish-slot-dialog" hidden>+ Publish New Energy Slot</button></div>
+      <p id="slot-expiry-note" class="slot-expiry-note" hidden>Past delivery windows are marked Expired in this view. Publish a future slot to add bookable supply to Availability.</p>
+    </section>
 
     <!-- Energy Slots Table -->
     <div class="card">
@@ -36,10 +44,10 @@
             <tr>
               <th>Microgrid Hub</th>
               <th>Energy Amount</th>
-              <th>Available</th>
+              <th>Remaining energy</th>
               <th>Start Time</th>
               <th>End Time</th>
-              <th>Price/kWh</th>
+              <th>Price / kWh (LKR)</th>
               <th>Status</th>
               <th>Actions</th>
             </tr>
@@ -54,6 +62,26 @@
     </div>
   </div>
 
+  <dialog id="publish-slot-dialog" class="publish-slot-dialog" aria-labelledby="publish-slot-title" aria-describedby="publish-slot-description">
+    <form id="publish-slot-form">
+      <header class="slot-dialog-header"><div><span class="slot-eyebrow">ENERGY MARKETPLACE</span><h2 id="publish-slot-title">Publish an energy slot</h2><p id="publish-slot-description">Offer energy from an Active microgrid for a future delivery window.</p></div><button type="button" class="slot-dialog-close" data-close-slot aria-label="Close energy slot form">&times;</button></header>
+      <div class="slot-dialog-body">
+        <p id="slot-form-error" class="slot-form-error" role="alert" tabindex="-1" hidden></p>
+        <div class="slot-form-field"><label for="slot-microgrid">Microgrid</label><select id="slot-microgrid" class="form-control" required><option value="">Loading active microgrids...</option></select><small id="slot-capacity-note" role="status">Choose the site that will supply this energy.</small></div>
+        <div class="slot-form-pair">
+          <div class="slot-form-field"><label for="slot-amount">Energy amount (kWh)</label><input id="slot-amount" class="form-control" type="number" min="0.1" step="0.1" placeholder="e.g. 100" required></div>
+          <div class="slot-form-field"><label for="slot-price">Price per kWh (LKR)</label><input id="slot-price" class="form-control" type="number" min="0" step="0.01" placeholder="e.g. 25.00" required></div>
+        </div>
+        <fieldset class="slot-window"><legend>Delivery window</legend><p id="slot-timezone"></p><div class="slot-form-pair">
+          <div class="slot-form-field"><label for="slot-start">Starts</label><input id="slot-start" class="form-control" type="datetime-local" required></div>
+          <div class="slot-form-field"><label for="slot-end">Ends</label><input id="slot-end" class="form-control" type="datetime-local" required></div>
+        </div></fieldset>
+        <div class="slot-publish-note"><strong>Published as Available</strong><p>The full energy amount is initially offered for booking. The slot appears on Availability while supply remains and its delivery window has not ended.</p></div>
+      </div>
+      <footer class="slot-dialog-footer"><button type="button" class="btn btn-secondary" data-close-slot>Cancel</button><button id="confirm-publish-slot" type="submit" class="btn btn-primary" disabled>Publish energy slot</button></footer>
+    </form>
+  </dialog>
+
   <script src="../../js/config/api-config.js"></script>
   <script src="../../js/common/theme.js"></script>
   <script src="../../js/common/session.js"></script>
@@ -61,116 +89,9 @@
   <script src="../../js/api/microgrid-api.js"></script>
   <script src="../../js/common/auth.js"></script>
   <script src="../../js/common/page-template.js"></script>
-  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/common/sidebar.js?v=20261016-logo-1"></script>
 
-  <script>
-    AuthGuard.requireAuth();
-    renderAppLayout('slots', 'Energy Slots Management');
-
-    const user = SessionManager.getUser();
-    const canManage = user && (user.role === 'MicrogridOperator' || user.role === 'Admin');
-
-    if (canManage) {
-      document.getElementById('operator-actions').style.display = 'block';
-    }
-
-    async function loadSlots() {
-      const tbody = document.getElementById('slots-table-body');
-
-      try {
-        const response = await MicrogridApi.getEnergySlots();
-        const list = response.data || [];
-
-        if (list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem;">No energy slots published.</td></tr>`;
-          return;
-        }
-
-        tbody.innerHTML = list.map(s => {
-          let badgeClass = 'status-active';
-          if (s.status === 'Cancelled') badgeClass = 'status-offline';
-          else if (s.status === 'Expired') badgeClass = 'status-inactive';
-
-          return `
-            <tr>
-              <td>
-                <div style="font-weight: 600;">${s.microgridName}</div>
-                <div style="font-size: 0.75rem; color: var(--text-secondary);">${s.location}</div>
-              </td>
-              <td>${s.energyAmount} kWh</td>
-              <td style="font-weight: 700; color: var(--accent-primary);">${s.availableAmount} kWh</td>
-              <td>${new Date(s.startTime).toLocaleString()}</td>
-              <td>${new Date(s.endTime).toLocaleString()}</td>
-              <td>$${s.pricePerUnit}</td>
-              <td><span class="status-badge ${badgeClass}">${s.status}</span></td>
-              <td>
-                ${canManage && s.status === 'Available' ? `
-                  <button onclick="cancelSlot('${s.id}')" class="btn btn-danger btn-sm">Cancel Slot</button>
-                ` : '<span style="color: var(--text-muted); font-size: 0.8rem;">N/A</span>'}
-              </td>
-            </tr>
-          `;
-        }).join('');
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--accent-danger); padding: 2rem;">Failed to load energy slots: ${err.message}</td></tr>`;
-      }
-    }
-
-    async function showCreateSlotModal() {
-      try {
-        const mgRes = await MicrogridApi.getMicrogrids({ status: 'Active' });
-        const mgs = mgRes.data || [];
-
-        if (mgs.length === 0) {
-          alert('No active microgrids available to publish energy slots. Please activate a microgrid first.');
-          return;
-        }
-
-        const mgId = prompt(`Select Microgrid ID:\n` + mgs.map((m, i) => `${i+1}. ${m.name} (${m.location}) - ID: ${m.id}`).join('\n'), mgs[0].id);
-        if (!mgId) return;
-
-        const energyStr = prompt('Enter energy amount in kWh:', '100');
-        if (!energyStr) return;
-
-        const priceStr = prompt('Enter price per kWh ($):', '25.00');
-        if (!priceStr) return;
-
-        const now = new Date();
-        const startIso = prompt('Enter start time (ISO string):', new Date(now.getTime() + 3600000).toISOString());
-        const endIso = prompt('Enter end time (ISO string):', new Date(now.getTime() + 14400000).toISOString());
-
-        const payload = {
-          microgridNodeId: mgId,
-          energyAmount: parseFloat(energyStr),
-          availableAmount: parseFloat(energyStr),
-          startTime: startIso,
-          endTime: endIso,
-          pricePerUnit: parseFloat(priceStr),
-          status: 'Available'
-        };
-
-        await MicrogridApi.createEnergySlot(payload);
-        ApiClient.showToast('Energy slot published successfully!', 'success');
-        loadSlots();
-      } catch (err) {
-        ApiClient.showToast(err.message || 'Failed to publish energy slot', 'error');
-      }
-    }
-
-    async function cancelSlot(id) {
-      if (!confirm('Are you sure you want to cancel this energy slot?')) return;
-
-      try {
-        await MicrogridApi.updateSlotStatus(id, 'Cancelled');
-        ApiClient.showToast('Energy slot cancelled', 'info');
-        loadSlots();
-      } catch (err) {
-        ApiClient.showToast(err.message || 'Failed to cancel slot', 'error');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', loadSlots);
-  </script>
+  <script src="../../js/common/energy-slots.js?v=20261016-1"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

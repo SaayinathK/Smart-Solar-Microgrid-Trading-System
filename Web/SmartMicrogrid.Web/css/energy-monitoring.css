@@ -1,0 +1,216 @@
+/* Animated current readings; no simulated telemetry or continuously moving charts. */
+.energy-monitoring-page [hidden] { display: none !important; }
+.energy-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 22px; }
+.energy-summary { padding: 20px; border: 1px solid var(--border-color); border-radius: 16px; background: var(--bg-card); }
+.energy-summary > span { display: block; color: var(--text-secondary); font-size: .75rem; margin-bottom: 10px; }
+.energy-summary > strong { display: block; font: 700 1.7rem/1.25 'Outfit', sans-serif; letter-spacing: -.03em; }
+.energy-summary > small { display: block; color: var(--text-secondary); font-size: .7rem; margin-top: 7px; }
+.energy-summary:first-child { border-color: color-mix(in srgb, #10b981 32%, var(--border-color)); background: color-mix(in srgb, #10b981 4%, var(--bg-card)); }
+.energy-monitoring-page .energy-chart-panel { min-width: 0; padding: 24px; margin-bottom: 22px; }
+.energy-panel-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 18px; }
+.energy-panel-heading h2 { margin: 0 0 6px; font-size: 1.1rem; }
+.energy-panel-heading p, .energy-refresh-status { margin: 0; color: var(--text-secondary); font-size: .77rem; line-height: 1.65; }
+.energy-refresh-status { margin: 0 0 18px; }
+.energy-svg-chart { width: 100%; height: auto; display: block; overflow: visible; }
+.energy-chart-label { fill: var(--text-secondary); font: 12px 'Plus Jakarta Sans', sans-serif; }
+.energy-chart-name { fill: var(--text-primary); font: 600 12px 'Plus Jakarta Sans', sans-serif; }
+.energy-chart-grid { stroke: var(--border-color); stroke-width: 1; }
+.energy-chart-track { fill: var(--bg-tertiary); }
+.energy-schedule-line { stroke: #10b981; stroke-width: 2.5; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.energy-chart-legend { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 16px; }
+.energy-chart-legend > span { display: flex; align-items: center; gap: 6px; font-size: .72rem; color: var(--text-secondary); }
+.energy-chart-legend i { width: 8px; height: 8px; border-radius: 50%; }
+.energy-chart-note { color: var(--text-secondary); font-size: .72rem; margin: 14px 0 0; line-height: 1.7; }
+.energy-chart-highlight { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 8px; }
+.energy-chart-highlight > span { color: var(--text-secondary); font-size: .76rem; }
+.energy-chart-highlight > strong { font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.energy-chart-highlight small { color: var(--text-secondary); font-size: .7rem; font-weight: 500; }
+.energy-chart-axis { display: flex; justify-content: space-between; gap: 12px; font-size: .68rem; color: var(--text-secondary); }
+.energy-gauge { --energy-color: #10b981; position: relative; width: 148px; height: 148px; flex: 0 0 148px; }
+.energy-tone-blue { --energy-color: #3b82f6; }
+.energy-tone-amber { --energy-color: #f59e0b; }
+.energy-gauge svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+.energy-ring-track, .energy-ring-fill { fill: none; stroke-width: 7; }
+.energy-ring-track { stroke: var(--bg-tertiary); }
+.energy-ring-fill { stroke: var(--energy-color); stroke-linecap: round; }
+.energy-gauge-value { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.energy-gauge-value > span { color: var(--energy-color); font-size: 1.65rem; font-weight: 700; line-height: 1; }
+.energy-gauge-value strong { font: 700 1.6rem/1.4 'Outfit', sans-serif; letter-spacing: -.03em; }
+.energy-gauge-value small { color: var(--text-secondary); font-size: .64rem; }
+.energy-battery { display: flex; align-items: center; width: 100%; margin: 15px 0 20px; }
+.energy-battery-cells { flex: 1; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3px; padding: 5px; height: 48px; border: 2px solid color-mix(in srgb, #10b981 50%, var(--border-color)); border-radius: 7px; }
+.energy-battery-cells > span { overflow: hidden; border-radius: 2px; background: var(--bg-tertiary); }
+.energy-battery-cells i { display: block; width: 100%; height: 100%; background: linear-gradient(180deg, #34d399, #0d9488); transform-origin: left; }
+.energy-battery-terminal { width: 6px; height: 19px; border-radius: 0 3px 3px 0; background: #0d9488; }
+.energy-meter { --energy-color: #10b981; height: 8px; width: 100%; overflow: hidden; border-radius: 99px; background: var(--bg-tertiary); }
+.energy-meter > span { display: block; width: 100%; height: 100%; background: var(--energy-color); border-radius: inherit; transform-origin: left; }
+.energy-meter.energy-tone-blue { --energy-color: #3b82f6; }
+.energy-meter.energy-tone-amber { --energy-color: #f59e0b; }
+.energy-chart-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.availability-publish-help { gap: 12px; min-height: 220px; }
+.availability-publish-help p { max-width: 640px; margin: 0 auto; font-size: .85rem; line-height: 1.75; }
+.availability-publish-help .btn { justify-self: center; }
+.availability-publish-help > small { max-width: 640px; margin: 0 auto; font-size: .75rem; line-height: 1.7; }
+.energy-monitoring-page #battery-cards-container, .energy-node-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 20px !important; }
+.energy-node-card { overflow: hidden; border: 1px solid var(--border-color); border-radius: 18px; background: var(--bg-card); box-shadow: var(--shadow-sm); }
+.energy-node-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding: 20px 22px; border-bottom: 1px solid var(--border-color); }
+.energy-node-head h3 { margin: 0 0 6px; font-size: 1.05rem; overflow-wrap: anywhere; }
+.energy-node-head > div { min-width: 0; }
+.energy-node-head p { color: var(--text-secondary); font-size: .74rem; margin: 0; overflow-wrap: anywhere; }
+.energy-node-head a { white-space: nowrap; }
+.energy-node-body { display: grid; grid-template-columns: minmax(140px, .85fr) minmax(0, 1.4fr); }
+.energy-node-photo { position: relative; min-height: 254px; isolation: isolate; display: grid; place-items: center; padding: 22px 12px; background: #102b4a; }
+.energy-node-photo::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(15,23,42,.22), rgba(15,23,42,.75)), url('../assets/images/img_solar_farm.jpg') center/cover; }
+.energy-node-photo .energy-gauge-value strong, .energy-node-photo .energy-gauge-value small { color: #fff; }
+.energy-node-photo .energy-ring-track { stroke: rgba(255,255,255,.25); }
+.energy-node-readings { min-width: 0; padding: 22px; display: flex; flex-direction: column; }
+.energy-reading-heading { display: flex; justify-content: space-between; gap: 10px; font-size: .76rem; color: var(--text-secondary); }
+.energy-reading-heading strong { color: var(--text-primary); font-size: .85rem; white-space: nowrap; }
+.energy-reading-list { display: grid; gap: 12px; margin: 0 0 18px; }
+.energy-reading-list > div { display: flex; justify-content: space-between; gap: 12px; }
+.energy-reading-list dt { color: var(--text-secondary); font-size: .73rem; font-weight: 500; }
+.energy-reading-list dd { margin: 0; font-size: .78rem; font-weight: 650; text-align: right; }
+.energy-node-readings .btn { margin-top: auto; }
+.energy-state-pill { border-radius: 99px; padding: 5px 9px; background: color-mix(in srgb, #10b981 10%, var(--bg-card)); color: var(--accent-emerald); font-size: .64rem; white-space: nowrap; }
+.energy-state-pill.warning { background: color-mix(in srgb, var(--accent-amber) 10%, var(--bg-card)); color: var(--accent-amber); }
+.energy-capacity-card { padding: 22px; }
+.energy-capacity-card .energy-node-head { padding: 0 0 18px; }
+.energy-capacity-overview { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 20px 0; }
+.energy-capacity-overview .energy-gauge { width: 130px; height: 130px; flex-basis: 130px; }
+.energy-capacity-total > span { display: block; font-size: .76rem; color: var(--text-secondary); margin-bottom: 8px; }
+.energy-capacity-total > strong { font-size: 1.7rem; letter-spacing: -.03em; }
+.energy-capacity-breakdown { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 0; }
+.energy-capacity-breakdown dt { font-size: .69rem; font-weight: 500; color: var(--text-secondary); }
+.energy-capacity-breakdown dd { margin: 6px 0 0; font-size: .9rem; font-weight: 700; }
+.energy-capacity-stack { display: flex; overflow: hidden; height: 10px; background: var(--bg-tertiary); border-radius: 99px; }
+.energy-capacity-stack > span { display: block; height: 100%; flex-shrink: 0; transform-origin: left; }
+.energy-data-note { font-size: .72rem; color: var(--accent-amber); margin: 15px 0 0; }
+.energy-empty { padding: 30px 22px; display: grid; gap: 8px; text-align: center; color: var(--text-secondary); border: 1px dashed var(--border-color); border-radius: 14px; background: var(--bg-card); grid-column: 1 / -1; }
+.energy-empty strong { color: var(--text-primary); font-size: .9rem; }
+.energy-empty span { font-size: .78rem; line-height: 1.7; }
+.energy-monitoring-page .energy-offer-card::before { display: none; }
+.energy-monitoring-page .energy-offer-card { padding: 0; }
+.energy-offer-photo { min-height: 155px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 22px; background: linear-gradient(90deg, rgba(15,23,42,.9), rgba(15,23,42,.4)), url('../assets/images/img_solar_farm.jpg') center/cover; }
+.energy-offer-photo h3 { font-size: 1.05rem; color: #fff; margin: 7px 0 0; }
+.energy-offer-photo > div:first-child { min-width: 0; overflow-wrap: anywhere; }
+.energy-offer-photo .offer-location { color: #bfdbfe; font-size: .64rem; }
+.energy-offer-photo .energy-gauge { width: 106px; height: 106px; flex: 0 0 106px; }
+.energy-offer-photo .energy-gauge-value strong { font-size: 1.15rem; color: #fff; }
+.energy-offer-photo .energy-gauge-value small { font-size: .55rem; color: #e2e8f0; }
+.energy-offer-photo .energy-ring-track { stroke: rgba(255,255,255,.2); }
+.energy-offer-body { padding: 20px; }
+.energy-offer-body .offer-metrics { margin-top: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.energy-offer-body .offer-metrics strong { overflow-wrap: anywhere; }
+.energy-offer-body .energy-meter { margin-top: 18px; }
+@media (max-width: 1200px) {
+  .energy-monitoring-page #battery-cards-container { grid-template-columns: minmax(0, 1fr) !important; }
+}
+@media (max-width: 760px) {
+  .energy-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .energy-chart-columns, .energy-node-grid { grid-template-columns: minmax(0, 1fr) !important; }
+}
+@media (max-width: 540px) {
+  .energy-node-body { grid-template-columns: minmax(0, 1fr); }
+  .energy-node-photo { min-height: 190px; padding: 18px; }
+  .energy-node-head { padding: 18px; flex-wrap: wrap; }
+  .energy-node-readings { padding: 20px; }
+  .energy-summary { padding: 16px; }
+  .energy-summary > strong { font-size: 1.35rem; overflow-wrap: anywhere; }
+  .energy-monitoring-page .energy-chart-panel { padding: 18px; }
+  .energy-capacity-card { padding: 18px; }
+  .energy-capacity-overview { gap: 12px; }
+  .energy-capacity-overview .energy-gauge { width: 110px; height: 110px; flex-basis: 110px; }
+  .energy-capacity-total > strong { font-size: 1.3rem; }
+  .energy-capacity-breakdown { gap: 8px; }
+  .energy-capacity-breakdown dd { font-size: .75rem; overflow-wrap: anywhere; }
+  .energy-offer-photo { padding: 18px; gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .energy-monitoring-page *, .energy-monitoring-page *::before, .energy-monitoring-page *::after { animation: none !important; transition: none !important; }
+}
+
+/* Compact capacity and storage workspaces. Availability retains its offer layout. */
+.energy-resource-page .page-intro { grid-template-columns: minmax(0, 1fr) minmax(170px, 24%); gap: 24px; margin-bottom: 18px; padding-bottom: 18px; }
+.energy-resource-page .page-intro-photo { min-height: 132px; border-radius: 12px; }
+.energy-resource-page .page-intro-title { font-size: clamp(1.45rem, 2vw, 1.85rem); }
+.energy-resource-page .page-intro-description { font-size: .8rem; }
+.energy-resource-page .page-intro-actions { margin-top: 12px; }
+.energy-resource-page .workspace-navigation { margin-bottom: 14px; }
+.energy-resource-page .workspace-navigation a { padding: 8px 12px; font-size: .73rem; }
+.energy-resource-page .energy-refresh-status { margin-bottom: 12px; font-size: .7rem; }
+.energy-overview-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr); gap: 18px; margin-bottom: 24px; }
+.energy-overview-layout .energy-summary-grid { grid-template-columns: minmax(0, 1fr); gap: 12px; margin: 0; }
+.energy-overview-layout .energy-summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: center; align-items: center; column-gap: 10px; min-width: 0; padding: 14px; border-radius: 12px; }
+.energy-overview-layout .energy-summary > span { font-size: .7rem; margin: 0; }
+.energy-overview-layout .energy-summary > strong { font-size: 1.25rem; overflow-wrap: anywhere; }
+.energy-overview-layout .energy-summary > small { grid-column: 1 / -1; margin-top: 4px; font-size: .65rem; line-height: 1.5; }
+.energy-resource-page .energy-chart-panel { margin: 0; padding: 18px 20px; border-radius: 13px; }
+.energy-resource-page .energy-panel-heading { margin-bottom: 14px; }
+.energy-resource-page .energy-panel-heading h2 { font-size: .93rem; }
+.energy-resource-page .energy-panel-heading p { font-size: .7rem; }
+.energy-resource-page .energy-chart-panel .energy-panel-heading h2 { margin-bottom: 5px; line-height: 1.3; }
+.energy-resource-page .energy-chart-panel .energy-panel-heading p { line-height: 1.5; }
+.energy-comparison-compact { display: grid; gap: 10px; }
+.energy-comparison-label { display: flex; align-items: baseline; gap: 14px; justify-content: space-between; margin-bottom: 5px; font-size: .73rem; line-height: 1.35; }
+.energy-comparison-label strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; color: var(--text-primary); }
+.energy-comparison-label > span { flex-shrink: 0; color: var(--text-secondary); font-size: .7rem; font-variant-numeric: tabular-nums; }
+.energy-comparison-track { display: flex; height: 6px; overflow: hidden; border-radius: 3px; background: var(--bg-tertiary); }
+.energy-comparison-track > span { display: block; height: 100%; flex-shrink: 0; transform-origin: left; }
+.energy-resource-page .energy-chart-legend { margin-top: 15px; gap: 8px 14px; }
+.energy-resource-page .energy-chart-legend > span, .energy-resource-page .energy-chart-note { font-size: .65rem; }
+.energy-resource-page .energy-chart-note { margin-top: 8px; }
+.energy-directory-heading { align-items: center; }
+.energy-node-count { flex-shrink: 0; padding: 5px 9px; border: 1px solid var(--border-color); border-radius: 7px; color: var(--text-secondary); background: var(--bg-secondary); font-size: .67rem; }
+.energy-resource-page .energy-node-grid, .energy-resource-page #battery-cards-container.energy-node-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 14px !important; }
+.energy-resource-page .energy-node-card { display: flex; flex-direction: column; min-width: 0; padding: 14px; border-radius: 12px; }
+.energy-resource-page .energy-node-head { gap: 10px; padding: 0 0 12px; flex-wrap: nowrap; }
+.energy-resource-page .energy-node-head h3 { margin-bottom: 4px; font-size: .8rem; line-height: 1.4; }
+.energy-resource-page .energy-node-head p { font-size: .66rem; }
+.energy-resource-page .energy-node-head .btn { min-height: 30px; padding: 5px 8px; font-size: .63rem; box-shadow: none; }
+.energy-resource-page .energy-state-pill { font-size: .58rem; padding: 4px 7px; border-radius: 6px; }
+.energy-resource-page .energy-gauge, .energy-resource-page .energy-capacity-overview .energy-gauge { width: 68px; height: 68px; flex: 0 0 68px; }
+.energy-resource-page .energy-gauge-value > span { display: none; }
+.energy-resource-page .energy-gauge-value strong { font-size: 1rem; }
+.energy-resource-page .energy-gauge-value small { font-size: .52rem; }
+.energy-resource-page .energy-capacity-overview { gap: 12px; padding: 12px 0; }
+.energy-resource-page .energy-capacity-total > span { margin-bottom: 6px; font-size: .66rem; }
+.energy-resource-page .energy-capacity-total > strong { font-size: 1.25rem; }
+.energy-resource-page .energy-capacity-stack { height: 6px; }
+.energy-resource-page .energy-capacity-breakdown { gap: 8px; margin-top: 12px; }
+.energy-resource-page .energy-capacity-breakdown dt { font-size: .62rem; }
+.energy-resource-page .energy-capacity-breakdown dd { margin-top: 5px; font-size: .76rem; overflow-wrap: anywhere; }
+.energy-resource-page .energy-data-note { margin-top: 10px; font-size: .62rem; line-height: 1.5; }
+.energy-battery-overview { display: flex; align-items: center; gap: 14px; margin: 12px 0; }
+.energy-battery-stored { flex: 1; min-width: 0; }
+.energy-battery-stored > span { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: .66rem; }
+.energy-battery-stored > strong { font-size: 1.35rem; line-height: 1.3; letter-spacing: -.02em; }
+.energy-battery-stored > strong small { font-size: .74rem; font-weight: 500; color: var(--text-secondary); }
+.energy-battery-stored .energy-battery { margin: 10px 0 0; }
+.energy-battery-stored .energy-battery-cells { height: 24px; padding: 3px; gap: 2px; border-width: 1px; border-radius: 4px; }
+.energy-battery-stored .energy-battery-terminal { width: 4px; height: 11px; }
+.energy-storage-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0 0 12px; }
+.energy-storage-metrics dt { color: var(--text-secondary); font-size: .65rem; font-weight: 500; }
+.energy-storage-metrics dd { margin: 5px 0 0; color: var(--text-primary); font-size: .78rem; font-weight: 600; }
+.energy-node-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: auto; padding-top: 10px; border-top: 1px solid var(--border-color); }
+.energy-node-footer > span { color: var(--text-secondary); font-size: .6rem; line-height: 1.5; }
+.energy-node-footer .btn { flex-shrink: 0; min-height: 32px; padding: 5px 9px; font-size: .64rem; box-shadow: none; }
+@media (max-width: 1350px) {
+  .energy-resource-page .energy-node-grid, .energy-resource-page #battery-cards-container.energy-node-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 1050px) {
+  .energy-overview-layout { grid-template-columns: minmax(0, 1fr); }
+  .energy-overview-layout .energy-summary-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .energy-overview-layout .energy-summary { display: block; }
+  .energy-overview-layout .energy-summary > span { margin-bottom: 7px; }
+}
+@media (max-width: 760px) {
+  .energy-resource-page .page-intro { grid-template-columns: minmax(0, 1fr); }
+  .energy-resource-page .page-intro-photo { display: none; }
+  .energy-overview-layout .energy-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .energy-resource-page .energy-node-grid, .energy-resource-page #battery-cards-container.energy-node-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .energy-resource-page .energy-node-head { padding: 0 0 12px; }
+  .energy-resource-page .energy-node-head .btn { min-height: 36px; }
+  .energy-node-footer .btn { min-height: 40px; }
+  .energy-resource-page .energy-chart-panel { padding: 17px; }
+  .energy-overview-layout { gap: 14px; margin-bottom: 20px; }
+}

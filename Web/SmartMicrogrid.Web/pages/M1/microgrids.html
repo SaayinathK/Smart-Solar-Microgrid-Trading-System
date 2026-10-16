@@ -6,10 +6,17 @@
   <title>Microgrids - Smart Microgrid Platform</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../../css/style.css">
-  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/sidebar.css?v=20261016-search-1">
   <link rel="stylesheet" href="../../css/tables.css">
   <link rel="stylesheet" href="../../css/forms.css">
   <link rel="stylesheet" href="../../css/interface.css">
+  <link rel="stylesheet" href="../../vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="../../css/location-picker.css">
+  <link rel="stylesheet" href="../../css/microgrid-registration.css?v=20261016-1">
+  <link rel="stylesheet" href="../../css/spacing.css?v=20261016-1">
+  <link rel="icon" type="image/png" href="../../assets/images/smart_micro.png">
+  <link rel="apple-touch-icon" href="../../assets/images/smart_micro.png">
+  <link rel="stylesheet" href="../../css/brand.css?v=20261016-1">
 </head>
 <body>
 
@@ -34,7 +41,7 @@
           </p>
         </div>
         <div id="operator-actions" style="display: none;">
-          <a href="create-microgrid.html" class="btn btn-primary">+ Register New Microgrid</a>
+          <button type="button" id="register-microgrid" class="btn btn-primary" aria-haspopup="dialog" aria-controls="microgrid-registration-dialog">+ Register New Microgrid</button>
         </div>
       </div>
 
@@ -69,7 +76,7 @@
           </thead>
           <tbody id="microgrids-table-body">
             <tr>
-              <td colspan="6" style="text-align: center; padding: 2rem;">Loading microgrids...</td>
+              <td colspan="7" style="text-align: center; padding: 2rem;">Loading microgrids...</td>
             </tr>
           </tbody>
         </table>
@@ -77,14 +84,73 @@
     </div>
   </div>
 
+  <dialog id="microgrid-registration-dialog" class="microgrid-registration-dialog" aria-labelledby="registration-title" aria-describedby="registration-description">
+    <form id="create-microgrid-form">
+      <header class="registration-header">
+        <div class="registration-heading">
+          <span class="registration-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m13 2-9 12h7l-1 8 10-12h-7l1-8Z"/></svg></span>
+          <div><span class="registration-eyebrow">SOLAR NETWORK</span><h2 id="registration-title">Register a microgrid</h2><p id="registration-description">Add a generation site and configure its location and battery storage.</p></div>
+        </div>
+        <button type="button" class="registration-close" data-registration-close aria-label="Close registration">&times;</button>
+      </header>
+
+      <div class="registration-body">
+        <p id="registration-error" class="registration-error" role="alert" tabindex="-1" hidden></p>
+        <fieldset class="registration-identity">
+          <legend>Node details</legend>
+          <div class="registration-identity-fields">
+            <div class="form-group"><label for="name">Microgrid name <span aria-hidden="true">*</span></label><input id="name" class="form-control" type="text" placeholder="e.g. Colombo Solar Hub" required autofocus></div>
+            <div class="form-group"><label for="status">Operating status <span aria-hidden="true">*</span></label><select id="status" class="form-control" required><option value="Active">Active</option><option value="Inactive">Inactive</option><option value="Maintenance">Maintenance</option></select></div>
+          </div>
+        </fieldset>
+
+        <div class="registration-columns">
+          <fieldset class="registration-section">
+            <legend><span class="registration-step" aria-hidden="true">01</span> Site location</legend>
+            <p class="registration-section-note">Find an address, choose a map point, or enter coordinates.</p>
+            <div class="form-group"><label for="location">Location / address <span aria-hidden="true">*</span></label><input id="location" type="text" class="form-control" placeholder="Street address, city, country" aria-describedby="location-status" required><small id="location-status" class="location-address-status" role="status">Enter an address to find its coordinates.</small></div>
+            <div class="registration-field-pair">
+              <div class="form-group"><label for="latitude">Latitude <span aria-hidden="true">*</span></label><input id="latitude" class="form-control" type="number" step="any" min="-90" max="90" placeholder="6.9271" required aria-describedby="registration-coordinates-note"></div>
+              <div class="form-group"><label for="longitude">Longitude <span aria-hidden="true">*</span></label><input id="longitude" class="form-control" type="number" step="any" min="-180" max="180" placeholder="79.8612" required aria-describedby="registration-coordinates-note"></div>
+            </div>
+            <small id="registration-coordinates-note" class="registration-help">Latitude: −90 to 90 &middot; Longitude: −180 to 180</small>
+            <div id="location-picker" class="location-picker"></div>
+          </fieldset>
+
+          <fieldset class="registration-section">
+            <legend><span class="registration-step" aria-hidden="true">02</span> Generation &amp; storage</legend>
+            <p class="registration-section-note">Set generation output and the initial battery readings.</p>
+            <div class="registration-field-pair">
+              <div class="form-group"><label for="capacity">Generation capacity <span aria-hidden="true">*</span></label><div class="registration-unit-input"><input id="capacity" class="form-control" type="number" min="0.1" step="0.1" placeholder="500" required><span aria-hidden="true">kW</span></div></div>
+              <div class="form-group"><label for="batteryStorageSlots">Battery storage slots <span aria-hidden="true">*</span></label><input id="batteryStorageSlots" class="form-control" type="number" min="0" step="1" placeholder="24" required></div>
+              <div class="form-group"><label for="batteryCapacity">Battery capacity <span aria-hidden="true">*</span></label><div class="registration-unit-input"><input id="batteryCapacity" class="form-control" type="number" min="0" step="0.1" placeholder="200" required><span aria-hidden="true">kWh</span></div></div>
+              <div class="form-group"><label for="currentBatteryLevel">Initial battery level <span aria-hidden="true">*</span></label><div class="registration-unit-input"><input id="currentBatteryLevel" class="form-control" type="number" min="0" step="0.1" placeholder="150" aria-describedby="registration-battery-note" required><span aria-hidden="true">kWh</span></div></div>
+            </div>
+            <small id="registration-battery-note" class="registration-help">Initial charge must be between zero and the battery capacity.</small>
+            <div class="form-group registration-description-field"><label for="description">Description <span class="registration-optional">Optional</span></label><textarea id="description" class="form-control" rows="4" placeholder="Panel models, inverter specifications, or notes about this site..."></textarea></div>
+            <div class="registration-note"><strong>Next: publish an energy offer</strong><p>Registration adds the site to your network. To show its energy on Availability, publish an energy slot from Energy Slots with an amount, price, and future delivery window. The microgrid must be Active.</p></div>
+          </fieldset>
+        </div>
+      </div>
+
+      <footer class="registration-footer">
+        <small><span aria-hidden="true">*</span> Required fields</small>
+        <div><button type="button" class="btn btn-secondary" data-registration-close>Cancel</button><button id="registration-submit" type="submit" class="btn btn-primary">Create microgrid</button></div>
+      </footer>
+    </form>
+  </dialog>
+
   <script src="../../js/config/api-config.js"></script>
+  <script src="../../vendor/leaflet/leaflet.js"></script>
+  <script src="../../js/common/openstreet-map.js"></script>
   <script src="../../js/common/theme.js"></script>
   <script src="../../js/common/session.js"></script>
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/api/microgrid-api.js"></script>
   <script src="../../js/common/auth.js"></script>
   <script src="../../js/common/page-template.js"></script>
-  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/common/sidebar.js?v=20261016-logo-1"></script>
+  <script src="../../js/common/location-picker.js"></script>
 
   <script>
     AuthGuard.requireAuth();
@@ -107,7 +173,7 @@
         const list = response.data || [];
 
         if (list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;">No microgrids found matching criteria.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">No microgrids found matching criteria.</td></tr>`;
           return;
         }
 
@@ -150,7 +216,7 @@
           `;
         }).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--accent-danger); padding: 2rem;">Failed to load microgrids: ${err.message || 'Server error'}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--accent-danger); padding: 2rem;">Failed to load microgrids: ${err.message || 'Server error'}</td></tr>`;
       }
     }
 
@@ -169,6 +235,7 @@
 
     document.addEventListener('DOMContentLoaded', loadMicrogrids);
   </script>
+  <script src="../../js/common/microgrid-registration.js?v=20261016-1"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
