@@ -66,6 +66,7 @@
         r.microgridNodeName,
         r.microgridNodeId,
         vCode,
+        RecordReferences.label('RES', idOf(r), rows.map(item => idOf(item))),
         idOf(r)
       ].join(' ').toLowerCase();
 
@@ -96,10 +97,9 @@
     body.innerHTML = filtered.map(r => {
       const statusName = String(r.status || 'Pending');
       const id = esc(idOf(r));
-      const vCode = esc(r.verificationCode || `SMG-RES-${(idOf(r)).slice(-6).toUpperCase()}`);
       const price = Number(r.pricePerUnit || 0);
       const estCost = Number(r.totalEstimatedCost || (r.energyAmount * price) || 0);
-      const costDisplay = estCost > 0 ? `$${estCost.toFixed(2)}` : 'Market rate';
+      const costDisplay = estCost > 0 ? `LKR ${estCost.toFixed(2)}` : 'Market rate (LKR)';
 
       // Role Action Matrix
       let actionButtons = [];
@@ -140,11 +140,7 @@
             <strong>${esc(fmt(r.startTime || r.reservationDate, { month: 'short', day: 'numeric', year: 'numeric' }))}</strong>
             <span>${esc(fmt(r.startTime, { hour: '2-digit', minute: '2-digit' }))}${r.endTime ? ` – ${esc(fmt(r.endTime, { hour: '2-digit', minute: '2-digit' }))}` : ''}</span>
           </td>
-          <td>
-            <span class="verification-code-badge" data-action="pass" data-id="${id}" title="Click to view Pass">
-              🏷️ ${vCode}
-            </span>
-          </td>
+          <td data-reservation-reference="${id}"></td>
           <td class="pass-cell">
             <button class="btn btn-outline-primary btn-sm pass-button" data-action="pass" data-id="${id}" title="View Digital Pass and QR">
               View pass
@@ -161,6 +157,9 @@
         </tr>
       `;
     }).join('');
+    body.querySelectorAll('[data-reservation-reference]').forEach(cell => {
+      RecordReferences.renderInto(cell, 'RES', cell.dataset.reservationReference, rows.map(item => idOf(item)));
+    });
   }
 
   async function load() {
@@ -216,7 +215,8 @@
   async function loadAvailableSlots() {
     const container = document.getElementById('slot-picker-container');
     if (!container) return;
-    container.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-secondary);">Loading available slots…</div>';
+    container.setAttribute('aria-busy', 'true');
+    container.innerHTML = '<p class="slot-picker-state" role="status">Loading available slots…</p>';
 
     try {
       const response = await ApiClient.get('/energy-availability');
@@ -224,7 +224,7 @@
       availableSlots = slots.filter(s => Number(s.availableAmount || 0) > 0);
 
       if (!availableSlots.length) {
-        container.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-secondary);">No slots currently available for booking. Check back shortly.</div>';
+        container.innerHTML = '<p class="slot-picker-state" role="status">No slots are available right now. Try again later, or enter a known slot ID below.</p>';
         return;
       }
 
@@ -232,16 +232,16 @@
         const slotId = slot.energySlotId || slot.id || '';
         const price = Number(slot.pricePerUnit || 0);
         return `
-          <div class="slot-picker-item ${index === 0 ? 'selected' : ''}" data-slot-id="${esc(slotId)}" data-price="${price}" data-max="${slot.availableAmount}">
-            <div class="slot-picker-info">
+          <button type="button" class="slot-picker-item ${index === 0 ? 'selected' : ''}" aria-pressed="${index === 0}" data-slot-id="${esc(slotId)}" data-price="${price}" data-max="${slot.availableAmount}">
+            <span class="slot-picker-info">
               <strong>${esc(slot.microgridName || 'Solar Microgrid')}</strong>
               <small>${esc(slot.location || 'Local Grid')} · ${fmt(slot.startTime, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</small>
-            </div>
-            <div class="slot-picker-meta">
-              <div class="slot-price">$${price.toFixed(2)}/kWh</div>
-              <div class="slot-kwh">${Number(slot.availableAmount).toFixed(1)} kWh left</div>
-            </div>
-          </div>
+            </span>
+            <span class="slot-picker-meta">
+              <span class="slot-price">LKR ${price.toFixed(2)} / kWh</span>
+              <span class="slot-kwh">${Number(slot.availableAmount).toFixed(1)} kWh left</span>
+            </span>
+          </button>
         `;
       }).join('');
 
@@ -250,7 +250,9 @@
         selectSlot(availableSlots[0]);
       }
     } catch (e) {
-      container.innerHTML = `<div style="padding: 12px; text-align: center; color: var(--text-secondary);">Could not load slots: ${esc(e.message)}</div>`;
+      container.innerHTML = '<p class="slot-picker-state" role="status">Available slots could not be loaded. Try again, or enter a known slot ID below.</p>';
+    } finally {
+      container.setAttribute('aria-busy', 'false');
     }
   }
 
@@ -281,7 +283,7 @@
     }
     const amount = Number(amountInput.value || 0);
     const total = Math.max(0, amount * price);
-    costInput.value = `$${total.toFixed(2)} ($${price.toFixed(2)}/kWh)`;
+    costInput.value = `LKR ${total.toFixed(2)} (LKR ${price.toFixed(2)} / kWh)`;
   }
 
   // QR Code generator (Vector SVG)
@@ -333,12 +335,13 @@
     const estCost = Number(r.totalEstimatedCost || (r.energyAmount * price) || 0);
 
     document.getElementById('pass-verification-code').textContent = vCode;
+    RecordReferences.renderInto(document.getElementById('pass-reservation-id'), 'RES', id, reservations.map(item => idOf(item)));
     document.getElementById('pass-qr-svg').innerHTML = renderSvgQr(vCode);
     document.getElementById('pass-prosumer-name').textContent = r.prosumerName || 'Registered Prosumer';
     document.getElementById('pass-prosumer-nic').textContent = `NIC: ${r.prosumerId || '—'}`;
     document.getElementById('pass-node-name').textContent = r.microgridName || r.microgridNodeName || 'Microgrid Hub';
     document.getElementById('pass-energy-amount').textContent = `${r.energyAmount} kWh`;
-    document.getElementById('pass-total-cost').textContent = estCost > 0 ? `$${estCost.toFixed(2)}` : 'Market Rate';
+    document.getElementById('pass-total-cost').textContent = estCost > 0 ? `LKR ${estCost.toFixed(2)}` : 'Market rate (LKR)';
     document.getElementById('pass-schedule-window').textContent = `${fmt(r.startTime, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })} – ${fmt(r.endTime, { hour: '2-digit', minute: '2-digit' })}`;
 
     const statusBadge = document.getElementById('pass-status-badge');
@@ -465,8 +468,12 @@
     slotPickerContainer.addEventListener('click', e => {
       const item = e.target.closest('.slot-picker-item');
       if (!item) return;
-      document.querySelectorAll('.slot-picker-item').forEach(i => i.classList.remove('selected'));
+      document.querySelectorAll('.slot-picker-item').forEach(i => {
+        i.classList.remove('selected');
+        i.setAttribute('aria-pressed', 'false');
+      });
       item.classList.add('selected');
+      item.setAttribute('aria-pressed', 'true');
       const slotId = item.dataset.slotId;
       document.getElementById('input-slot-id').value = slotId;
       updateEstimatedCost(Number(item.dataset.price || 0));
@@ -481,9 +488,11 @@
   // Create Reservation Button & Form
   const btnNewRes = document.getElementById('new-reservation');
   if (btnNewRes) {
-    btnNewRes.addEventListener('click', async () => {
-      await loadAvailableSlots();
+    btnNewRes.addEventListener('click', () => {
+      document.getElementById('reservation-form-error').hidden = true;
       document.getElementById('reservation-dialog').showModal();
+      document.getElementById(role === 'Prosumer' ? 'input-slot-id' : 'input-prosumer-nic').focus();
+      loadAvailableSlots();
     });
   }
 
@@ -491,9 +500,13 @@
   if (reservationForm) {
     reservationForm.addEventListener('submit', async event => {
       event.preventDefault();
-      const form = new FormData(event.currentTarget);
+      const submittedForm = event.currentTarget;
+      const form = new FormData(submittedForm);
       const submit = document.getElementById('save-reservation');
+      const errorMessage = document.getElementById('reservation-form-error');
+      errorMessage.hidden = true;
       submit.disabled = true;
+      submit.textContent = 'Reserving…';
 
       const payload = {
         energySlotId: form.get('energySlotId')?.toString().trim(),
@@ -506,13 +519,16 @@
       try {
         await ReservationApi.create(payload);
         document.getElementById('reservation-dialog').close();
-        event.currentTarget.reset();
+        submittedForm.reset();
         ApiClient.showToast('Reservation submitted successfully.', 'success');
         await load();
       } catch (err) {
-        ApiClient.showToast(err?.message || 'Unable to create reservation.', 'error');
+        errorMessage.textContent = err?.message || 'Unable to create reservation. Please try again.';
+        errorMessage.hidden = false;
+        errorMessage.focus();
       } finally {
         submit.disabled = false;
+        submit.textContent = 'Confirm Reservation';
       }
     });
   }

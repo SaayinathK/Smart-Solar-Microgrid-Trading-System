@@ -1,0 +1,20 @@
+.energy-offer-card { position: relative; }
+.energy-offer-card:has(.energy-offer-reserve):hover { border-color: var(--accent-primary); box-shadow: var(--shadow-md); }
+.energy-offer-card:has(.energy-offer-reserve:focus-visible) { outline: 3px solid var(--accent-primary); outline-offset: 3px; }
+.energy-offer-reserve, .energy-offer-reserve:hover { position: static; width: 100%; justify-content: space-between; margin-top: 16px; min-height: 44px; transform: none; }
+.energy-offer-reserve::after { content: ''; position: absolute; inset: 0; z-index: 1; border-radius: inherit; cursor: pointer; }
+.availability-booking-success { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding: 14px 16px; border: 1px solid var(--accent-emerald); border-radius: 12px; background: var(--bg-secondary); color: var(--text-primary); font-size: .82rem; }
+.booking-offer-summary { padding: 16px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-primary); }
+.booking-eyebrow { color: var(--accent-primary); font-size: .62rem; font-weight: 700; letter-spacing: .1em; }
+.booking-offer-summary h3 { font-size: 1.08rem; margin: 6px 0; }
+.booking-offer-summary > p { margin: 0; color: var(--text-secondary); font-size: .77rem; }
+.booking-supply-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
+.booking-supply-details span, .booking-delivery > span { display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: .7rem; }
+.booking-supply-details strong { font-size: .9rem; }
+.booking-delivery { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-color); }
+.booking-delivery strong { display: block; font-size: .76rem; font-weight: 500; line-height: 1.6; }
+.offer-booking-dialog .booking-estimate { display: flex; align-items: center; background: var(--bg-tertiary) !important; color: var(--accent-primary) !important; font-weight: 700; }
+.offer-booking-dialog .reservation-field-help { font-weight: 400; }
+.offer-booking-dialog .reservation-amount-row { align-items: start; }
+.offer-booking-dialog button:disabled { opacity: .6; cursor: wait; }
+.offer-booking-dialog [hidden] { display: none !important; }
