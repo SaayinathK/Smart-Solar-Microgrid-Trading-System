@@ -114,6 +114,16 @@ namespace SmartMicrogrid.API.Repositories.Implementation
         /// Updates the specified async record.
         /// </summary>
 
+        public Task<Transaction?> TryIssueQrAsync(string id, string code, string payload, DateTime updatedAt)
+        {
+            var filter = Builders<Transaction>.Filter.Eq(t => t.Id, id) &
+                Builders<Transaction>.Filter.Eq(t => t.Status, "Pending");
+            var update = Builders<Transaction>.Update.Set(t => t.TransactionCode, code)
+                .Set(t => t.QrCodeData, payload).Set(t => t.Status, "QRGenerated").Set(t => t.UpdatedAt, updatedAt);
+            return _transactions.FindOneAndUpdateAsync(filter, update,
+                new FindOneAndUpdateOptions<Transaction> { ReturnDocument = ReturnDocument.After })!;
+        }
+
         public async Task<Transaction?> UpdateAsync(
             Transaction transaction)
         {

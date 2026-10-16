@@ -54,19 +54,13 @@ namespace SmartMicrogrid.API.Data
         }
 
         /// <summary>
-        /// Drops all collections, regenerates database indexes, and seeds rich interrelated datasets across all models.
+        /// Drops the database, regenerates database indexes, and seeds rich interrelated datasets across all models.
         /// </summary>
         public static async Task ReseedAllAsync(MongoDbContext context)
         {
-            // Execute complete database drop and clean wipe of all collections
-            var db = context.Database;
-            await db.DropCollectionAsync(MongoCollections.Users);
-            await db.DropCollectionAsync(MongoCollections.Microgrids);
-            await db.DropCollectionAsync(MongoCollections.EnergySlots);
-            await db.DropCollectionAsync(MongoCollections.Reservations);
-            await db.DropCollectionAsync(MongoCollections.Transactions);
-            await db.DropCollectionAsync(MongoCollections.SystemActivity);
-            await db.DropCollectionAsync(MongoCollections.SystemConfiguration);
+            // Drop the whole database so legacy or otherwise unregistered collections
+            // cannot survive a reset and be mistaken for current seed data.
+            await context.Database.Client.DropDatabaseAsync(context.Database.DatabaseNamespace.DatabaseName);
 
             // Recreate all database indexes cleanly
             context.EnsureIndexes();
@@ -520,7 +514,7 @@ namespace SmartMicrogrid.API.Data
             foreach (var transaction in transactions)
             {
                 if (!string.IsNullOrEmpty(transaction.QrCodeData))
-                    transaction.QrCodeData = $"SMART-MICROGRID|TRANSACTION|{transaction.Id}|{transaction.TransactionCode}";
+                    transaction.QrCodeData = TransactionQrPayload.Create(transaction.Id, transaction.TransactionCode);
             }
 
             // ─────────────────────────────────────────────────────────────

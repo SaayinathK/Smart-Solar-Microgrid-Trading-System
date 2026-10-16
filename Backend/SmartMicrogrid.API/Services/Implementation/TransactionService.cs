@@ -7,6 +7,7 @@
 // Description: Business logic service implementing TransactionService operations, rules, and workflows.
 // ===========================================================================================================
 using System.Security.Cryptography;
+using SmartMicrogrid.API.Helpers;
 
 using SmartMicrogrid.API.DTOs.Transactions;
 using SmartMicrogrid.API.Models.Common;
@@ -322,7 +323,7 @@ namespace SmartMicrogrid.API.Services.Implementation
 
 
             transaction.QrCodeData =
-                $"SMART-MICROGRID|TRANSACTION|{transaction.Id}|{transactionCode}";
+                TransactionQrPayload.Create(transaction.Id, transactionCode);
 
 
             transaction.Status =
@@ -332,8 +333,9 @@ namespace SmartMicrogrid.API.Services.Implementation
                 DateTime.UtcNow;
 
 
-            await _transactionRepository
-                .UpdateAsync(transaction);
+            transaction = await _transactionRepository.TryIssueQrAsync(transaction.Id,
+                transaction.TransactionCode, transaction.QrCodeData, transaction.UpdatedAt)
+                ?? throw new TransactionConflictException("The transaction changed or its QR was already issued. Refresh to use the existing QR.");
 
 
             return new GenerateQrResponse
@@ -662,6 +664,11 @@ namespace SmartMicrogrid.API.Services.Implementation
                     .UpdateAsync(transaction);
             }
 
+
+            // Keep the transfer retryable until the reservation has also been completed.
+            // MarkCompletedAsync verifies the persisted M3 verification and operator identity.
+            await _reservationService.MarkCompletedAsync(
+                transaction.ReservationId, currentUserId, currentUserId);
 
             transaction.Status =
                 "Completed";

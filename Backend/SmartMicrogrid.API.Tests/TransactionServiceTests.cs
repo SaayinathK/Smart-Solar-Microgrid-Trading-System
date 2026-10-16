@@ -150,7 +150,7 @@ namespace SmartMicrogrid.API.Tests
                 Status = "Pending"
             };
             _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
-            _transactions.Setup(x => x.UpdateAsync(transaction)).ReturnsAsync(transaction);
+            _transactions.Setup(x => x.TryIssueQrAsync(transaction.Id, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateTime>())).ReturnsAsync(transaction);
 
             var result = await _service.GenerateQrAsync(transaction.Id, "operator1");
 
@@ -328,6 +328,7 @@ namespace SmartMicrogrid.API.Tests
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.VerifyAsync(transaction.Id,
                 new VerifyTransactionRequest { QrCodeData = "valid-qr" }, "verifier1", "verifier1"));
             _reservations.Verify(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _reservations.Verify(x => x.MarkCompletedAsync(transaction.ReservationId, "verifier1", "verifier1"), Times.Once);
         }
         /// <summary>
         /// Verifies and validates async_missing reservation_is rejected and transaction rejected criteria.

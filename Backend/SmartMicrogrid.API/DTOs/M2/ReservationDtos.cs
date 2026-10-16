@@ -35,7 +35,6 @@ public class ReservationResponseDto
     public string? MicrogridName { get; set; }
     public double PricePerUnit { get; set; }
     public double TotalEstimatedCost { get; set; }
-    public string VerificationCode { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<ReservationStatusEvent> StatusHistory { get; set; } = new();

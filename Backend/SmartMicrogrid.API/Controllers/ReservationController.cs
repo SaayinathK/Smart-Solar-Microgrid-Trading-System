@@ -141,14 +141,8 @@ _service = service; _users = users; }
     /// Performs complete operation.
     /// </summary>
     [HttpPatch("{id}/complete"), Authorize(Roles="Admin,MicrogridOperator")]
-    public async Task<IActionResult> Complete(string id)
-    {
-        // Execute complete operations
-        try { return Ok(ApiResponse<object>.SuccessResponse(await _service.MarkCompletedAsync(id, ActorId, IsOperator ? ActorId : null), "Reservation completed.")); }
-        catch (KeyNotFoundException ex) { return NotFound(ApiResponse<object>.FailureResponse(ex.Message)); }
-        catch (ArgumentException ex) { return BadRequest(ApiResponse<object>.FailureResponse(ex.Message)); }
-        catch (UnauthorizedAccessException ex) { return StatusCode(403, ApiResponse<object>.FailureResponse(ex.Message)); }
-    }
+    public IActionResult Complete(string id) => Conflict(ApiResponse<object>.FailureResponse(
+        "Reservation-only completion is no longer supported. Open its M3 transaction, verify the transaction QR, and confirm energy transfer."));
     /// <summary>
     /// Performs has active for node operation.
     /// </summary>

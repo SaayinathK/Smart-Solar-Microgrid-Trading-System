@@ -184,9 +184,11 @@ namespace SmartMicrogrid.API.Data
                 operatorById.TryGetValue(ownerId ?? string.Empty, out var owner);
 
                 var code = $"SMG-{now.Year}-{100000 + i * 37}";
+                var transactionId = MongoDB.Bson.ObjectId.GenerateNewId().ToString();
 
                 transactions.Add(new Transaction
                 {
+                    Id = transactionId,
                     ReservationId = reservation.Id ?? string.Empty,
                     ProsumerId = reservation.ProsumerId,
                     MicrogridNodeId = reservation.MicrogridNodeId,
@@ -194,7 +196,7 @@ namespace SmartMicrogrid.API.Data
                     EnergyAmount = reservation.EnergyAmount,
                     TransactionCode = HasCode(status) ? code : string.Empty,
                     QrCodeData = HasQr(status)
-                        ? $"SMART-MICROGRID|TRANSACTION|pending|{code}"
+                        ? TransactionQrPayload.Create(transactionId, code)
                         : string.Empty,
                     VerifiedBy = IsVerifiedOrBeyond(status) ? owner?.Id : null,
                     VerificationTime = IsVerifiedOrBeyond(status)

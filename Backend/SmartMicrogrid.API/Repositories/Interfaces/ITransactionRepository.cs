@@ -51,5 +51,8 @@ namespace SmartMicrogrid.API.Repositories.Interfaces
         /// </summary>
 
         Task<Transaction?> UpdateAsync(Transaction transaction);
+
+        // Compare-and-set prevents concurrent clients from issuing two QR payloads for one transaction.
+        Task<Transaction?> TryIssueQrAsync(string id, string code, string payload, DateTime updatedAt);
     }
 }

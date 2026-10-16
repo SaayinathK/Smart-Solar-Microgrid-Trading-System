@@ -181,6 +181,9 @@ using (var scope = app.Services.CreateScope())
 {
     var mongoContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
 
+    await DbSeeder.MigrateTransactionQrPayloadsAsync(mongoContext);
+    if (args.Contains("--migrate-qr")) return;
+
     // Explicit one-shot insertion exits before background services or the HTTP server start.
     if (args.Contains("--seed"))
     {

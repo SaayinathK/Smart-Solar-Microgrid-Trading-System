@@ -23,7 +23,7 @@ dotnet run --project Backend/SmartMicrogrid.API --no-launch-profile -- --environ
 
 This one-shot command uses the API's configured MongoDB database and inserts missing users, microgrids, energy slots, reservations, transactions, system configuration, and activity records. Prices are in LKR and new delivery windows are relative to the execution time. It preserves existing records, passwords, configuration, and workflow changes. Repeating it does not duplicate the same demo dataset or refresh its delivery dates. It prints insertion counts and verifies every demo record before exiting.
 
-The separate `--reseed` option deletes the seven collections before rebuilding them; use it only when an intentional database reset is required.
+The separate `--reseed` option drops the configured MongoDB database, including any legacy or unregistered collections, before rebuilding the complete demonstration dataset; use it only when an intentional database reset is required.
 
 ### 1. Local Publish Command
 ```powershell

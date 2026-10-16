@@ -189,6 +189,11 @@ _reservations = reservations; _db = db; _users = users; }
         // Execute mark completed async operations
         var current = await _reservations.GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
         if (!string.IsNullOrWhiteSpace(operatorId)) await EnsureOperatorAccessAsync(current.MicrogridNodeId, current.EnergySlotId, operatorId);
+        var transaction = await _db.Transactions.Find(t => t.ReservationId == id).FirstOrDefaultAsync();
+        if (transaction == null || transaction.Status is not ("EnergyTransferInProgress" or "Completed") ||
+            transaction.VerificationTime == null || transaction.VerifiedBy != actorId)
+            throw new InvalidOperationException("Complete delivery through the verified M3 transaction workflow.");
+        if (current.Status == "Completed") return await GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
         if (current.Status != "Approved") throw new ArgumentException("Only approved reservations can be completed.");
         if (!await _reservations.MarkCompletedAsync(id, actorId)) throw new InvalidOperationException("Reservation was already changed.");
         return await GetByIdAsync(id) ?? throw new KeyNotFoundException("Reservation not found.");
@@ -210,6 +215,9 @@ _reservations = reservations; _db = db; _users = users; }
         foreach (var reservation in await _reservations.GetApprovedEndedAsync(DateTime.UtcNow))
         {
             cancellationToken.ThrowIfCancellationRequested();
+            // A verified physical transfer must remain completable even if its window ends.
+            if (await _db.Transactions.Find(t => t.ReservationId == reservation.Id &&
+                (t.Status == "Verified" || t.Status == "EnergyTransferInProgress" || t.Status == "Completed")).AnyAsync()) continue;
             if (reservation.Id != null) await _reservations.TransitionAsync(reservation.Id, "Approved", "Expired", "reservation-expiry-service");
         }
     }
@@ -272,7 +280,6 @@ _reservations = reservations; _db = db; _users = users; }
     {
         // Execute map operations
         var price = slotMap != null && !string.IsNullOrEmpty(r.EnergySlotId) && slotMap.TryGetValue(r.EnergySlotId, out var p) ? p : 0.0;
-        var code = r.Id != null && r.Id.Length >= 6 ? $"SMG-RES-{r.Id[^6..].ToUpperInvariant()}" : "SMG-RES-000000";
         var prosumerName = userMap != null && !string.IsNullOrEmpty(r.ProsumerId) && userMap.TryGetValue(r.ProsumerId, out var name) ? name : null;
         var nodeName = nodeMap != null && !string.IsNullOrEmpty(r.MicrogridNodeId) && nodeMap.TryGetValue(r.MicrogridNodeId, out var nn) ? nn : null;
 
@@ -287,7 +294,6 @@ _reservations = reservations; _db = db; _users = users; }
             EnergyAmount = r.EnergyAmount,
             PricePerUnit = price,
             TotalEstimatedCost = Math.Round(r.EnergyAmount * price, 2),
-            VerificationCode = code,
             ReservationDate = r.ReservationDate,
             StartTime = r.StartTime,
             EndTime = r.EndTime,
