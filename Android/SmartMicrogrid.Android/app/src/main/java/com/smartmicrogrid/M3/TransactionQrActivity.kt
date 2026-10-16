@@ -109,6 +109,10 @@ class TransactionQrActivity : WorkspaceActivity() {
         binding.tvQrError.visibility = View.GONE
 
         try {
+            val payload = TransactionQrPayload.parse(qrCodeData)
+            require(payload?.transactionId == transactionId && payload?.transactionCode == transactionCode) {
+                "The transaction QR payload is invalid. Refresh transaction details and retry."
+            }
             val hints = mapOf(
                 EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.M,
                 EncodeHintType.MARGIN to 1

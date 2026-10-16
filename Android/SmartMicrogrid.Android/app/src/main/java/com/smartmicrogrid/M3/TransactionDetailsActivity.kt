@@ -447,14 +447,8 @@ class TransactionDetailsActivity : WorkspaceActivity() {
     }
 
     private fun parseTransactionQr(qrData: String): Pair<String, String>? {
-        val parts = qrData.split('|')
-        if (parts.size != 4 || parts[0] != "SMART-MICROGRID" || parts[1] != "TRANSACTION") {
-            return null
-        }
-        val transactionId = parts[2].trim()
-        val transactionCode = parts[3].trim()
-        if (transactionId.isBlank() || transactionCode.isBlank()) return null
-        return transactionId to transactionCode
+        val payload = TransactionQrPayload.parse(qrData) ?: return null
+        return payload.transactionId to payload.transactionCode
     }
 
     private fun isVerificationEligible(status: String): Boolean =

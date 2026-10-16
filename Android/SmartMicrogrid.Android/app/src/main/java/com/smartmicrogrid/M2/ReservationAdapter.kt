@@ -49,8 +49,7 @@ class ReservationAdapter(
         val canVerifyTransfer = role == "MicrogridOperator" || role == "Admin"
         val isProsumer = role == "Prosumer" || role == "Admin"
 
-        val vCode = item.verificationCode?.ifBlank { null }
-            ?: "SMG-RES-${if (item.id.length >= 6) item.id.takeLast(6).uppercase() else "000000"}"
+        val vCode = "RES-${item.id.takeLast(8).uppercase()}"
 
         holder.id.text = vCode
         holder.status.text = item.status
@@ -75,7 +74,7 @@ class ReservationAdapter(
         // Energy & cost
         holder.amount.text = "%.1f kWh".format(item.energyAmount)
         val totalCost = if (item.totalEstimatedCost > 0) item.totalEstimatedCost else (item.energyAmount * item.pricePerUnit)
-        holder.cost.text = if (totalCost > 0) "Est. $%.2f".format(totalCost) else ""
+        holder.cost.text = if (totalCost > 0) "Est. LKR %.2f".format(totalCost) else ""
 
         // Schedule
         holder.time.text = "${ReservationTime.display(item.startTime)} – ${ReservationTime.display(item.endTime)}"
@@ -96,6 +95,7 @@ class ReservationAdapter(
 
         // Grid operator verifies the QR/pass data and completes the transfer.
         if (canVerifyTransfer && item.status == "Approved") {
+            holder.complete.text = "Process transaction"
             holder.complete.visibility = View.VISIBLE
             holder.complete.setOnClickListener { onComplete?.invoke(item) }
         } else {

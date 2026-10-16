@@ -81,7 +81,7 @@ class QRScannerActivity : WorkspaceActivity() {
         }
 
         val contents = result.contents
-        val payload = parseTransactionPayload(contents)
+        val payload = TransactionQrPayload.parse(contents)
         if (payload == null) {
             finishWithError("Invalid Smart Microgrid transaction QR.")
             return
@@ -98,21 +98,6 @@ class QRScannerActivity : WorkspaceActivity() {
         finish()
     }
 
-    private fun parseTransactionPayload(contents: String): TransactionQrPayload? {
-        val parts = contents.split('|')
-        if (parts.size != 4 || parts[0] != "SMART-MICROGRID" || parts[1] != "TRANSACTION") {
-            return null
-        }
-
-        val transactionId = parts[2].trim()
-        val transactionCode = parts[3].trim()
-        if (transactionId.isEmpty() || transactionCode.isEmpty()) {
-            return null
-        }
-
-        return TransactionQrPayload(transactionId, transactionCode)
-    }
-
     private fun finishWithError(message: String) {
         setResult(
             RESULT_CANCELED,
@@ -120,11 +105,6 @@ class QRScannerActivity : WorkspaceActivity() {
         )
         finish()
     }
-
-    private data class TransactionQrPayload(
-        val transactionId: String,
-        val transactionCode: String
-    )
 
     companion object {
         const val EXTRA_QR_DATA = "QR_DATA"

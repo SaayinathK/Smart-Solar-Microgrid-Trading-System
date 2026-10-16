@@ -16,6 +16,8 @@ import com.smartmicrogrid.data.local.AppDatabase
 import com.smartmicrogrid.data.remote.RetrofitClient
 import com.smartmicrogrid.databinding.FragmentReservationsBinding
 import com.smartmicrogrid.models.Reservation
+import com.smartmicrogrid.M3.ReservationTransactionFlow
+import kotlinx.coroutines.CancellationException
 import com.smartmicrogrid.utils.SessionManager
 import kotlinx.coroutines.launch
 
@@ -100,7 +102,7 @@ class MyReservationsFragment : Fragment() {
             val activeStatus = row.status in listOf("Pending", "Approved")
             val category = if (historySelected) !activeStatus else activeStatus
             val date = binding.reservationDateFilter.text?.toString()?.trim().orEmpty()
-            val vCode = row.verificationCode.orEmpty()
+            val vCode = "RES-${row.id.takeLast(8).uppercase()}"
             val pName = row.prosumerName.orEmpty()
             val mName = row.microgridName.orEmpty()
             category && (statusFilter == "All statuses" || row.status.equals(statusFilter, true)) && (date.isBlank() || ReservationTime.localDate(row.startTime) == date) && (q.isBlank() || row.energySlotId.contains(q, true) || row.microgridNodeId.contains(q, true) || row.status.contains(q, true) || vCode.contains(q, true) || pName.contains(q, true) || mName.contains(q, true))
@@ -154,35 +156,22 @@ class MyReservationsFragment : Fragment() {
     }
 
     private fun complete(row: Reservation) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("Confirm energy transfer?")
-            .setMessage("Verify physical dispatch of ${row.energyAmount} kWh and mark completed?")
-            .setNegativeButton("Back", null)
-            .setPositiveButton("Verify & Complete") { _, _ ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    try {
-                        val response = RetrofitClient.apiService.completeReservation(row.id)
-                        if (!response.isSuccessful || response.body()?.success != true)
-                            throw Exception(response.body()?.message ?: "Completion failed")
-                        Toast.makeText(requireContext(), "Reservation fulfilled and completed", Toast.LENGTH_SHORT).show()
-                        refresh()
-                    } catch (e: Exception) {
-                        Toast.makeText(requireContext(), e.message ?: "Completion failed", Toast.LENGTH_LONG).show()
-                    }
-                }
-            }.show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try { ReservationTransactionFlow.open(requireContext(), row, createIfMissing = true) }
+            catch (e: CancellationException) { throw e }
+            catch (e: Exception) { Toast.makeText(requireContext(), e.message ?: "Unable to open transaction", Toast.LENGTH_LONG).show() }
+        }
     }
 
     private fun showPass(row: Reservation) {
-        val vCode = row.verificationCode?.ifBlank { null }
-            ?: "SMG-RES-${if (row.id.length >= 6) row.id.takeLast(6).uppercase() else "000000"}"
+        val reference = "RES-${row.id.takeLast(8).uppercase()}"
         val pName = if (!row.prosumerName.isNullOrBlank()) row.prosumerName else "Registered Prosumer"
         val mName = if (!row.microgridName.isNullOrBlank()) row.microgridName else "Microgrid Hub"
         val cost = if (row.totalEstimatedCost > 0) row.totalEstimatedCost else (row.energyAmount * row.pricePerUnit)
-        val costStr = if (cost > 0) "$%.2f".format(cost) else "Market rate"
+        val costStr = if (cost > 0) "LKR %.2f".format(cost) else "Market rate (LKR)"
 
         val details = """
-TOKEN: $vCode
+Reservation: $reference
 
 Status: ${row.status}
 Prosumer: $pName (NIC: ${row.prosumerId})
@@ -196,9 +185,16 @@ ${ReservationTime.display(row.startTime)} to ${ReservationTime.display(row.endTi
         """.trimIndent()
 
         AlertDialog.Builder(requireContext())
-            .setTitle("Official Reservation Pass")
-            .setMessage(details)
-            .setPositiveButton("Done", null)
+            .setTitle("Reservation details")
+            .setMessage("$details\n\nUse the M3 transaction QR for operator verification.")
+            .setNegativeButton("Close", null)
+            .setPositiveButton("View transaction QR") { _, _ ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try { ReservationTransactionFlow.open(requireContext(), row, preferQr = true) }
+                    catch (e: CancellationException) { throw e }
+                    catch (e: Exception) { Toast.makeText(requireContext(), e.message ?: "Unable to open QR", Toast.LENGTH_LONG).show() }
+                }
+            }
             .show()
     }
 

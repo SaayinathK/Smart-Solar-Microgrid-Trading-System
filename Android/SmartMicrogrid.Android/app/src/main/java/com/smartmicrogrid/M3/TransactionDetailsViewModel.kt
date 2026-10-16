@@ -174,22 +174,20 @@ class TransactionDetailsViewModel(application: Application) : AndroidViewModel(a
             return
         }
 
-        val qrParts = qrCodeData.split('|')
-        if (qrParts.size != 4 || qrParts[0] != "SMART-MICROGRID" ||
-            qrParts[1] != "TRANSACTION" || qrParts[2].isBlank() || qrParts[3].isBlank()
-        ) {
+        val payload = TransactionQrPayload.parse(qrCodeData)
+        if (payload == null) {
             _verificationError.value = getApplication<Application>()
                 .getString(com.smartmicrogrid.R.string.invalid_transaction_qr)
             return
         }
 
-        if (qrParts[2] != currentTransaction.id) {
+        if (payload.transactionId != currentTransaction.id) {
             _verificationError.value = getApplication<Application>()
                 .getString(com.smartmicrogrid.R.string.different_transaction_qr)
             return
         }
 
-        if (qrParts[3] != currentTransaction.transactionCode) {
+        if (payload.transactionCode != currentTransaction.transactionCode) {
             _verificationError.value = getApplication<Application>()
                 .getString(com.smartmicrogrid.R.string.invalid_transaction_qr)
             return
