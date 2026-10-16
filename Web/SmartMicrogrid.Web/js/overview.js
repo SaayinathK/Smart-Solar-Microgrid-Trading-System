@@ -5,9 +5,12 @@
     const percent = (part, total) => total > 0 ? Math.max(0, Math.min(100, part / total * 100)) : 0;
     const energy = number => new Intl.NumberFormat(undefined, { maximumFractionDigits: 1 }).format(number);
     async function loadDashboard() {
-      const button = document.getElementById('refresh-dashboard'); button.disabled = true; button.textContent = 'Refreshing...';
+      const button = document.getElementById('refresh-dashboard');
+      if (button) { button.disabled = true; button.textContent = 'Refreshing...'; }
       try {
-        const response = await MicrogridApi.getDashboardStats(), d = response.data || {};
+        const response = await MicrogridApi.getDashboardStats();
+        if (!response.success || !response.data) throw new Error(response.message || 'Infrastructure data unavailable');
+        const d = response.data;
         const availablePct = percent(value(d, 'totalAvailableCapacity'), value(d, 'totalCapacity'));
         const batteryPct = value(d, 'averageBatteryPercentage') || percent(value(d, 'currentBatteryLevel'), value(d, 'totalBatteryCapacity'));
         document.getElementById('dash-total-cap').textContent = `${energy(value(d, 'totalCapacity'))} kWh`;
@@ -19,9 +22,14 @@
         renderInsights(d, availablePct, batteryPct); renderCharts(d); document.getElementById('last-updated').textContent = `Updated ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
       } catch (err) {
         document.getElementById('last-updated').textContent = 'Could not refresh infrastructure data. Please try again.';
+        document.querySelectorAll('.chart-canvas canvas').forEach(canvas => { canvas.hidden = true; });
+        document.querySelectorAll('.chart-unavailable').forEach(message => {
+          message.hidden = false;
+          message.textContent = 'Chart data unavailable. Refresh network data to try again.';
+        });
         ApiClient.showToast('Failed to load dashboard statistics', 'error');
       }
-      finally { button.disabled = false; button.textContent = 'Refresh data'; }
+      finally { if (button) { button.disabled = false; button.textContent = 'Refresh data'; } }
     }
     function renderInsights(d, availablePct, batteryPct) {
       const activePct = percent(value(d, 'activeMicrogrids'), value(d, 'totalMicrogrids'));
@@ -48,5 +56,10 @@
       if (statusChartInstance) statusChartInstance.destroy(); statusChartInstance = new Chart(document.getElementById('statusChart'), { type: 'doughnut', data: { labels: ['Active', 'Inactive', 'Maintenance', 'Offline'], datasets: [{ data: [value(d, 'activeMicrogrids'), value(d, 'inactiveMicrogrids'), value(d, 'maintenanceMicrogrids'), value(d, 'offlineMicrogrids')], backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444'], borderWidth: 0 }] }, options: common });
       if (capacityChartInstance) capacityChartInstance.destroy(); capacityChartInstance = new Chart(document.getElementById('capacityChart'), { type: 'bar', data: { labels: ['Available', 'Reserved', 'Used', 'Total'], datasets: [{ label: 'Capacity (kWh)', data: [value(d, 'totalAvailableCapacity'), value(d, 'totalReservedCapacity'), value(d, 'totalUsedCapacity'), value(d, 'totalCapacity')], backgroundColor: ['#10b981', '#f59e0b', '#6366f1', '#06b6d4'], borderRadius: 7 }] }, options: { ...common, scales: { y: { beginAtZero: true, grid: { color: 'rgba(148,163,184,.15)' } }, x: { grid: { display: false } } } } });
     }
-    document.addEventListener('DOMContentLoaded', () => { loadDashboard(); document.getElementById('refresh-dashboard').addEventListener('click', loadDashboard); });
+    window.InfrastructureOverview = { refresh: loadDashboard };
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!SessionManager.isAuthenticated() || SessionManager.isAdmin()) return;
+      loadDashboard();
+      document.getElementById('refresh-dashboard')?.addEventListener('click', loadDashboard);
+    });
 })();

@@ -8,11 +8,16 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/forms.css">
   <link rel="stylesheet" href="css/interface.css">
+  <link rel="stylesheet" href="css/register.css">
+  <link rel="stylesheet" href="css/spacing.css?v=20261016-1">
+  <link rel="icon" type="image/png" href="assets/images/smart_micro.png">
+  <link rel="apple-touch-icon" href="assets/images/smart_micro.png">
+  <link rel="stylesheet" href="css/brand.css?v=20261016-1">
 </head>
-<body>
+<body class="registration-page">
   <div id="navbar-container"></div>
 
-  <div class="auth-wrapper">
+  <main class="auth-wrapper">
     <div class="auth-container">
       <!-- Visual Side -->
       <div class="auth-visual-side">
@@ -22,13 +27,16 @@
           <p id="hero-desc">Register your solar energy prosumer account to trade clean energy across microgrid nodes.</p>
           <div class="auth-feature-list">
             <div class="auth-feature-item">
-              <span>☀️</span> <strong>P2P Solar Trading:</strong> Direct clean energy exchange
+              <span aria-hidden="true">☀️</span>
+              <div><strong>P2P Solar Trading</strong><p>Direct clean energy exchange</p></div>
             </div>
             <div class="auth-feature-item">
-              <span>🆔</span> <strong>NIC Verification:</strong> Identity verification with Backoffice approval
+              <span aria-hidden="true">🆔</span>
+              <div><strong>NIC Verification</strong><p>Identity verification with Backoffice approval</p></div>
             </div>
             <div class="auth-feature-item">
-              <span>🔋</span> <strong>Storage Telemetry:</strong> Track battery reservations & dispatch
+              <span aria-hidden="true">🔋</span>
+              <div><strong>Storage Telemetry</strong><p>Track battery reservations &amp; dispatch</p></div>
             </div>
           </div>
         </div>
@@ -41,8 +49,8 @@
           <p>National Identity Card (NIC) required</p>
         </div>
 
-        <div class="role-hint-pill mb-3" style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid var(--accent-primary, #10B981); padding: 10px 14px; border-radius: 6px; font-size: 0.84rem; margin-bottom: 16px;">
-          <span>ℹ️</span> <span>Self-registration is for <strong>Prosumers</strong> only. Grid Operator and Backoffice accounts are provisioned by system administrators.</span>
+        <div class="registration-notice">
+          <span class="registration-notice-icon" aria-hidden="true">i</span> <span>Self-registration is for <strong>Prosumers</strong> only. Grid Operator and Backoffice accounts are provisioned by system administrators.</span>
         </div>
 
         <div id="alert-box" class="alert alert-danger"></div>
@@ -50,7 +58,7 @@
         <form id="register-form">
           <input type="hidden" id="selectedRole" value="Prosumer">
 
-          <div class="form-row">
+          <div class="registration-fields">
             <div class="form-group">
               <label class="form-label" for="firstName">First Name</label>
               <input type="text" id="firstName" class="form-control" placeholder="John" required>
@@ -59,24 +67,21 @@
               <label class="form-label" for="lastName">Last Name</label>
               <input type="text" id="lastName" class="form-control" placeholder="Doe" required>
             </div>
-          </div>
+            <div class="form-group registration-field-wide" id="nic-group">
+              <label class="form-label" for="nic">National Identity Card (NIC) *</label>
+              <input type="text" id="nic" class="form-control" placeholder="e.g. 199012345678" required pattern="[A-Za-z0-9]{9,12}">
+            </div>
 
-          <div class="form-group" id="nic-group">
-            <label class="form-label" for="nic">National Identity Card (NIC) *</label>
-            <input type="text" id="nic" class="form-control" placeholder="e.g. 199012345678" required pattern="[A-Za-z0-9]{9,12}">
-          </div>
+            <div class="form-group">
+              <label class="form-label" for="email">Email Address</label>
+              <input type="email" id="email" class="form-control" placeholder="name@domain.com" required>
+            </div>
 
-          <div class="form-group">
-            <label class="form-label" for="email">Email Address</label>
-            <input type="email" id="email" class="form-control" placeholder="name@domain.com" required>
-          </div>
+            <div class="form-group">
+              <label class="form-label" for="phoneNumber">Phone Number</label>
+              <input type="tel" id="phoneNumber" class="form-control" placeholder="+94771234567">
+            </div>
 
-          <div class="form-group">
-            <label class="form-label" for="phoneNumber">Phone Number</label>
-            <input type="tel" id="phoneNumber" class="form-control" placeholder="+94771234567">
-          </div>
-
-          <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="password">Password</label>
               <input type="password" id="password" class="form-control" placeholder="Min 6 characters" required minlength="6">
@@ -87,19 +92,19 @@
             </div>
           </div>
 
-          <button type="submit" id="btn-submit" class="btn btn-primary" style="width: 100%; margin-top: 0.75rem; padding: 0.8rem;">
+          <button type="submit" id="btn-submit" class="btn btn-primary registration-submit">
             Register Account
           </button>
         </form>
 
-        <div class="auth-footer" style="margin-top: 1rem;">
+        <div class="auth-footer">
           Already have an account? <a href="login.html">Sign In</a>
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
-  <footer class="footer"><div class="container"><span class="footer-brand">SmartMicrogrid</span><span>Connected energy communities</span><span>&copy; 2026</span></div></footer>
+  <footer class="footer"><div class="container"><span class="footer-brand"><img src="assets/images/smart_micro.png" alt="" aria-hidden="true" width="24" height="24">SmartMicrogrid</span><span>Connected energy communities</span><span>&copy; 2026</span></div></footer>
 
   <script src="js/config/api-config.js"></script>
   <script src="js/common/theme.js"></script>
@@ -107,7 +112,7 @@
   <script src="js/api/api-client.js"></script>
   <script src="js/api/auth-api.js"></script>
   <script src="js/common/auth.js"></script>
-  <script src="js/common/navbar.js"></script>
+  <script src="js/common/navbar.js?v=20261016-logo-1"></script>
   <script>
     AuthGuard.redirectIfAuthenticated();
     renderNavbar();

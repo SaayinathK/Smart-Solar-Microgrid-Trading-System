@@ -42,7 +42,7 @@ function renderPageIntro(content, activePage, pageTitle) {
   body.className = 'page-intro-body';
   const category = document.createElement('span');
   category.className = 'page-intro-category';
-  category.textContent = group === 'trading' ? 'Energy marketplace' : caption;
+  category.textContent = source.dataset.introCategory || (group === 'trading' ? 'Energy marketplace' : caption);
   body.append(category, heading);
   if (description) {
     description.className = 'page-intro-description';
@@ -63,13 +63,13 @@ function renderPageIntro(content, activePage, pageTitle) {
   const photo = document.createElement('figure');
   photo.className = 'page-intro-photo';
   const image = document.createElement('img');
-  image.src = getWebAppUrl(`assets/images/${filename}`);
+  image.src = getWebAppUrl(`assets/images/${source.dataset.introImage || filename}`);
   image.alt = ''; // Contextual decoration; the page text carries the information.
   image.width = 640;
   image.height = 360;
   image.decoding = 'async';
   const label = document.createElement('figcaption');
-  label.textContent = caption;
+  label.textContent = source.dataset.introCaption || caption;
   photo.append(image, label);
   intro.append(body, photo);
   source.remove();

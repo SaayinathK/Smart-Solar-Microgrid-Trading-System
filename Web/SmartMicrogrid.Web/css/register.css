@@ -1,0 +1,199 @@
+/* Registration-only layout; shared authentication styles stay in forms.css. */
+.registration-page .auth-wrapper {
+  min-height: 0;
+  padding: 32px 28px;
+}
+
+.registration-page .auth-container {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.5fr);
+  max-width: 1280px;
+  border-radius: 24px;
+}
+
+.registration-page .auth-visual-side {
+  display: flex;
+  padding: 36px;
+}
+
+.registration-page .auth-visual-eyebrow {
+  line-height: 1.8;
+  margin-bottom: 64px;
+}
+
+.registration-page .auth-visual-content h2 {
+  font-size: clamp(1.7rem, 2.4vw, 2.25rem);
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+
+.registration-page .auth-visual-content > p {
+  font-size: .9rem;
+  margin-bottom: 28px;
+}
+
+.registration-page .auth-feature-list {
+  gap: 0;
+}
+
+.registration-page .auth-feature-item {
+  gap: 12px;
+  padding: 14px 0;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.registration-page .auth-feature-item > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .12);
+}
+
+.registration-page .auth-feature-item strong {
+  display: block;
+  font-size: .82rem;
+}
+
+.registration-page .auth-feature-item p {
+  font-size: .75rem;
+  line-height: 1.6;
+  margin: 3px 0 0;
+}
+
+.registration-page .auth-card {
+  min-width: 0;
+  padding: 36px 44px;
+}
+
+.registration-page .auth-header {
+  margin-bottom: 20px;
+}
+
+.registration-page .auth-header h1 {
+  font-size: 2rem;
+}
+
+.registration-page .auth-header p {
+  font-size: .875rem;
+  margin: 0;
+}
+
+.registration-page .registration-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--accent-light);
+  color: var(--text-secondary);
+  font-size: .75rem;
+  line-height: 1.7;
+}
+
+.registration-page .registration-notice-icon {
+  flex: 0 0 18px;
+  height: 18px;
+  margin-top: 2px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: var(--accent-primary);
+  text-align: center;
+  font-size: .7rem;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.registration-page .registration-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 20px;
+}
+
+.registration-page .form-group {
+  min-width: 0;
+  margin: 0;
+}
+
+.registration-page .registration-field-wide {
+  grid-column: 1 / -1;
+}
+
+.registration-page .form-label {
+  font-size: .8rem;
+  margin-bottom: 7px;
+}
+
+.registration-page .form-control {
+  min-height: 46px;
+  padding: 11px 14px;
+  font-size: .85rem;
+}
+
+.registration-page .registration-submit {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 24px;
+}
+
+.registration-page .auth-footer {
+  padding-top: 18px;
+  margin-top: 20px;
+  border-top: 1px solid var(--border-color);
+  font-size: .8rem;
+}
+
+@media (max-width: 1100px) {
+  .registration-page .auth-container {
+    grid-template-columns: minmax(0, .8fr) minmax(0, 1.5fr);
+  }
+
+  .registration-page .auth-visual-side {
+    padding: 28px;
+  }
+
+  .registration-page .auth-card {
+    padding: 32px;
+  }
+}
+
+@media (max-width: 860px) {
+  .registration-page .auth-container {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 720px;
+  }
+
+  .registration-page .auth-visual-side {
+    display: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .registration-page .auth-wrapper {
+    padding: 20px 16px;
+  }
+
+  .registration-page .auth-container {
+    border-radius: 18px;
+  }
+
+  .registration-page .auth-card {
+    padding: 28px 20px;
+  }
+
+  .registration-page .auth-header h1 {
+    font-size: 1.7rem;
+  }
+
+  .registration-page .registration-fields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}

@@ -11,12 +11,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('search-input');
   const roleFilter = document.getElementById('role-filter');
   const statusFilter = document.getElementById('status-filter');
+  const resultsCount = document.getElementById('user-results-count');
+  const refreshButton = document.getElementById('refresh-users');
+  const directory = document.querySelector('.user-directory');
 
   let debounceTimer;
+  let loadRequestId = 0;
+
+  // Dashboard approval shortcuts open the existing filtered account queue.
+  const initialStatus = new URLSearchParams(window.location.search).get('status');
+  if (['Active', 'Pending', 'Inactive', 'Suspended'].includes(initialStatus)) {
+    statusFilter.value = initialStatus;
+    updateQuickTabs(initialStatus);
+  }
 
   // Initial Load
   loadUsers();
-  refreshPendingCount();
 
   // Event Listeners
   searchInput.addEventListener('input', () => {
@@ -25,6 +35,25 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   roleFilter.addEventListener('change', loadUsers);
+  refreshButton.addEventListener('click', loadUsers);
+  document.getElementById('clear-user-filters').addEventListener('click', () => {
+    clearTimeout(debounceTimer);
+    searchInput.value = '';
+    roleFilter.value = '';
+    statusFilter.value = '';
+    updateQuickTabs('');
+    loadUsers();
+  });
+  tableBody.addEventListener('click', event => {
+    const button = event.target.closest('[data-user-status]');
+    if (button) window.changeUserStatus(button.dataset.userId, button.dataset.userStatus);
+  });
+  tableBody.addEventListener('change', event => {
+    const select = event.target.closest('[data-user-actions]');
+    if (!select) return;
+    window.handleUserAction(select.dataset.userId, select.value);
+    select.value = '';
+  });
   statusFilter.addEventListener('change', () => {
     updateQuickTabs(statusFilter.value);
     loadUsers();
@@ -48,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     Object.entries(tabs).forEach(([val, tabId]) => {
       const el = document.getElementById(tabId);
       if (el) {
+        el.setAttribute('aria-pressed', String(val === (status || '')));
         if (val === (status || '')) {
           el.classList.add('active');
         } else {
@@ -58,11 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const banner = document.getElementById('pending-queue-banner');
     if (banner) {
-      if (status === 'Pending') {
-        banner.classList.remove('d-none');
-      } else {
-        banner.classList.add('d-none');
-      }
+      banner.hidden = status !== 'Pending';
     }
   }
 
@@ -85,9 +111,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadUsers() {
+    const requestId = ++loadRequestId;
+    refreshButton.disabled = true;
+    directory.setAttribute('aria-busy', 'true');
+    resultsCount.textContent = 'Loading accounts…';
     tableBody.innerHTML = `
       <tr>
-        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+        <td colspan="6" class="user-table-message">
           Loading system users...
         </td>
       </tr>
@@ -104,35 +134,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const response = await UserApi.getAllUsers(params);
-      if (response.success && response.data) {
+      if (requestId !== loadRequestId) return;
+      if (response.success && Array.isArray(response.data)) {
         renderUserTable(response.data);
+        const count = response.data.length;
+        resultsCount.textContent = `${count} ${count === 1 ? 'account' : 'accounts'}${Object.keys(params).length ? ' matching your filters' : ''}`;
       } else {
+        resultsCount.textContent = 'Accounts unavailable';
         tableBody.innerHTML = `
           <tr>
-            <td colspan="8" style="text-align: center; color: var(--accent-rose); padding: 2rem;">
+            <td colspan="6" class="user-table-message">
             ${escapeUserHtml(response.message || 'Failed to load users.')}
             </td>
           </tr>
         `;
       }
     } catch (err) {
+      if (requestId !== loadRequestId) return;
+      resultsCount.textContent = 'Accounts unavailable';
       tableBody.innerHTML = `
         <tr>
-          <td colspan="8" style="text-align: center; color: var(--accent-rose); padding: 2rem;">
+          <td colspan="6" class="user-table-message">
             ${escapeUserHtml(err.message || 'Error connecting to API.')}
           </td>
         </tr>
       `;
+    } finally {
+      if (requestId === loadRequestId) {
+        directory.setAttribute('aria-busy', 'false');
+        refreshButton.disabled = false;
+        refreshPendingCount();
+      }
     }
-
-    refreshPendingCount();
   }
 
   function renderUserTable(users) {
     if (!users || users.length === 0) {
       tableBody.innerHTML = `
         <tr>
-          <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+          <td colspan="6" class="user-table-message">
             No user accounts found matching criteria.
           </td>
         </tr>
@@ -149,58 +189,43 @@ document.addEventListener('DOMContentLoaded', () => {
         || (user.isActive ? 'Active' : 'Inactive');
       const safeStatus = ['Active', 'Pending', 'Inactive', 'Suspended'].includes(accountStatus) ? accountStatus : 'Unknown';
 
-      let statusBadge = `<span class="status-badge">${escapeUserHtml(safeStatus)}</span>`;
-      if (accountStatus === 'Active') {
-        statusBadge = '<span class="status-badge status-active"><span class="status-dot"></span> Active</span>';
-      } else if (accountStatus === 'Pending') {
-        statusBadge = '<span class="badge bg-warning text-dark px-2 py-1">⏳ Pending Activation</span>';
-      } else if (accountStatus === 'Inactive') {
-        statusBadge = '<span class="badge bg-secondary px-2 py-1">Inactive / Deactivated</span>';
-      } else if (accountStatus === 'Suspended') {
-        statusBadge = '<span class="badge bg-danger px-2 py-1">Suspended</span>';
-      }
+      const statusBadge = `<span class="status-badge status-${safeStatus.toLowerCase()}">${safeStatus === 'Pending' ? 'Pending activation' : escapeUserHtml(safeStatus)}</span>`;
 
-      const createdDate = new Date(user.createdAt).toLocaleDateString(undefined, {
+      const date = user.createdAt ? new Date(user.createdAt) : null;
+      const createdDate = date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'short',
         day: 'numeric'
-      });
+      }) : 'Not available';
       const userId = encodeURIComponent(String(user.id || ''));
+      const safeUserId = escapeUserHtml(user.id || '');
+      const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unnamed user';
+      const initials = [user.firstName, user.lastName].filter(Boolean).map(part => String(part).charAt(0)).join('').toUpperCase() || 'U';
+      const roleLabel = { Admin: 'Administrator', MicrogridOperator: 'Microgrid operator', Prosumer: 'Prosumer' }[user.role] || 'Unknown';
 
       let primaryAction = '';
-      if (accountStatus === 'Active') {
-        primaryAction = `<button onclick="changeUserStatus('${userId}', 'Inactive')" class="btn btn-outline-danger btn-sm">Deactivate</button>`;
-      } else if (accountStatus === 'Pending') {
-        primaryAction = `<button onclick="changeUserStatus('${user.id}', 'Active')" class="btn btn-success btn-sm font-weight-bold">✓ Activate</button>`;
-      } else {
-        primaryAction = `<button onclick="changeUserStatus('${userId}', 'Active')" class="btn btn-primary btn-sm">Activate</button>`;
-      }
-      if (accountStatus === 'Pending') {
-        statusBadge = '<span class="status-badge status-pending">Pending activation</span>';
-        primaryAction = `<button onclick="changeUserStatus('${userId}', 'Active')" class="btn btn-primary btn-sm">Activate</button>`;
+      if (accountStatus !== 'Active') {
+        primaryAction = `<button type="button" data-user-id="${safeUserId}" data-user-status="Active" class="btn btn-primary btn-sm" aria-label="Activate ${escapeUserHtml(fullName)}">Activate</button>`;
       }
 
       return `
         <tr>
-          <td>
-            <strong>${escapeUserHtml(`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unnamed user')}</strong>
+          <td data-label="Account">
+            <div class="user-account-identity"><span class="user-account-avatar" aria-hidden="true">${escapeUserHtml(initials)}</span><div><strong class="user-account-name">${escapeUserHtml(fullName)}</strong><span class="user-account-nic">NIC ${escapeUserHtml(user.nic || 'not provided')}</span></div></div>
           </td>
-          <td><code>${escapeUserHtml(user.nic || '-')}</code></td>
-          <td>${escapeUserHtml(user.email || '-')}</td>
-          <td>${escapeUserHtml(user.phoneNumber || '-')}</td>
-          <td><span class="role-pill ${roleClass}">${escapeUserHtml(user.role || 'Unknown')}</span></td>
-          <td>${statusBadge}</td>
-          <td>${createdDate}</td>
-          <td>
-            <div class="table-actions">
-              <a href="user-details.html?id=${userId}" class="btn btn-secondary btn-sm">View</a>
-              <a href="edit-user.html?id=${userId}" class="btn btn-secondary btn-sm">Edit</a>
+          <td data-label="Contact"><span class="user-account-email">${escapeUserHtml(user.email || 'Not provided')}</span><span class="user-account-phone">${escapeUserHtml(user.phoneNumber || 'No phone number')}</span></td>
+          <td data-label="Role"><span class="role-pill ${roleClass}">${roleLabel}</span></td>
+          <td data-label="Status">${statusBadge}</td>
+          <td data-label="Joined">${createdDate}</td>
+          <td data-label="Actions">
+            <div class="user-row-actions">
+              <a href="${getWebPageUrl(`user-details.html?id=${userId}`)}" class="btn btn-secondary btn-sm" aria-label="View ${escapeUserHtml(fullName)}">View</a>
               ${primaryAction}
-              <select class="form-select btn-sm" style="width: auto; min-width: 118px;"
-                      onchange="handleUserAction('${userId}', this.value); this.value = '';">
-                <option value="">More...</option>
-                <option value="Suspended">Suspend</option>
-                <option value="Pending">Set Pending</option>
+              <select class="form-select" data-user-actions data-user-id="${safeUserId}" aria-label="More actions for ${escapeUserHtml(fullName)}">
+                <option value="">More</option>
+                <option value="__edit">Edit account</option>
+                ${accountStatus !== 'Suspended' ? '<option value="Suspended">Suspend</option>' : ''}
+                ${accountStatus !== 'Pending' ? '<option value="Pending">Set pending</option>' : ''}
                 ${accountStatus === 'Active' ? '<option value="Inactive">Deactivate</option>' : ''}
                 ${accountStatus !== 'Active' ? '<option value="Active">Activate</option>' : ''}
                 <option value="__delete">Delete user...</option>
@@ -238,6 +263,10 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   window.handleUserAction = (userId, action) => {
+    if (action === '__edit') {
+      window.location.href = getWebPageUrl(`edit-user.html?id=${encodeURIComponent(userId)}`);
+      return;
+    }
     if (action === '__delete') return window.deleteUserAccount(userId);
     return window.changeUserStatus(userId, action);
   };

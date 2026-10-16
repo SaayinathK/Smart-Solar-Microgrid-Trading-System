@@ -71,6 +71,14 @@ Run `node --test Web/SmartMicrogrid.Web/tests/*.test.cjs`. The tests use stubbed
 
 ## 2. Key Architecture Concepts
 
+### Animated energy monitoring
+
+Battery Storage has circular charge gauges, segmented batteries, fleet summary cards, and a stored-energy/headroom comparison. Energy Capacity has allocation charts and per-microgrid utilization gauges. Energy Availability charts available supply by microgrid and across the delivery windows matching the current filters.
+
+Capacity and Battery Storage use compact comparison rows beside the overview metrics, followed by a responsive grid of smaller microgrid cards. These charts and gauges use the existing API readings and slot schedules; they do not generate battery history or simulate incoming telemetry. Refresh readings manually, or search supply again, to fetch updated values. Animations run once as visuals enter the viewport and respect the system's reduced-motion preference. Missing readings remain unavailable, and empty/error states replace charts when data cannot be loaded.
+
+The shared components are `js/common/energy-visuals.js` and `css/energy-monitoring.css`. Existing server authorization stays in place; battery charge updates are shown only to Admin and MicrogridOperator accounts. Run `node --test Web/SmartMicrogrid.Web/tests/*.test.cjs` for chart calculation and navigation regression checks.
+
 ### A. Centralized API Configuration (`js/config/api-config.js`)
 Do not hardcode API URLs in individual JavaScript files. Change the API base URL in `api-config.js`:
 ```javascript
@@ -87,6 +95,12 @@ const API_CONFIG = {
 - Theme preference persists automatically in `localStorage`.
 
 ### C. Role-Based Sidebar Navigation (`js/common/sidebar.js`)
+
+Admin login opens `pages/M4/dashboard.html`, which combines the network overview (capacity, storage, alerts, charts and map) with account approvals, trading totals, system health and recent activity. Existing `dashboard.html` links redirect Admin accounts to this combined dashboard; MicrogridOperator accounts keep their existing overview.
+
+The Admin sidebar has seven destinations: Dashboard, Microgrids, Reservations, Transactions, Users & access, System, and Reports. Contextual navigation groups capacity/storage/slots/availability under Microgrids, accounts/roles under Users & access, and health/activity/configuration under System. Existing page URLs remain available, and server authorization remains unchanged. The pending-activation shortcut opens `pages/users/users.html?status=Pending`.
+
+The operator sidebar has four destinations: Dashboard, Microgrids, Reservations, and Transactions. Microgrids includes contextual tabs for capacity, battery storage, energy slots, and availability. Transactions combines the former operations dashboard, transaction records, and history in one workspace. Its default **Needs attention** view includes QR generation, verification, and transfers awaiting completion; **All transactions** and **History** provide the full ledger and closed records. Creating a transaction from an approved reservation is available in an expandable panel. Existing `pages/M3/dashboard.html` bookmarks redirect operators to `transactions.html?view=attention`. Admin monitoring remains read-only and backend role checks remain unchanged.
 Displays custom navigation options based on the authenticated user's assigned role:
 - **`Admin`**: Dashboard, User Management, Operational Reports.
 - **`MicrogridOperator`**: M1 infrastructure pages and M3 transaction operations, including creating transactions from approved reservations, QR generation, manual QR-payload verification, transfer confirmation/completion, and transaction history for assigned microgrids.
@@ -94,6 +108,8 @@ Displays custom navigation options based on the authenticated user's assigned ro
 - **`Prosumer`**: M3 transaction visibility is provided through the Mobile/Android application; Prosumer does not verify or complete transactions in the Web application.
 
 M3 Web pages are `pages/M3/dashboard.html`, `transactions.html` (including history view), `transaction-details.html`, `transaction-verify.html`, and `transaction-complete.html`. Their scripts are in `js/transactions/`; API calls are centralized in `js/api/transaction-api.js`. QR verification in Web accepts manually entered QR payload/data and does not use a camera scanner.
+
+Page links follow the current host's URL style: HTML routes keep `.html`, while extensionless routes link directly to other extensionless pages. This avoids static-server redirects that discard transaction IDs (`?id=...`) or selected views (`?view=history`). Open an individual record using **View Details** in Transactions; opening the details route alone cannot identify a transaction.
 
 ---
 

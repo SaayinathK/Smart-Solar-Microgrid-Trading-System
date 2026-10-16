@@ -218,9 +218,13 @@ class MicrogridMap {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (!SessionManager.isAuthenticated()) return;
+  if (SessionManager.isAdmin() && !document.querySelector('[data-admin-dashboard]')) return;
+  if (document.querySelector('[data-admin-dashboard]') && !SessionManager.isAdmin()) return;
   document.querySelectorAll('[data-microgrid-map]').forEach(container => {
     const dashboardMap = new MicrogridMap(container);
     dashboardMap.load();
     document.getElementById('refresh-dashboard')?.addEventListener('click', () => dashboardMap.load());
+    document.addEventListener('dashboard:refresh', () => dashboardMap.load());
   });
 });

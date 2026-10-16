@@ -14,6 +14,11 @@ function getAuthAppUrl(path) {
 }
 
 const AuthGuard = {
+  getHomeUrl() {
+    return getAuthAppUrl(SessionManager.getUserRole() === 'Admin'
+      ? 'pages/M4/dashboard.html' : 'dashboard.html');
+  },
+
   requireAuth(requiredRole = null) {
     if (!SessionManager.isAuthenticated()) {
       window.location.href = getAuthAppUrl('login.html');
@@ -23,7 +28,7 @@ const AuthGuard = {
     if (requiredRole && SessionManager.getUserRole() !== requiredRole) {
       ApiClient.showToast('Access denied: You do not have permission to view this page.', 'error');
       setTimeout(() => {
-        window.location.href = getAuthAppUrl('dashboard.html');
+        window.location.href = this.getHomeUrl();
       }, 1500);
       return false;
     }
@@ -37,7 +42,7 @@ const AuthGuard = {
     if (!roles.includes(SessionManager.getUserRole())) {
       ApiClient.showToast('Access denied: You do not have permission to view this page.', 'error');
       setTimeout(() => {
-        window.location.href = '/dashboard.html';
+        window.location.href = this.getHomeUrl();
       }, 1500);
       return false;
     }
@@ -46,7 +51,7 @@ const AuthGuard = {
 
   redirectIfAuthenticated() {
     if (SessionManager.isAuthenticated()) {
-      window.location.href = getAuthAppUrl('dashboard.html');
+      window.location.href = this.getHomeUrl();
     }
   },
 

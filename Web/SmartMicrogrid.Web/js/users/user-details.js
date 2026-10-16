@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  editBtn.href = `edit-user.html?id=${encodeURIComponent(userId)}`;
+  editBtn.href = getWebPageUrl(`edit-user.html?id=${encodeURIComponent(userId)}`);
 
   try {
     const response = await UserApi.getUserById(userId);

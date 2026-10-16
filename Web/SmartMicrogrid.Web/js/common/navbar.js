@@ -15,14 +15,17 @@ function renderNavbar(activePage = '') {
   else if (user?.role === 'MicrogridOperator') roleClass = 'role-operator';
 
   const currentTheme = ThemeManager.getTheme();
+  const navbarScript = Array.from(document.scripts).find(script =>
+    new URL(script.src, document.baseURI).pathname.endsWith('/js/common/navbar.js')
+  );
+  const logoUrl = new URL('../../assets/images/smart_micro.png',
+    navbarScript?.src || new URL('js/common/navbar.js', document.baseURI)).href;
 
   container.innerHTML = `
     <nav class="navbar" aria-label="Main navigation">
       <div class="container navbar-container">
         <a href="/dashboard.html" class="navbar-brand">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
+          <img class="brand-logo" src="${logoUrl}" alt="" aria-hidden="true" width="40" height="40">
           <span>SmartMicrogrid</span>
         </a>
 
