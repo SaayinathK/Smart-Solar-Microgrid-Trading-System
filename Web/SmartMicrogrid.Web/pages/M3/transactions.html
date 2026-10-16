@@ -6,11 +6,16 @@
   <title>Energy Transactions - Smart Microgrid Platform</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../../css/style.css">
-  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/sidebar.css?v=20261016-search-1">
   <link rel="stylesheet" href="../../css/tables.css">
   <link rel="stylesheet" href="../../css/forms.css">
-  <link rel="stylesheet" href="../../css/transactions.css">
+  <link rel="stylesheet" href="../../css/transactions.css?v=20261016-create-panel-1">
   <link rel="stylesheet" href="../../css/interface.css">
+  <link rel="stylesheet" href="../../css/spacing.css?v=20261016-1">
+  <link rel="stylesheet" href="../../css/record-references.css?v=20261016-1">
+  <link rel="icon" type="image/png" href="../../assets/images/smart_micro.png">
+  <link rel="apple-touch-icon" href="../../assets/images/smart_micro.png">
+  <link rel="stylesheet" href="../../css/brand.css?v=20261016-1">
 </head>
 <body>
   <div id="app-layout-wrapper">
@@ -32,7 +37,7 @@
         <strong id="pending-transactions">0</strong>
       </article>
       <article class="transaction-summary-card">
-        <span>Verified</span>
+        <span>Awaiting completion</span>
         <strong id="verified-transactions">0</strong>
       </article>
       <article class="transaction-summary-card">
@@ -41,24 +46,31 @@
       </article>
     </section>
 
-    <section id="create-transaction-card" class="card transaction-list-card" hidden>
-      <h2>Create Transaction from Approved Reservation</h2>
-      <p>Enter an approved reservation ID to start its transaction workflow.</p>
-      <form id="create-transaction-form">
-        <label class="transaction-filter-label" for="reservation-id">
-          Reservation ID
-          <input id="reservation-id" class="form-control" type="text" required autocomplete="off">
-        </label>
-        <button id="create-transaction-button" type="submit" class="btn btn-primary">Create Transaction</button>
-      </form>
-      <div id="create-transaction-state" class="transactions-state" role="status" aria-live="polite" hidden></div>
-    </section>
+    <details id="create-transaction-card" class="card transaction-list-card transaction-create" hidden>
+      <summary class="transaction-create-heading">
+        <span class="transaction-create-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8 M8 12h4 M12 15v5 M9.5 17.5h5"/></svg></span>
+        <span class="transaction-create-intro"><strong>Start a transaction</strong><span>Turn an approved reservation into an energy transfer.</span></span>
+        <span class="transaction-create-badge">Approved reservations only</span>
+        <svg class="transaction-create-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m7 10 5 5 5-5"/></svg>
+      </summary>
+      <div class="transaction-create-body">
+        <form id="create-transaction-form">
+          <div class="transaction-create-field">
+            <label for="reservation-id">Reservation reference or full ID</label>
+            <div class="transaction-reference-input"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 2v6 M16 2v6 M4 11h16 M8 15h3"/></svg><input id="reservation-id" class="form-control" type="text" required autocomplete="off" spellcheck="false" placeholder="e.g. RES-24F1984C" aria-describedby="transaction-create-help"></div>
+          </div>
+          <button id="create-transaction-button" type="submit" class="btn btn-primary transaction-create-submit"><span id="create-transaction-label">Create transaction</span><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12h15 M13 6l6 6-6 6"/></svg></button>
+        </form>
+        <p id="transaction-create-help" class="transaction-create-help"><span>Use the short reference or copy the full ID from Reservations.</span><a href="../reservations/reservations.html">Browse reservations <span aria-hidden="true">&rarr;</span></a></p>
+        <div id="create-transaction-state" class="transaction-create-state" role="status" aria-live="polite" tabindex="-1" hidden></div>
+      </div>
+    </details>
 
     <section class="card transaction-list-card">
       <div class="transaction-list-toolbar">
         <div>
           <h2 id="transactions-list-title">Transaction records</h2>
-          <p>Review current and past energy transactions.</p>
+          <p id="transactions-list-description">Review current and past energy transactions.</p>
         </div>
         <div class="transaction-list-controls">
           <label class="transaction-filter-label" for="transaction-search">
@@ -69,6 +81,7 @@
             Filter by status
             <select id="transaction-filter" class="form-control">
               <option value="all">All transactions</option>
+              <option value="attention">Needs attention</option>
               <option value="pending">Pending / QRGenerated / VerificationPending</option>
               <option value="Verified">Verified</option>
               <option value="EnergyTransferInProgress">Energy Transfer In Progress</option>
@@ -94,10 +107,10 @@
               <th>Prosumer</th>
               <th>Energy</th>
               <th>Status</th>
-              <th>Created</th>
-              <th>Verification Time</th>
-              <th>Energy Transfer Time</th>
               <th>Action</th>
+              <th class="transaction-date">Created</th>
+              <th class="transaction-date">Verification Time</th>
+              <th class="transaction-date">Energy Transfer Time</th>
             </tr>
           </thead>
           <tbody id="transactions-table-body"></tbody>
@@ -106,15 +119,17 @@
     </section>
   </div>
 
+  <script src="../../js/common/record-references.js?v=20261016-1"></script>
   <script src="../../js/config/api-config.js"></script>
   <script src="../../js/common/theme.js"></script>
   <script src="../../js/common/session.js"></script>
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/common/auth.js"></script>
   <script src="../../js/common/page-template.js"></script>
-  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/common/sidebar.js?v=20261016-logo-1"></script>
   <script src="../../js/api/transaction-api.js"></script>
-  <script src="../../js/transactions/transactions.js"></script>
+  <script src="../../js/api/reservation-api.js"></script>
+  <script src="../../js/transactions/transactions.js?v=20261016-create-panel-1"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

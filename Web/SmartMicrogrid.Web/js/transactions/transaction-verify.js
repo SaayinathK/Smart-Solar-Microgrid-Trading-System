@@ -25,12 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!verificationTransactionId) {
     setPageMessage('Transaction ID is missing.');
-    cancelLink.href = 'transactions.html';
+    cancelLink.href = getWebPageUrl('transactions.html');
     document.getElementById('refresh-verification-transaction').disabled = true;
     return;
   }
 
-  cancelLink.href = `transaction-details.html?id=${encodeURIComponent(verificationTransactionId)}`;
+  cancelLink.href = getWebPageUrl(`transaction-details.html?id=${encodeURIComponent(verificationTransactionId)}`);
   loadVerificationTransaction();
 });
 
@@ -62,8 +62,8 @@ async function loadVerificationTransaction() {
 }
 
 function renderVerificationSummary(transaction) {
-  setValue('verification-transaction-id', transaction.id);
-  setValue('verification-reservation-id', transaction.reservationId);
+  RecordReferences.renderInto(document.getElementById('verification-transaction-id'), 'TX', transaction.id);
+  RecordReferences.renderInto(document.getElementById('verification-reservation-id'), 'RES', transaction.reservationId);
   setValue('verification-prosumer-id', transaction.prosumerId);
   setValue('verification-microgrid-id', transaction.microgridNodeId);
   setValue('verification-energy-slot-id', transaction.energySlotId);
@@ -169,17 +169,17 @@ function renderReturnedStatus(status) {
 
 function renderVerificationSuccess(transaction) {
   const transactionId = transaction.id;
-  setVerificationValue('verified-transaction-id', transactionId);
-  setVerificationValue('verified-reservation-id', transaction.reservationId);
+  RecordReferences.renderInto(document.getElementById('verified-transaction-id'), 'TX', transactionId);
+  RecordReferences.renderInto(document.getElementById('verified-reservation-id'), 'RES', transaction.reservationId);
   setVerificationValue('verified-energy-amount', formatVerificationEnergy(transaction.energyAmount));
   setVerificationValue('verified-by', transaction.verifiedBy);
   setVerificationValue('verified-at', formatVerificationDate(transaction.verificationTime));
   setVerificationValue('verified-status', transaction.status);
 
   document.getElementById('verified-view-transaction').href =
-    `transaction-details.html?id=${encodeURIComponent(transactionId)}`;
+    getWebPageUrl(`transaction-details.html?id=${encodeURIComponent(transactionId)}`);
   document.getElementById('verified-continue-transfer').href =
-    `transaction-complete.html?id=${encodeURIComponent(transactionId)}`;
+    getWebPageUrl(`transaction-complete.html?id=${encodeURIComponent(transactionId)}`);
   document.getElementById('verification-success-details').hidden = false;
 }
 

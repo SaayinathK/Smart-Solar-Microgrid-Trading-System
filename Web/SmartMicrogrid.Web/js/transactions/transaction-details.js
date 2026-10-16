@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   refreshButton.addEventListener('click', () => loadTransaction(transactionId));
 
   if (!transactionId) {
-    setTransactionMessage('Transaction ID is missing.');
+    setTransactionMessage('Select a transaction from Transactions to view its details.');
     refreshButton.disabled = true;
     return;
   }
@@ -49,9 +49,9 @@ async function loadTransaction(transactionId) {
 }
 
 function renderTransaction(transaction) {
-  setDetailValue('detail-id', transaction.id);
+  RecordReferences.renderInto(document.getElementById('detail-id'), 'TX', transaction.id);
   setDetailValue('detail-code', transaction.transactionCode);
-  setDetailValue('detail-reservation', transaction.reservationId);
+  RecordReferences.renderInto(document.getElementById('detail-reservation'), 'RES', transaction.reservationId);
   setDetailValue('detail-prosumer', transaction.prosumerId);
   setDetailValue('detail-microgrid', transaction.microgridNodeId);
   setDetailValue('detail-slot', transaction.energySlotId);
@@ -150,7 +150,7 @@ async function generateTransactionQr(transactionId) {
 function createActionLink(label, href) {
   const link = document.createElement('a');
   link.className = 'btn btn-primary';
-  link.href = href;
+  link.href = getWebPageUrl(href);
   link.textContent = label;
   return link;
 }

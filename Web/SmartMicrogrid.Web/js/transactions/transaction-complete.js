@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.getElementById('completion-view-details').href =
-    `transaction-details.html?id=${encodeURIComponent(completionTransactionId)}`;
+    getWebPageUrl(`transaction-details.html?id=${encodeURIComponent(completionTransactionId)}`);
   loadCompletionTransaction();
 });
 
@@ -57,8 +57,8 @@ async function loadCompletionTransaction() {
 }
 
 function renderCompletionTransaction(transaction) {
-  setCompletionValue('completion-transaction-id', transaction.id);
-  setCompletionValue('completion-reservation-id', transaction.reservationId);
+  RecordReferences.renderInto(document.getElementById('completion-transaction-id'), 'TX', transaction.id);
+  RecordReferences.renderInto(document.getElementById('completion-reservation-id'), 'RES', transaction.reservationId);
   setCompletionValue('completion-prosumer-id', transaction.prosumerId);
   setCompletionValue('completion-energy-amount', formatCompletionEnergy(transaction.energyAmount));
 
@@ -132,14 +132,14 @@ async function completeTransaction() {
 }
 
 function renderCompletionSuccess(transaction) {
-  setCompletionValue('completed-transaction-id', transaction.id);
-  setCompletionValue('completed-reservation-id', transaction.reservationId);
+  RecordReferences.renderInto(document.getElementById('completed-transaction-id'), 'TX', transaction.id);
+  RecordReferences.renderInto(document.getElementById('completed-reservation-id'), 'RES', transaction.reservationId);
   setCompletionValue('completed-energy-amount', formatCompletionEnergy(transaction.energyAmount));
   setCompletionValue('completed-transfer-time', formatCompletionDate(transaction.energyTransferTime));
   setCompletionValue('completed-final-status', transaction.status);
   setCompletionValue('completed-updated-at', formatCompletionDate(transaction.updatedAt));
   document.getElementById('completed-view-transaction').href =
-    `transaction-details.html?id=${encodeURIComponent(transaction.id)}`;
+    getWebPageUrl(`transaction-details.html?id=${encodeURIComponent(transaction.id)}`);
 }
 
 function setCompletionControlsDisabled(disabled) {
