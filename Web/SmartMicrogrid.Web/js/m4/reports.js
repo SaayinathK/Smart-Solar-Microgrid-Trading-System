@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     statusFilter.disabled = !isUserReport;
     document.getElementById('from-date').disabled = !hasDateRange;
     document.getElementById('to-date').disabled = !hasDateRange;
+    document.getElementById('report-filter-hint').textContent = isUserReport
+      ? 'Role and status filters apply to this user summary.'
+      : hasDateRange ? 'Date filters apply to this report. Account filters are unavailable.' : 'This report shows the current distribution across all roles.';
   }
 
   function dateRangeParams() {
@@ -45,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const button = document.getElementById('generate-btn');
     button.disabled = true;
     button.textContent = 'Generating...';
+    document.getElementById('csv-btn').disabled = true;
+    output.setAttribute('aria-busy', 'true');
     output.innerHTML = '<div class="card"><p class="text-muted" style="margin:0;">Generating report...</p></div>';
 
     try {
@@ -72,28 +77,38 @@ document.addEventListener('DOMContentLoaded', () => {
     } finally {
       button.disabled = false;
       button.textContent = 'Generate';
+      output.setAttribute('aria-busy', 'false');
     }
   }
 
   function handle(response, renderer) {
     if (response.success && response.data) {
       renderer(response.data);
+      document.getElementById('csv-btn').disabled = false;
     } else {
       output.innerHTML = card(`<p class="text-muted" style="margin:0;">${escapeHtml(response.message || 'Report generation failed.')}</p>`);
     }
   }
 
   function card(inner) {
-    return `<div class="card">${inner}</div>`;
+    return `<div class="card report-document">${inner}</div>`;
+  }
+
+  function reportHeading(title, generatedAt) {
+    return `<div class="report-document-header"><div><span class="management-eyebrow">Report results</span><h3>${escapeHtml(title)}</h3></div>${generatedAt ? `<p>Generated ${AdminUi.formatDateTime(generatedAt)}</p>` : ''}</div>`;
+  }
+
+  function reportSection(title, content, wide = false) {
+    return `<section class="report-section${wide ? ' report-section-wide' : ''}"><h4>${escapeHtml(title)}</h4>${content}</section>`;
   }
 
   function statRow(stats) {
-    return `<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom:1.5rem;">
+    return `<div class="stats-grid report-stat-grid">
       ${stats.map(s => `
-        <div class="stat-card" style="padding:1.1rem; border-top-width:3px;">
+        <div class="stat-card">
           <div class="stat-info">
             <h3>${escapeHtml(s.label)}</h3>
-            <div class="stat-value">${escapeHtml(String(s.value))}</div>
+            <div class="stat-value">${s.value == null ? '—' : escapeHtml(String(s.value))}</div>
           </div>
         </div>`).join('')}
     </div>`;
@@ -112,8 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderUserReport(data) {
     output.innerHTML = card(`
-      <h3>User Summary Report</h3>
-      <p class="text-muted">Generated ${AdminUi.formatDateTime(data.generatedAt)}</p>
+      ${reportHeading('User Summary Report', data.generatedAt)}
       ${statRow([
         { label: 'Total Users', value: data.totalUsers },
         { label: 'Active', value: data.activeUsers },
@@ -122,18 +136,18 @@ document.addEventListener('DOMContentLoaded', () => {
         { label: 'Pending', value: data.pendingUsers },
         { label: 'New in Period', value: data.newUsersInPeriod }
       ])}
-      <h4>By Role</h4>
-      ${table(['Role', 'Users', 'Active Users'],
-        (data.byRole || []).map(r => [escapeHtml(r.role), r.userCount, r.activeUserCount]))}
-      <h4>By Status</h4>
-      ${table(['Status', 'Users'],
-        (data.byStatus || []).map(r => [escapeHtml(r.status), r.count]))}
+      <div class="report-sections">
+      ${reportSection('By role', table(['Role', 'Users', 'Active users'],
+        (data.byRole || []).map(r => [escapeHtml(r.role), r.userCount, r.activeUserCount])))}
+      ${reportSection('By status', table(['Status', 'Users'],
+        (data.byStatus || []).map(r => [escapeHtml(r.status), r.count])))}
+      </div>
     `);
   }
 
   function renderRoleReport(data) {
     output.innerHTML = card(`
-      <h3>Role Distribution Report</h3>
+      ${reportHeading('Role Distribution Report')}
       ${table(['Role', 'Description', 'Users', 'Active Users'],
         data.map(r => [escapeHtml(r.role), escapeHtml(r.description), r.userCount, r.activeUserCount]))}
     `);
@@ -144,26 +158,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const modules = Object.entries(data.byModule || {});
 
     output.innerHTML = card(`
-      <h3>System Activity Report</h3>
-      <p class="text-muted">Generated ${AdminUi.formatDateTime(data.generatedAt)}</p>
+      ${reportHeading('System Activity Report', data.generatedAt)}
       ${statRow([
         { label: 'Total Events', value: data.totalEvents },
         { label: 'Success', value: data.successEvents },
         { label: 'Failure', value: data.failureEvents }
       ])}
-      <h4>By Action</h4>
-      ${table(['Action', 'Count'], actions.map(([k, v]) => [escapeHtml(k), v]))}
-      <h4>By Module</h4>
-      ${table(['Module', 'Count'], modules.map(([k, v]) => [escapeHtml(k), v]))}
-      <h4>Most Recent</h4>
-      ${table(['Timestamp', 'User', 'Action', 'Module', 'Status'],
+      <div class="report-sections">
+      ${reportSection('By action', table(['Action', 'Count'], actions.map(([k, v]) => [escapeHtml(k), v])))}
+      ${reportSection('By module', table(['Module', 'Count'], modules.map(([k, v]) => [escapeHtml(k), v])))}
+      ${reportSection('Most recent', table(['Timestamp', 'User', 'Action', 'Module', 'Status'],
         (data.recent || []).map(r => [
           AdminUi.formatDateTime(r.timestamp),
           escapeHtml(r.userName || '-'),
           escapeHtml(r.action),
           escapeHtml(r.module),
           escapeHtml(r.status)
-        ]))}
+        ])), true)}
+      </div>
     `);
   }
 
@@ -172,8 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const u = data.users || {};
 
     output.innerHTML = card(`
-      <h3>Platform Statistics Report</h3>
-      <p class="text-muted">Generated ${AdminUi.formatDateTime(data.generatedAt)}</p>
+      ${reportHeading('Platform Statistics Report', data.generatedAt)}
 
       <h4>Users</h4>
       ${statRow([
@@ -210,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const lines = [];
-    const reportTitle = output.querySelector(':scope > .card > h3')?.textContent.trim();
+    const reportTitle = output.querySelector('.report-document-header h3')?.textContent.trim();
     if (reportTitle) lines.push(csvCell(reportTitle));
 
     if (stats.length) {

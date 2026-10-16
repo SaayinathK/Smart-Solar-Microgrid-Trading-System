@@ -3,190 +3,222 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard - Smart Microgrid</title>
+  <title>Dashboard - Smart Microgrid Administration</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../../css/style.css">
-  <link rel="stylesheet" href="../../css/sidebar.css">
+  <link rel="stylesheet" href="../../css/sidebar.css?v=20261016-search-1">
   <link rel="stylesheet" href="../../css/dashboard.css">
   <link rel="stylesheet" href="../../css/tables.css">
+  <link rel="stylesheet" href="../../vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="../../css/interface.css">
   <link rel="stylesheet" href="../../css/admin.css">
+  <link rel="stylesheet" href="../../css/admin-overview.css?v=20261016-merged-workspace-1">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <link rel="stylesheet" href="../../css/spacing.css?v=20261016-1">
+  <link rel="icon" type="image/png" href="../../assets/images/smart_micro.png">
+  <link rel="apple-touch-icon" href="../../assets/images/smart_micro.png">
+  <link rel="stylesheet" href="../../css/brand.css?v=20261016-1">
 </head>
-<body>
-
-  <div id="app-layout-wrapper">
-    <div data-page-intro class="page-header">
+<body class="dashboard-page dashboard-admin">
+  <div id="app-layout-wrapper" data-admin-dashboard hidden>
+      <div data-page-intro data-intro-category="Administration" data-intro-image="img_solar_farm.jpg" data-intro-caption="Solar network" class="page-header">
       <div class="page-title">
-        <h1>Administration Dashboard</h1>
-        <p id="platform-subtitle">Platform statistics, system health and administrative activity</p>
+        <h1>Welcome, <span id="admin-display-name">Administrator</span>!</h1>
+        <p>Oversee your energy network, manage user access and keep your community connected.</p>
       </div>
       <div>
-        <button id="refresh-btn" class="btn btn-secondary">Refresh</button>
+
+
       </div>
     </div>
 
-    <div id="maintenance-banner" class="alert-item warning" style="display:none; margin-bottom:1.5rem;">
-      <span class="alert-icon">!</span>
-      <div>
-        <strong>Maintenance mode is active</strong>
-        <p id="maintenance-message">The platform is currently in maintenance mode.</p>
-      </div>
+    <div id="maintenance-banner" class="alert-item warning" hidden>
+      <span class="alert-icon" aria-hidden="true">!</span>
+      <div><strong>Maintenance mode is active</strong><p>The platform is currently in maintenance mode. <a href="configuration.html">Review configuration</a></p></div>
     </div>
 
-    <!-- User Statistics -->
-    <h2 style="margin-bottom:1rem;">User Statistics</h2>
-    <div class="admin-stat-grid">
-      <div class="stat-card admin-stat-card">
-        <div class="stat-content">
-          <div class="stat-label">Total Users</div>
-          <div class="stat-value" id="stat-total-users">-</div>
-        </div>
-      </div>
-      <div class="stat-card admin-stat-card cyan-card">
-        <div class="stat-content">
-          <div class="stat-label">Active</div>
-          <div class="stat-value" id="stat-active-users">-</div>
-        </div>
-      </div>
-      <div class="stat-card admin-stat-card amber-card">
-        <div class="stat-content">
-          <div class="stat-label">Inactive</div>
-          <div class="stat-value" id="stat-inactive-users">-</div>
-        </div>
-      </div>
-      <div class="stat-card admin-stat-card rose-card">
-        <div class="stat-content">
-          <div class="stat-label">Suspended</div>
-          <div class="stat-value" id="stat-suspended-users">-</div>
-        </div>
-      </div>
-      <div class="stat-card admin-stat-card indigo-card">
-        <div class="stat-content">
-          <div class="stat-label">Pending</div>
-          <div class="stat-value" id="stat-pending-users">-</div>
-        </div>
-      </div>
-    </div>
+    <p id="admin-dashboard-error" class="dashboard-load-error" role="alert" hidden></p>
 
-    <!-- Role Distribution -->
-    <div class="card" style="margin-bottom:2rem;">
-      <div class="card-title-row">
-        <div>
-          <h3>Role Distribution</h3>
-          <p>User accounts per platform role, derived from the shared users collection</p>
-        </div>
+    <section class="admin-workspace-modules" aria-labelledby="admin-workspace-title">
+      <div class="admin-section-heading">
+        <div><h2 id="admin-workspace-title">Administration workspace</h2><p>Quick access to network resources, reservations, transactions and administration.</p></div>
       </div>
-      <div id="role-distribution" style="margin-top:1.25rem;">
-        <p class="text-muted">Loading role distribution...</p>
-      </div>
-    </div>
-
-    <!-- Platform Overview -->
-    <div class="card" style="margin-bottom:2rem;">
-      <div class="card-title-row">
-        <div>
-          <h3>Platform Overview</h3>
-          <p>Read-only monitoring of Component 1, 2 and 3 data</p>
-        </div>
-      </div>
-      <div class="operations-grid" style="margin-top:1.25rem;">
-        <div class="alert-item healthy" id="mg-card">
-          <span class="alert-icon">M1</span>
-          <div>
-            <strong>Microgrids: <span id="mg-count">-</span></strong>
-            <p id="mg-note">Loading...</p>
+      <div class="admin-module-grid">
+    <article class="admin-module-card">
+          <div class="admin-module-visual">
+            <img src="../../assets/images/img_solar_farm.jpg" alt="" width="640" height="360" loading="lazy">
+            <span class="admin-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-7 9 7v10H3z M9 20v-7h6v7"/></svg></span>
+            <span class="admin-module-category">Generation</span>
+            <h3>Microgrids &amp; assets</h3>
           </div>
-        </div>
-        <div class="alert-item healthy" id="cap-card">
-          <span class="alert-icon">M1</span>
-          <div>
-            <strong>Available capacity: <span id="cap-value">-</span></strong>
-            <p id="cap-note">Loading...</p>
+          <div class="admin-module-body">
+            <p>Manage generation sites, battery storage and network capacity.</p>
+            <div class="admin-module-actions">
+              <a href="../M1/microgrids.html" class="btn btn-primary btn-sm">Microgrids</a>
+              <a href="../M1/battery-storage.html" class="btn btn-secondary btn-sm">Storage</a>
+            </div>
           </div>
-        </div>
-        <div class="alert-item healthy" id="res-card">
-          <span class="alert-icon">M2</span>
-          <div>
-            <strong>Reservations: <span id="res-count">-</span></strong>
-            <p id="res-note">Loading...</p>
-          </div>
-        </div>
-        <div class="alert-item healthy" id="txn-card">
-          <span class="alert-icon">M3</span>
-          <div>
-            <strong>Transactions: <span id="txn-count">-</span></strong>
-            <p id="txn-note">Loading...</p>
-          </div>
-        </div>
-      </div>
-    </div>
+        </article>
 
-    <!-- System Health -->
-    <div class="card" style="margin-bottom:2rem;">
-      <div class="card-title-row">
-        <div>
-          <h3>System Health</h3>
-          <p>Live checks against the running API and MongoDB instance</p>
-        </div>
-        <a href="system.html" class="btn btn-secondary btn-sm">Open System Health</a>
-      </div>
-      <div class="operations-grid" style="margin-top:1.25rem;">
-        <div class="alert-item healthy">
-          <span class="alert-icon">A</span>
-          <div><strong>API</strong><p id="health-api">-</p></div>
-        </div>
-        <div class="alert-item healthy">
-          <span class="alert-icon">D</span>
-          <div><strong>Database</strong><p id="health-db">-</p></div>
-        </div>
-        <div class="alert-item healthy">
-          <span class="alert-icon">S</span>
-          <div><strong>Server</strong><p id="health-server">-</p></div>
-        </div>
-      </div>
-    </div>
+    <article class="admin-module-card">
+          <div class="admin-module-visual">
+            <img src="../../assets/images/bg_energy_home.jpg" alt="" width="640" height="360" loading="lazy">
+            <span class="admin-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v16H4z M8 2v6 M16 2v6 M4 11h16"/></svg></span>
+            <span class="admin-module-category">Marketplace</span>
+            <h3>Reservations &amp; energy</h3>
+          </div>
+          <div class="admin-module-body">
+            <p>Review booking requests and explore available energy offers.</p>
+            <div class="admin-module-actions">
+              <a href="../reservations/reservations.html" class="btn btn-primary btn-sm">Reservations</a>
+              <a href="../M1/energy-availability.html" class="btn btn-secondary btn-sm">Available energy</a>
+            </div>
+          </div>
+        </article>
 
-    <!-- Recent Activity -->
-    <div class="card" style="margin-bottom:2rem;">
-      <div class="card-title-row">
-        <div>
-          <h3>Recent Administrative Activity</h3>
-          <p id="activity-subtitle">Latest audit records</p>
-        </div>
-        <a href="activity.html" class="btn btn-secondary btn-sm">View All Activity</a>
-      </div>
-      <div class="table-container" style="margin-top:1.25rem; padding:0;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>User</th>
-              <th>Role</th>
-              <th>Action</th>
-              <th>Module</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="recent-activity-body">
-            <tr><td colspan="6" class="reservation-message">Loading activity...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <article class="admin-module-card">
+          <div class="admin-module-visual">
+            <img src="../../assets/images/bg_web_dashboard.png" alt="" width="640" height="360" loading="lazy">
+            <span class="admin-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-4-4 M20 17H4l4 4"/></svg></span>
+            <span class="admin-module-category">Energy transfers</span>
+            <h3>Transactions</h3>
+          </div>
+          <div class="admin-module-body">
+            <p>Monitor energy transfers and review the transaction history.</p>
+            <div class="admin-module-actions">
+              <a href="../M3/transactions.html" class="btn btn-primary btn-sm">View ledger</a>
+              <a href="../M3/transactions.html?view=history" class="btn btn-secondary btn-sm">History</a>
+            </div>
+          </div>
+        </article>
+
+    <article class="admin-module-card">
+          <div class="admin-module-visual">
+            <img src="../../assets/images/img_battery_storage.jpg" alt="" width="640" height="360" loading="lazy">
+            <span class="admin-module-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 21v-2a6 6 0 0 1 12 0v2 M16 5a3 3 0 0 1 0 6 M21 21v-2a6 6 0 0 0-3-5.2"/></svg></span>
+            <span class="admin-module-category">Administration</span>
+            <h3>Users &amp; administration</h3>
+          </div>
+          <div class="admin-module-body">
+            <p>Manage user accounts, permissions and platform reports.</p>
+            <div class="admin-module-actions">
+              <a href="../users/users.html" class="btn btn-primary btn-sm">Users &amp; access</a>
+              <a href="reports.html" class="btn btn-secondary btn-sm">Reports</a>
+            </div>
+          </div>
+        </article>
+  </div>
+    </section>
+
+
+
+    <section aria-labelledby="network-overview-title" class="admin-network-overview">
+    <div class="dashboard-toolbar"><div><h2 id="network-overview-title">Operational pulse</h2><span id="last-updated" role="status" aria-live="polite">Loading infrastructure data...</span></div><div class="overview-actions"><a href="../M1/energy-slots.html" class="btn btn-secondary btn-sm">Manage energy slots</a><button id="refresh-btn" type="button" class="btn btn-secondary">Refresh data</button></div></div>
+
+    <p class="overview-readiness">Fleet readiness <strong id="readiness-score">&mdash;</strong></p>
+
+    <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon emerald"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m13 2-9 12h7l-1 8 10-12h-7z"/></svg></div><div class="stat-info"><h3>Total Generation Capacity</h3><div id="dash-total-cap" class="stat-value">&mdash;</div><div id="dash-avail-cap" class="stat-trend"><span class="status-dot"></span> Loading available capacity...</div></div></div>
+
+    <div class="stat-card cyan-card"><div class="stat-icon cyan"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="17" height="12" rx="3"/><path d="M23 10v4 M7 10v4 M11 10v4 M15 10v4"/></svg></div><div class="stat-info"><h3>Current Battery Storage</h3><div id="dash-battery-lvl" class="stat-value">&mdash;</div><div id="dash-battery-pct" class="stat-trend" style="color:var(--accent-cyan)">Loading storage capacity...</div></div></div>
+
+    <div class="stat-card amber-card"><div class="stat-icon amber"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10 12 3l9 7v11H3z M9 21v-8h6v8"/></svg></div><div class="stat-info"><h3>Registered Microgrids</h3><div id="dash-total-mg" class="stat-value">&mdash;</div><div id="dash-active-mg" class="stat-trend" style="color:var(--accent-amber)">Loading node status...</div></div></div>
+
+    <div class="stat-card indigo-card"><div class="stat-icon indigo"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4 M17 3v4 M3 11h18 M8 15h3 M8 18h7"/></svg></div><div class="stat-info"><h3>Active Energy Slots</h3><div id="dash-slots-count" class="stat-value">&mdash;</div><div id="dash-avail-energy" class="stat-trend" style="color:var(--accent-indigo)">Loading available energy...</div></div></div>
   </div>
 
+    <section class="resource-insights">
+      <div class="insight-card availability-insight"><div class="insight-heading"><span>Capacity headroom</span><strong id="capacity-headroom">&mdash;</strong></div><div class="insight-meter"><span id="capacity-meter"></span></div><p id="capacity-guidance">Loading capacity signals...</p></div>
+      <div class="insight-card battery-insight"><div class="insight-heading"><span>Battery resilience</span><strong id="battery-readiness">&mdash;</strong></div><div class="insight-meter"><span id="battery-meter"></span></div><p id="battery-guidance">Loading storage signals...</p></div>
+      <div class="insight-card slots-insight"><div class="insight-heading"><span>Market-ready energy</span><strong id="slot-energy">&mdash;</strong></div><p id="slot-guidance">Available energy is being calculated...</p><a href="../M1/energy-availability.html">Explore available supply &rarr;</a></div>
+    </section>
+
+    <section class="grid-map-card" data-microgrid-map aria-label="Microgrid locations"></section>
+
+    <div class="operations-grid overview-operations">
+      <section class="card chart-card"><div class="card-title-row"><div><h3>Operational status</h3><p>Fleet condition by microgrid node</p></div></div><div class="chart-canvas"><canvas id="statusChart" role="img" aria-label="Microgrid operational status distribution"></canvas><p class="chart-unavailable" hidden>Chart unavailable. The fleet totals are shown above.</p></div></section>
+      <section class="card chart-card"><div class="card-title-row"><div><h3>Capacity distribution</h3><p>Available, reserved, used and total energy</p></div></div><div class="chart-canvas"><canvas id="capacityChart" role="img" aria-label="Available, reserved, used and total capacity"></canvas><p class="chart-unavailable" hidden>Chart unavailable. Capacity totals are shown above.</p></div></section>
+
+    </div>
+
+    <section class="card alerts-card dashboard-attention-card"><div class="card-title-row"><div><h3>Attention queue</h3><p>Priority signals derived from live infrastructure data</p></div><span id="alert-count" class="alert-count">&mdash;</span></div><div id="operations-alerts" class="operations-alerts"><div class="empty-alert">Checking operational signals...</div></div></section>
+  </section>
+
+    <div class="admin-section-heading"><div><h2>Platform administration</h2><p id="platform-subtitle" role="status">Loading account and trading summary...</p></div><div class="admin-section-actions"><a href="../users/users.html?status=Pending" class="btn btn-primary">Review activations</a><a href="reports.html" class="btn btn-secondary btn-sm">View reports</a></div></div>
+
+    <section class="admin-summary-grid" aria-label="Platform summary">
+      <article class="admin-summary-card summary-attention">
+        <span class="summary-label">Pending activations<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><strong id="stat-pending-users">&mdash;</strong>
+        <a href="../users/users.html?status=Pending">Review pending users &rarr;</a>
+      </article>
+      <article class="admin-summary-card">
+        <span class="summary-label">Total users<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75"/><circle cx="9" cy="7" r="4"/></svg></span><strong id="stat-total-users">&mdash;</strong>
+        <a href="../users/users.html">Manage accounts &rarr;</a>
+      </article>
+      <article class="admin-summary-card" id="res-card">
+        <span class="summary-label">Reservations<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4 M17 3v4 M3 11h18 M8 15h3 M8 18h7"/></svg></span><strong id="res-count">&mdash;</strong>
+        <p id="res-note">Loading reservations...</p><a href="../reservations/reservations.html">View reservations &rarr;</a>
+      </article>
+      <article class="admin-summary-card" id="txn-card">
+        <span class="summary-label">Transactions<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-4-4 M20 17H4l4 4"/></svg></span><strong id="txn-count">&mdash;</strong>
+        <p id="txn-note">Loading transactions...</p><a href="../M3/transactions.html">View ledger &rarr;</a>
+      </article>
+    </section>
+
+    <div class="admin-detail-grid">
+      <section class="card" aria-labelledby="system-status-title">
+        <div class="card-title-row"><div><h2 id="system-status-title">System status</h2><p>Service availability and runtime health</p></div><a href="system.html" class="btn btn-secondary btn-sm">View system</a></div>
+        <div class="admin-health-list">
+          <div class="alert-item"><span class="alert-icon" aria-hidden="true"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m8 7-5 5 5 5 M16 7l5 5-5 5 M14 4l-4 16"/></svg></span><div><strong>API service</strong><p id="health-api">Checking...</p></div></div>
+          <div class="alert-item"><span class="alert-icon" aria-hidden="true"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5 M4 12c0 4 16 4 16 0"/></svg></span><div><strong>Database</strong><p id="health-db">Checking...</p></div></div>
+          <div class="alert-item"><span class="alert-icon" aria-hidden="true"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 6.5h.01 M7 17.5h.01"/></svg></span><div><strong>Server</strong><p id="health-server">Checking...</p></div></div>
+        </div>
+        <div class="admin-system-links"><a href="activity.html">Activity log &rarr;</a><a href="configuration.html">Configuration &rarr;</a></div>
+      </section>
+      <section class="card" aria-labelledby="users-access-title">
+        <div class="card-title-row"><div><h2 id="users-access-title">Users &amp; access</h2><p>Account status and role distribution</p></div><a href="../users/users.html" class="btn btn-secondary btn-sm">Manage users</a></div>
+        <dl class="admin-account-status">
+          <div><dt>Active</dt><dd id="stat-active-users">&mdash;</dd></div>
+          <div><dt>Inactive</dt><dd id="stat-inactive-users">&mdash;</dd></div>
+          <div><dt>Suspended</dt><dd id="stat-suspended-users">&mdash;</dd></div>
+        </dl>
+        <div id="role-distribution"><p class="text-muted">Loading role distribution...</p></div>
+        <a href="roles.html" class="admin-detail-link">View roles &amp; permissions &rarr;</a>
+      </section>
+    </div>
+
+    <section class="card admin-recent-activity" aria-labelledby="recent-activity-title">
+      <div class="card-title-row"><div><h2 id="recent-activity-title">Recent activity</h2><p id="activity-subtitle">Latest administrative actions</p></div><a href="activity.html" class="btn btn-secondary btn-sm">View activity log</a></div>
+      <div class="table-container">
+        <table class="data-table">
+          <thead><tr><th>Timestamp</th><th>User</th><th>Role</th><th>Action</th><th>Module</th><th>Status</th></tr></thead>
+          <tbody id="recent-activity-body"><tr><td colspan="6" class="reservation-message">Loading activity...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+
+  </div>
   <script src="../../js/config/api-config.js"></script>
   <script src="../../js/common/session.js"></script>
   <script src="../../js/common/theme.js"></script>
   <script src="../../js/common/auth.js"></script>
   <script src="../../js/common/page-template.js"></script>
-  <script src="../../js/common/sidebar.js"></script>
+  <script src="../../js/common/sidebar.js?v=20261016-logo-1"></script>
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/api/admin-api.js"></script>
+  <script src="../../js/api/microgrid-api.js"></script>
   <script src="../../js/common/admin-ui.js"></script>
+  <script src="../../vendor/leaflet/leaflet.js"></script>
+  <script src="../../js/common/openstreet-map.js"></script>
+  <script src="../../js/common/microgrid-map.js"></script>
+  <script src="../../js/overview.js"></script>
   <script src="../../js/m4/admin-dashboard.js"></script>
   <script>
-    renderAppLayout('m4-dashboard', 'Administration Dashboard');
+    if (SessionManager.isAuthenticated() && SessionManager.isAdmin()) {
+      document.getElementById('app-layout-wrapper').hidden = false;
+      renderAppLayout('m4-dashboard', 'Administration dashboard');
+    }
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -5,7 +5,14 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (!AuthGuard.requireAuth('Admin')) return;
 
-  document.getElementById('refresh-btn').addEventListener('click', loadDashboard);
+  const user = SessionManager.getUser();
+  document.getElementById('admin-display-name').textContent =
+    [user?.firstName, user?.lastName].filter(Boolean).join(' ') || 'Administrator';
+
+  document.getElementById('refresh-btn').addEventListener('click', () => {
+    loadDashboard();
+    document.dispatchEvent(new Event('dashboard:refresh'));
+  });
   loadDashboard();
 });
 
@@ -14,19 +21,28 @@ async function loadDashboard() {
   button.disabled = true;
   button.textContent = 'Refreshing...';
 
+  await Promise.all([loadAdminSummary(), InfrastructureOverview.refresh()]);
+  button.disabled = false;
+  button.textContent = 'Refresh data';
+}
+
+async function loadAdminSummary() {
+  const error = document.getElementById('admin-dashboard-error');
+  error.hidden = true;
+
   try {
     const response = await AdminApi.getDashboard();
 
     if (response.success && response.data) {
       render(response.data);
     } else {
-      ApiClient.showToast(response.message || 'Failed to load dashboard.', 'error');
+      throw new Error(response.message || 'Failed to load dashboard.');
     }
   } catch (err) {
-    ApiClient.showToast(err.message || 'Network error while loading the dashboard.', 'error');
-  } finally {
-    button.disabled = false;
-    button.textContent = 'Refresh';
+    error.textContent = `${err.message || 'Unable to load the platform summary.'} Displayed values may be out of date. Refresh to try again.`;
+    error.hidden = false;
+    document.getElementById('platform-subtitle').textContent = 'Platform summary unavailable. Network data is loaded separately.';
+    document.getElementById('recent-activity-body').innerHTML = AdminUi.emptyRow(6, 'Activity could not be refreshed. Open the activity log or try again.');
   }
 }
 
@@ -35,7 +51,7 @@ function render(data) {
     `${data.platformName} — generated ${AdminUi.formatDateTime(data.generatedAt)}`;
 
   renderMaintenance(data.maintenanceMode);
-  renderUsers(data.users);
+  renderUsers(data.users || {});
   renderRoleDistribution(data.roleDistribution || []);
   renderPlatform(data.platform || {});
   renderHealth(data.health || {});
@@ -44,7 +60,7 @@ function render(data) {
 
 function renderMaintenance(enabled) {
   const banner = document.getElementById('maintenance-banner');
-  banner.style.display = enabled ? 'flex' : 'none';
+  banner.hidden = !enabled;
 }
 
 function renderUsers(users) {
@@ -82,10 +98,14 @@ function renderRoleDistribution(rows) {
 }
 
 function renderPlatform(platform) {
-  setComponentCard('mg-card', 'mg-count', 'mg-note', platform.microgrids, platform.microgridCount);
-  setComponentCard('cap-card', 'cap-value', 'cap-note', platform.microgrids, `${AdminUi.formatNumber(platform.totalAvailableCapacity, 1)} kWh`);
   setComponentCard('res-card', 'res-count', 'res-note', platform.reservations, platform.reservationCount);
   setComponentCard('txn-card', 'txn-count', 'txn-note', platform.transactions, platform.transactionCount);
+  if (platform.reservations?.status === 'Live') {
+    document.getElementById('res-note').textContent = `${AdminUi.formatNumber(platform.pendingReservationCount)} pending approval`;
+  }
+  if (platform.transactions?.status === 'Live') {
+    document.getElementById('txn-note').textContent = `${AdminUi.formatNumber(platform.completedTransactionCount)} completed transfers`;
+  }
 }
 
 function setComponentCard(cardId, valueId, noteId, stat, value) {
@@ -95,7 +115,7 @@ function setComponentCard(cardId, valueId, noteId, stat, value) {
   card.classList.toggle('healthy', !!isLive);
   card.classList.toggle('warning', !isLive);
 
-  document.getElementById(valueId).textContent = value;
+  document.getElementById(valueId).textContent = isLive ? AdminUi.formatNumber(value) : 'Unavailable';
   document.getElementById(noteId).textContent = isLive
     ? (stat.note || '')
     : (stat ? stat.note : 'Component data is not reachable.');
