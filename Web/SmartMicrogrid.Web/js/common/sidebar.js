@@ -341,6 +341,11 @@ function getMenuItemsForRole(role, activePage) {
         </li>
         ${role === 'Prosumer' ? `
         <li>
+          <a href="/pages/M3/transactions.html?view=all" class="sidebar-link ${activePage === 'transactions' ? 'active' : ''}">
+            ${icons.reports} <span>My transactions & QR</span>
+          </a>
+        </li>
+        <li>
           <a href="/pages/M1/energy-availability.html" class="sidebar-link ${activePage === 'availability' ? 'active' : ''}">
             ${icons.grid} <span>Browse Available Energy</span>
           </a>

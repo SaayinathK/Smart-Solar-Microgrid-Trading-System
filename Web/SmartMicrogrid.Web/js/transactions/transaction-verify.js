@@ -105,8 +105,7 @@ function prepareVerification(event) {
 }
 
 function getQrTransactionId(qrCodeData) {
-  const match = qrCodeData.match(/^SMART-MICROGRID\|TRANSACTION\|([^|]+)\|([^|]+)$/);
-  return match ? match[1] : null;
+  return TransactionQr.parse(qrCodeData)?.transactionId || null;
 }
 
 function cancelConfirmation() {

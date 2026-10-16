@@ -19,7 +19,7 @@
     if (roleSubtitle) roleSubtitle.textContent = 'Network-wide monitoring, validation, and control over all microgrid energy reservations.';
     if (roleBadge) roleBadge.textContent = 'System Administrator';
     if (toolbarHeading) toolbarHeading.textContent = 'Network Reservation Registry';
-    if (btnQuickVerify) btnQuickVerify.style.display = 'inline-block';
+    if (btnQuickVerify) btnQuickVerify.style.display = 'none';
   } else if (role === 'MicrogridOperator') {
     if (roleEyebrow) roleEyebrow.textContent = 'MICROGRID OPERATIONS';
     if (roleTitle) roleTitle.textContent = 'Microgrid Reservations Queue';
@@ -58,14 +58,12 @@
     const date = document.getElementById('reservation-date').value;
 
     const filtered = rows.filter(r => {
-      const vCode = r.verificationCode || (r.id ? `SMG-RES-${r.id.slice(-6).toUpperCase()}` : '');
       const haystack = [
         r.prosumerName,
         r.prosumerId,
         r.microgridName,
         r.microgridNodeName,
         r.microgridNodeId,
-        vCode,
         RecordReferences.label('RES', idOf(r), rows.map(item => idOf(item))),
         idOf(r)
       ].join(' ').toLowerCase();
@@ -112,7 +110,7 @@
 
       // Grid Operator Actions (verify and complete delivery)
       if ((isOperator || isAdmin) && statusName === 'Approved') {
-        actionButtons.push(`<button class="btn btn-success btn-sm" data-action="complete" data-id="${id}">Verify & Complete</button>`);
+        actionButtons.push(`<button class="btn btn-secondary btn-sm" data-action="transaction" data-id="${id}">${isOperator ? 'Process transaction' : 'View transaction'}</button>`);
       }
 
       // Prosumer & Admin Actions (Modify / Cancel)
@@ -286,57 +284,32 @@
     costInput.value = `LKR ${total.toFixed(2)} (LKR ${price.toFixed(2)} / kWh)`;
   }
 
-  // QR Code generator (Vector SVG)
-  function renderSvgQr(text) {
-    // Generates a crisp deterministic 21x21 visual QR matrix
-    const size = 21;
-    let hash = 0;
-    for (let i = 0; i < text.length; i++) {
-      hash = ((hash << 5) - hash) + text.charCodeAt(i);
-      hash |= 0;
-    }
-
-    const cells = [];
-    const isCorner = (r, c) => (r < 7 && c < 7) || (r < 7 && c >= 14) || (r >= 14 && c < 7);
-    const isCornerPattern = (r, c) => {
-      const inBox = (r <= 6 && c <= 6) || (r <= 6 && c >= 14) || (r >= 14 && c <= 6);
-      if (!inBox) return false;
-      const ro = r >= 14 ? r - 14 : r;
-      const co = c >= 14 ? c - 14 : c;
-      if (ro === 0 || ro === 6 || co === 0 || co === 6) return true;
-      if (ro >= 2 && ro <= 4 && co >= 2 && co <= 4) return true;
-      return false;
-    };
-
-    for (let r = 0; r < size; r++) {
-      for (let c = 0; c < size; c++) {
-        if (isCorner(r, c)) {
-          if (isCornerPattern(r, c)) cells.push(`M${c},${r}h1v1h-1z`);
-        } else {
-          const bit = Math.abs((hash ^ (r * 31 + c * 17) ^ (text.charCodeAt((r + c) % text.length))) % 3);
-          if (bit === 0 || (r === 6 || c === 6)) {
-            cells.push(`M${c},${r}h1v1h-1z`);
-          }
-        }
-      }
-    }
-
-    return `<svg viewBox="0 0 ${size} ${size}" shape-rendering="crispEdges" fill="#0f172a"><path d="${cells.join('')}"/></svg>`;
-  }
-
   // Open Digital Pass Modal
-  function showDigitalPass(r) {
+  let passRequestVersion = 0;
+  async function showDigitalPass(r) {
     const dialog = document.getElementById('digital-pass-dialog');
     if (!dialog) return;
 
     const id = idOf(r);
-    const vCode = r.verificationCode || `SMG-RES-${id.slice(-6).toUpperCase()}`;
+    const version = ++passRequestVersion;
     const price = Number(r.pricePerUnit || 0);
     const estCost = Number(r.totalEstimatedCost || (r.energyAmount * price) || 0);
 
-    document.getElementById('pass-verification-code').textContent = vCode;
+    document.getElementById('pass-verification-code').textContent = '';
     RecordReferences.renderInto(document.getElementById('pass-reservation-id'), 'RES', id, reservations.map(item => idOf(item)));
-    document.getElementById('pass-qr-svg').innerHTML = renderSvgQr(vCode);
+    const qr = document.getElementById('pass-qr-svg');
+    const message = document.getElementById('pass-qr-message');
+    const openTransaction = document.getElementById('pass-open-transaction');
+    qr.textContent = 'Loading transaction QR…';
+    message.textContent = '';
+    openTransaction.hidden = true;
+    openTransaction.disabled = false;
+    openTransaction.onclick = async () => {
+      openTransaction.disabled = true;
+      try { await TransactionQr.openForReservation(r); }
+      catch (error) { message.textContent = error.message || 'Unable to open transaction.'; }
+      finally { openTransaction.disabled = false; }
+    };
     document.getElementById('pass-prosumer-name').textContent = r.prosumerName || 'Registered Prosumer';
     document.getElementById('pass-prosumer-nic').textContent = `NIC: ${r.prosumerId || '—'}`;
     document.getElementById('pass-node-name').textContent = r.microgridName || r.microgridNodeName || 'Microgrid Hub';
@@ -369,6 +342,21 @@
     }
 
     dialog.showModal();
+    try {
+      const transaction = await TransactionQr.findForReservation(id);
+      if (version !== passRequestVersion || !dialog.open) return;
+      const displayed = TransactionQr.render(qr, transaction);
+      document.getElementById('pass-verification-code').textContent = displayed ? transaction.transactionCode : '';
+      message.textContent = displayed
+        ? (transaction.status === 'Completed' ? 'Transfer completed. This QR is retained for reference.' : 'Show this transaction QR to the assigned operator.')
+        : (transaction ? 'The assigned operator must issue the transaction QR before verification.' : 'No transaction has been started for this reservation.');
+      openTransaction.hidden = !transaction && !(role === 'MicrogridOperator' && r.status === 'Approved');
+      openTransaction.textContent = transaction ? 'View transaction' : 'Start transaction';
+    } catch (error) {
+      if (version !== passRequestVersion || !dialog.open) return;
+      qr.textContent = 'QR unavailable';
+      message.textContent = error.message || 'Unable to load the transaction. Close and reopen this pass to retry.';
+    }
   }
 
   // Event Listeners for Table Actions
@@ -447,15 +435,12 @@
       return;
     }
 
-    if (action === 'complete') {
-      if (!confirm('Confirm energy delivery and complete this transaction?')) return;
+    if (action === 'transaction') {
       button.disabled = true;
       try {
-        await ReservationApi.complete(id);
-        ApiClient.showToast('Transaction confirmed and reservation marked Completed.', 'success');
-        await load();
+        await TransactionQr.openForReservation(reservation);
       } catch (err) {
-        ApiClient.showToast(err?.message || 'Completion failed.', 'error');
+        ApiClient.showToast(err?.message || 'Unable to open transaction.', 'error');
         button.disabled = false;
       }
       return;
@@ -547,31 +532,17 @@
     quickVerifyForm.addEventListener('submit', async event => {
       event.preventDefault();
       const rawCode = document.getElementById('input-verify-code').value.trim();
-      if (!rawCode) return;
-
-      // Find matching reservation by verification code or id
-      const target = reservations.find(r => {
-        const vCode = r.verificationCode || `SMG-RES-${(idOf(r)).slice(-6).toUpperCase()}`;
-        return vCode.toLowerCase() === rawCode.toLowerCase() || idOf(r).toLowerCase() === rawCode.toLowerCase();
-      });
-
-      if (!target) {
-        ApiClient.showToast('No reservation found matching this code or ID.', 'error');
-        return;
-      }
-
-      if (target.status !== 'Approved') {
-        ApiClient.showToast(`Cannot verify: Reservation status is "${target.status}". Only Approved reservations can be verified.`, 'error');
-        return;
-      }
+      const payload = TransactionQr.parse(rawCode);
+      if (!payload) { ApiClient.showToast('Paste a valid M3 transaction QR payload.', 'error'); return; }
 
       const btnSubmit = document.getElementById('btn-submit-verify');
       btnSubmit.disabled = true;
       try {
-        await ReservationApi.complete(idOf(target));
-        ApiClient.showToast(`Reservation verified! Delivery of ${target.energyAmount} kWh confirmed.`, 'success');
+        const response = await TransactionApi.verifyTransaction(payload.transactionId, rawCode);
+        if (response?.success !== true || response.data?.status !== 'Verified') throw new Error(response?.message || 'Verification did not complete.');
+        ApiClient.showToast('QR verified. Continue to confirm the physical energy transfer.', 'success');
         document.getElementById('quick-verify-dialog').close();
-        await load();
+        window.location.href = getWebAppUrl(`pages/M3/transaction-complete.html?id=${encodeURIComponent(payload.transactionId)}`);
       } catch (err) {
         ApiClient.showToast(err?.message || 'Verification failed.', 'error');
       } finally {

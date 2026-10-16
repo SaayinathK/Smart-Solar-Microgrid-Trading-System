@@ -3,7 +3,7 @@
    ============================================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (!AuthGuard.requireRole(['Admin', 'MicrogridOperator'])) return;
+  if (!AuthGuard.requireRole(['Admin', 'MicrogridOperator', 'Prosumer'])) return;
 
   renderAppLayout('transactions', 'Energy Transactions');
 

@@ -3,7 +3,7 @@
    ============================================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (!AuthGuard.requireRole(['Admin', 'MicrogridOperator'])) return;
+  if (!AuthGuard.requireRole(['Admin', 'MicrogridOperator', 'Prosumer'])) return;
 
   renderAppLayout('transactions', 'Transaction Details');
 
@@ -71,6 +71,7 @@ function renderTransaction(transaction) {
 
   const qrData = document.getElementById('detail-qr');
   qrData.textContent = transaction.qrCodeData || 'QR code has not been generated.';
+  TransactionQr.render(document.getElementById('detail-qr-image'), transaction);
 
   renderTransactionAction(status, transaction.id);
 }
@@ -137,7 +138,7 @@ async function generateTransactionQr(transactionId) {
     }
 
     await loadTransaction(transactionId);
-    ApiClient.showToast('QR code generated. The Prosumer can now view its payload in transaction details.', 'success');
+    ApiClient.showToast('Transaction QR issued. The Prosumer can now show it to the assigned operator.', 'success');
   } catch (error) {
     if (button) {
       button.disabled = false;

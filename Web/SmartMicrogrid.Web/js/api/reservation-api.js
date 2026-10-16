@@ -8,5 +8,5 @@ const ReservationApi = {
   approve(id) { return ApiClient.patch(`/reservations/${encodeURIComponent(id)}/approve`, {}); },
   reject(id, reason) { return ApiClient.patch(`/reservations/${encodeURIComponent(id)}/reject`, { reason }); },
   cancel(id) { return ApiClient.patch(`/reservations/${encodeURIComponent(id)}/cancel`, {}); },
-  complete(id) { return ApiClient.patch(`/reservations/${encodeURIComponent(id)}/complete`, {}); }
+  // Delivery is completed through TransactionApi.completeTransaction after M3 QR verification.
 };

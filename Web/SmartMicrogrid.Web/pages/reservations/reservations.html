@@ -16,6 +16,7 @@
   <link rel="icon" type="image/png" href="../../assets/images/smart_micro.png">
   <link rel="apple-touch-icon" href="../../assets/images/smart_micro.png">
   <link rel="stylesheet" href="../../css/brand.css?v=20261016-1">
+  <link rel="stylesheet" href="../../css/transaction-qr.css?v=20261016-m3-1">
 </head>
 <body>
   <div id="app-layout-wrapper">
@@ -51,14 +52,14 @@
           <p id="toolbar-subtitle">Filter, inspect, and track microgrid energy allocations.</p>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn btn-outline-primary" id="btn-quick-verify" type="button" style="display: none;">✓ Verify by Code</button>
+          <button class="btn btn-outline-primary" id="btn-quick-verify" type="button" style="display: none;">Verify transaction QR</button>
           <button class="btn btn-primary" id="new-reservation" type="button">＋ Reserve Energy</button>
         </div>
       </div>
       <div class="reservation-filters">
         <label class="reservation-search">
           <span>⌕</span>
-          <input id="reservation-search" class="form-control" type="search" placeholder="Search by name, NIC, node, or verification code">
+          <input id="reservation-search" class="form-control" type="search" placeholder="Search by name, NIC, node, or reservation reference">
         </label>
         <select id="reservation-status" class="form-select">
           <option value="">All statuses</option>
@@ -173,9 +174,13 @@
       </div>
 
       <div class="digital-pass-layout">
+      <div class="pass-qr-column">
       <div class="qr-container">
         <div id="pass-qr-svg" role="img" aria-label="Reservation verification QR code"></div>
-        <span class="qr-code-text" id="pass-verification-code">SMG-RES-000000</span>
+        <span class="qr-code-text" id="pass-verification-code"></span>
+      </div>
+      <p class="pass-qr-message" id="pass-qr-message" role="status" aria-live="polite"></p>
+      <button class="btn btn-secondary pass-transaction-link" id="pass-open-transaction" type="button" hidden>Open transaction</button>
       </div>
 
       <div class="pass-grid">
@@ -237,15 +242,15 @@
         <button class="dialog-close" type="button" onclick="document.getElementById('quick-verify-dialog').close()">×</button>
       </div>
       <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 12px;">
-        Enter the Prosumer's Verification Token or Reservation ID to verify dispatch and mark fulfillment complete.
+        Paste the M3 transaction QR payload shown by the Prosumer. After verification, confirm the physical energy transfer in its transaction.
       </p>
-      <label>Verification Token / Reservation ID
-        <input class="form-input form-control" id="input-verify-code" required placeholder="e.g. SMG-RES-87AB21 or ID">
+      <label>Transaction QR payload
+        <textarea class="form-input form-control" id="input-verify-code" required rows="3" placeholder="SMART-MICROGRID|TRANSACTION|transactionId|transactionCode"></textarea>
       </label>
       <div id="verify-preview-box" style="display: none; padding: 12px; background: var(--bg-tertiary); border-radius: 8px; margin-top: 8px; font-size: 0.85rem;"></div>
       <div class="dialog-actions" style="margin-top: 16px;">
         <button class="btn btn-secondary" type="button" onclick="document.getElementById('quick-verify-dialog').close()">Cancel</button>
-        <button class="btn btn-primary" id="btn-submit-verify" type="submit">Confirm & Complete</button>
+        <button class="btn btn-primary" id="btn-submit-verify" type="submit">Verify transaction</button>
       </div>
     </form>
   </dialog>
@@ -256,6 +261,9 @@
   <script src="../../js/common/session.js"></script>
   <script src="../../js/api/api-client.js"></script>
   <script src="../../js/api/reservation-api.js"></script>
+  <script src="../../js/api/transaction-api.js"></script>
+  <script src="../../vendor/qrcode.js"></script>
+  <script src="../../js/common/transaction-qr.js?v=20261016-m3-1"></script>
   <script src="../../js/common/auth.js"></script>
   <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js?v=20261016-logo-1"></script>
@@ -264,6 +272,6 @@
     AuthGuard.requireAuth();
     renderAppLayout('reservations', 'Energy Reservations & Trading');
   </script>
-  <script src="../../js/reservations/reservations.js?v=20261016-lkr-1"></script>
+  <script src="../../js/reservations/reservations.js?v=20261016-m3-1"></script>
 </body>
 </html>

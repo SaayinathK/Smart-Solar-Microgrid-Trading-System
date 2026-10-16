@@ -1,0 +1,10 @@
+.transaction-qr-image { display: grid; place-items: center; width: min(250px, 100%); min-height: 160px; padding: 12px; margin-block: 12px; border: 1px solid var(--border-color); border-radius: 12px; background: #fff; color: #475569; font-size: .8rem; text-align: center; }
+.transaction-qr-image svg { display: block; width: 100%; height: auto; }
+.pass-qr-column { min-width: 0; }
+#pass-qr-svg { min-height: 106px; display: grid; align-items: center; text-align: center; font-size: .68rem; color: #475569; }
+#digital-pass-dialog .qr-container { padding: 0; overflow: hidden; }
+#digital-pass-dialog .qr-container svg { width: 124px; height: 124px; }
+#digital-pass-dialog .qr-code-text { display: block; white-space: normal; overflow-wrap: anywhere; text-align: center; padding: 0 5px 8px; margin: 0; font-size: .56rem; }
+.pass-qr-message { font-size: .64rem; line-height: 1.5; color: var(--text-secondary); margin: 8px 0; }
+.pass-transaction-link { padding: 6px 8px; font-size: .65rem; width: 100%; }
+@media (max-width: 480px) { .pass-qr-column { max-width: 230px; justify-self: center; text-align: center; } }
