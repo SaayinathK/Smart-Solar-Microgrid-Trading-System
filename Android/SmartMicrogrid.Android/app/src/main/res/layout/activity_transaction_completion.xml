@@ -27,6 +27,15 @@
                 android:orientation="vertical"
                 android:padding="@dimen/screen_gutter">
 
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="78dp"
+                    android:layout_marginBottom="12dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/img_solar_farm"
+                    android:importantForAccessibility="no"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Operator.Photo" />
+
                 <TextView
                     android:id="@+id/tv_completion_success_icon"
                     android:layout_width="wrap_content"
@@ -34,15 +43,7 @@
                     android:contentDescription="Transaction completed successfully"
                     android:text="✓"
                     android:textColor="@color/m3_success"
-                    android:textSize="36sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/transaction_completed"
-                    android:textColor="@color/m3_success"
-                    android:textSize="@dimen/screen_title_size"
+                    android:textSize="28sp"
                     android:textStyle="bold" />
 
                 <TextView

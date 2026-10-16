@@ -18,6 +18,7 @@ class EditProfileActivity : WorkspaceActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityEditProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        com.smartmicrogrid.operator.OperatorMotion.enter(binding.root)
         supportActionBar?.title = "Edit Profile"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 

@@ -1,7 +1,6 @@
 package com.smartmicrogrid.utils
 
 import android.content.Context
-import android.net.wifi.WifiManager
 import android.os.Build
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -9,7 +8,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.net.InetAddress
 import java.net.NetworkInterface
 import java.util.concurrent.TimeUnit
 
@@ -26,6 +24,7 @@ object ServerDiscovery {
     private val probeClient = OkHttpClient.Builder()
         .connectTimeout(1200, TimeUnit.MILLISECONDS)
         .readTimeout(1200, TimeUnit.MILLISECONDS)
+        .callTimeout(2000, TimeUnit.MILLISECONDS)
         .build()
 
     fun isEmulator(): Boolean {
@@ -81,7 +80,8 @@ object ServerDiscovery {
         }
 
         // 2. Default LAN Wi-Fi backend
-        candidates.add("http://192.168.1.4:5050/api/")
+        candidates.add(Constants.API_BASE_URL)
+        candidates.add(Constants.DEFAULT_LAN_URL)
 
         // 3. Android emulator host loopback
         if (isEmulator()) {
@@ -110,19 +110,16 @@ object ServerDiscovery {
 
     /**
      * Probes an individual URL by requesting its microgrids endpoint or health.
-     * Returns true if the server responds with a valid HTTP status.
+     * A missing endpoint must not be treated as a working API.
      */
     suspend fun probeUrl(url: String): Boolean = withContext(Dispatchers.IO) {
-        val formatted = formatBaseUrl(url)
-        val probeEndpoint = formatted + "microgrids"
         try {
             val request = Request.Builder()
-                .url(probeEndpoint)
+                .url(formatBaseUrl(url) + "microgrids")
                 .get()
                 .build()
             probeClient.newCall(request).execute().use { response ->
-                // Status 200, 401, or 404 indicates an active HTTP server responded
-                response.code in 200..404
+                response.code == 200 || response.code == 401
             }
         } catch (_: Exception) {
             false

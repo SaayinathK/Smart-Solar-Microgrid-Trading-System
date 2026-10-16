@@ -29,36 +29,14 @@
             android:translationY="-6dp">
 
             <TextView
-                android:id="@+id/tvReadyHeader"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:letterSpacing="0.12"
-                android:text="@string/transaction_ready_header"
-                android:textAllCaps="true"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvReadyTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center"
-                android:text="@string/ready_for_verification"
-                android:textColor="?attr/colorOnBackground"
-                android:textSize="28sp"
-                android:textStyle="bold" />
-
-            <TextView
                 android:id="@+id/tvReadySubtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="0dp"
                 android:gravity="center"
                 android:text="@string/show_transaction_qr_to_operator"
                 android:textColor="?android:attr/textColorSecondary"
-                android:textSize="15sp" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/tvReadyHint"
@@ -75,7 +53,7 @@
             android:id="@+id/qrCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="12dp"
             app:cardBackgroundColor="?attr/colorSurface"
             app:cardCornerRadius="28dp"
             app:cardElevation="8dp"

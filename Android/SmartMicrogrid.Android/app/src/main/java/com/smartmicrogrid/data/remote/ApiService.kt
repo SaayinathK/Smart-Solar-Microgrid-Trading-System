@@ -20,6 +20,18 @@ interface ApiService {
         @Path("id") id: String
     ): Response<ApiResponse<Microgrid>>
 
+    @POST("microgrids")
+    suspend fun createMicrogrid(@Body request: OperatorMicrogridRequest): Response<ApiResponse<Microgrid>>
+
+    @PUT("microgrids/{id}")
+    suspend fun editMicrogrid(@Path("id") id: String, @Body request: OperatorMicrogridRequest): Response<ApiResponse<Microgrid>>
+
+    @GET("geocoding")
+    suspend fun locateAddress(@Query("address") address: String): Response<ApiResponse<OperatorLocation>>
+
+    @GET("geocoding/reverse")
+    suspend fun reverseLocation(@Query("latitude") latitude: Double, @Query("longitude") longitude: Double): Response<ApiResponse<OperatorLocation>>
+
     @PATCH("microgrids/{id}/status")
     suspend fun updateMicrogridStatus(
         @Path("id") id: String,
@@ -36,9 +48,12 @@ interface ApiService {
     suspend fun updateBattery(
         @Path("id") id: String,
         @Body request: UpdateBatteryRequest
-    ): Response<ApiResponse<Unit>>
+    ): Response<ApiResponse<OperatorBatteryReading>>
 
     // Energy Slot Endpoints
+    @GET("energy-slots/{id}")
+    suspend fun getEnergySlotById(@Path("id") id: String): Response<ApiResponse<EnergySlot>>
+
     @GET("energy-slots")
     suspend fun getEnergySlots(
         @Query("microgridId") microgridId: String? = null,
@@ -60,7 +75,8 @@ interface ApiService {
     @GET("energy-availability")
     suspend fun getEnergyAvailability(
         @Query("location") location: String? = null,
-        @Query("minimumEnergy") minimumEnergy: Double? = null
+        @Query("minimumEnergy") minimumEnergy: Double? = null,
+        @Query("operatorId") operatorId: String? = null
     ): Response<ApiResponse<List<EnergyAvailabilitySlot>>>
 
     // ── M3 Transaction Endpoints ──

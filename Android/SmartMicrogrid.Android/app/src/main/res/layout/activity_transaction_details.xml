@@ -27,19 +27,20 @@
                 android:orientation="vertical"
                 android:padding="@dimen/screen_gutter">
 
-                <TextView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/transaction_details"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="@dimen/screen_title_size"
-                    android:textStyle="bold" />
+                    android:layout_height="78dp"
+                    android:layout_marginBottom="12dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/bg_web_dashboard"
+                    android:importantForAccessibility="no"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Operator.Photo" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="0dp"
                     android:checkable="false"
                     android:clickable="false"
                     android:text="Pending"
@@ -549,6 +550,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
                     android:text="@string/scan_transaction_qr" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_manual_qr"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Paste QR payload instead"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tv_scan_result"

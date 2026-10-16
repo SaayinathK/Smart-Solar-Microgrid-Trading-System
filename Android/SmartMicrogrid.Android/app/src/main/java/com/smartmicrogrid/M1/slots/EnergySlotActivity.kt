@@ -18,6 +18,16 @@ class EnergySlotActivity : WorkspaceActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (com.smartmicrogrid.utils.SessionManager.getUserRole() == "Prosumer") {
+            startActivity(android.content.Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java).apply {
+                flags = android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
+                putExtra("prosumer_destination", "explore")
+                putExtra("mode", 4)
+                putExtra("MICROGRID_ID", intent.getStringExtra("MICROGRID_ID"))
+            })
+            finish()
+            return
+        }
         binding = ActivityEnergySlotsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

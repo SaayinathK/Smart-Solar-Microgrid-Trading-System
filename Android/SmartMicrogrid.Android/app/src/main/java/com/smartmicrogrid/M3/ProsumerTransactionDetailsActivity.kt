@@ -7,11 +7,17 @@ import com.smartmicrogrid.ui.WorkspaceActivity
 import com.smartmicrogrid.R
 import com.smartmicrogrid.databinding.ActivityProsumerTransactionDetailsBinding
 import com.smartmicrogrid.models.Transaction
+import com.smartmicrogrid.operator.*
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 
 class ProsumerTransactionDetailsActivity : WorkspaceActivity() {
 
     private lateinit var binding: ActivityProsumerTransactionDetailsBinding
     private val viewModel: TransactionDetailsViewModel by viewModels()
+    private var transactionId = ""
+    private var deliveryLabel: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,7 +27,7 @@ class ProsumerTransactionDetailsActivity : WorkspaceActivity() {
         supportActionBar?.title = getString(R.string.prosumer_transaction_details)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val transactionId = intent.getStringExtra(EXTRA_TRANSACTION_ID).orEmpty()
+        transactionId = intent.getStringExtra(EXTRA_TRANSACTION_ID).orEmpty()
         binding.btnRetry.setOnClickListener { viewModel.loadTransaction(transactionId) }
         binding.btnQrAction.setOnClickListener {
             val transaction = viewModel.transaction.value ?: return@setOnClickListener
@@ -46,13 +52,28 @@ class ProsumerTransactionDetailsActivity : WorkspaceActivity() {
             binding.tvError.text = error
         }
 
-        viewModel.loadTransaction(transactionId)
     }
+    override fun onResume() { super.onResume(); if (transactionId.isNotBlank()) viewModel.loadTransaction(transactionId) }
 
     private fun displayTransaction(transaction: Transaction) {
         binding.progressBar.visibility = View.GONE
         binding.errorContent.visibility = View.GONE
         binding.detailsContent.visibility = View.VISIBLE
+        OperatorMotion.enter(binding.detailsContent)
+        binding.transferSummary.removeAllViews()
+        binding.transferSummary.addView(OperatorVisuals.pill(this, TransactionUiFormatters.statusLabel(transaction.status), transaction.status in setOf("Cancelled", "Rejected")))
+        binding.transferSummary.addView(label("${OperatorOverview.format(transaction.energyAmount)} kWh", 24f, true).apply { setPadding(0, context.dp(8), 0, context.dp(4)) })
+        binding.transferSummary.addView(label(com.smartmicrogrid.prosumer.ProsumerRules.step(transaction.status), 14f))
+        val progress = when (transaction.status) { "Pending" -> 20; "QRGenerated", "VerificationPending" -> 40; "Verified" -> 60; "EnergyTransferInProgress" -> 80; "Completed" -> 100; else -> 0 }
+        binding.transferSummary.addView(OperatorMeterView(this, progress, OperatorVisuals.blue), android.widget.LinearLayout.LayoutParams(-1, dp(6)).apply { topMargin = dp(10) })
+        lifecycleScope.launch {
+            try {
+                val booking = com.smartmicrogrid.data.remote.RetrofitClient.apiService.getReservationById(transaction.reservationId).data()
+                deliveryLabel = "${TransactionUiFormatters.dateTime(booking.startTime)} to ${TransactionUiFormatters.dateTime(booking.endTime)}"
+                binding.transferSummary.addView(label("Delivery: $deliveryLabel", 12f).apply { setPadding(0, context.dp(8), 0, 0) })
+            } catch (cancelled: CancellationException) { throw cancelled }
+            catch (_: Exception) { /* Transaction details and its QR remain available. */ }
+        }
         binding.tvTransactionId.text = valueOrFallback(transaction.id)
         binding.tvTransactionCode.text = valueOrFallback(transaction.transactionCode)
         binding.tvReservationId.text = valueOrFallback(transaction.reservationId)
@@ -85,13 +106,7 @@ class ProsumerTransactionDetailsActivity : WorkspaceActivity() {
             putExtra(TransactionQrActivity.EXTRA_ENERGY_SLOT_ID, transaction.energySlotId)
             putExtra(
                 TransactionQrActivity.EXTRA_SCHEDULE_LABEL,
-                buildString {
-                    append(TransactionUiFormatters.dateTime(transaction.createdAt))
-                    if (transaction.updatedAt.isNotBlank()) {
-                        append(" • ")
-                        append(TransactionUiFormatters.dateTime(transaction.updatedAt))
-                    }
-                }
+                deliveryLabel ?: "Delivery window unavailable. Check your booking."
             )
         })
     }

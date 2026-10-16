@@ -3,26 +3,32 @@ package com.smartmicrogrid.auth
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
-import com.smartmicrogrid.ui.WorkspaceActivity
+import androidx.appcompat.app.AppCompatActivity
 import com.smartmicrogrid.databinding.ActivityRegisterBinding
 import com.smartmicrogrid.models.RegisterRequest
 
-class RegisterActivity : WorkspaceActivity() {
+class RegisterActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityRegisterBinding
     private val viewModel: AuthViewModel by viewModels()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRegisterBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        supportActionBar?.title = "Prosumer Registration"
+        supportActionBar?.hide()
 
+        AuthScreenControls.bind(this, binding.btnTheme, binding.btnConnection)
         setupListeners()
         observeViewModel()
     }
 
     private fun setupListeners() {
+        binding.btnBackToLogin.setOnClickListener {
+            finish()
+        }
+
         binding.btnRegister.setOnClickListener {
             val firstName = binding.etFirstName.text.toString().trim()
             val lastName = binding.etLastName.text.toString().trim()
@@ -77,14 +83,15 @@ class RegisterActivity : WorkspaceActivity() {
     private fun observeViewModel() {
         viewModel.isLoading.observe(this) { loading ->
             binding.btnRegister.isEnabled = !loading
+            binding.btnConnection.isEnabled = !loading
             binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
-            binding.btnRegister.text = if (loading) "Creating..." else "Create Account"
+            binding.btnRegister.text = if (loading) "Creating account…" else "Create account"
         }
 
         viewModel.registerResult.observe(this) { result ->
             result?.let {
                 if (it.isSuccess) {
-                    binding.tvSuccess.text = "Registration successful! Your account is pending activation by a Backoffice administrator."
+                    binding.tvSuccess.text = "Account created. You can sign in once an administrator activates it."
                     binding.tvSuccess.visibility = View.VISIBLE
                     hideError()
                     // Delay then go back to login
@@ -99,7 +106,6 @@ class RegisterActivity : WorkspaceActivity() {
     private fun showError(message: String) {
         binding.tvError.text = message
         binding.tvError.visibility = View.VISIBLE
-        binding.tvSuccess.visibility = View.GONE
     }
 
     private fun hideError() {

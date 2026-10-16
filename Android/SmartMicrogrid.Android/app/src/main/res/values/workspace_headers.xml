@@ -1,0 +1,13 @@
+<resources>
+    <string name="header_prosumer_explore">Explore energy</string>
+    <string name="header_operator_transfers">Transfers</string>
+    <string name="header_nearby_microgrids">Nearby microgrids</string>
+    <string name="header_microgrid_operations">Microgrid operations</string>
+    <string name="header_reservations">Reservations</string>
+    <string name="header_profile">My profile</string>
+    <string name="header_microgrids">Solar microgrids</string>
+    <string name="header_available_energy">Available energy</string>
+    <string name="header_energy_slots">Energy slots</string>
+    <string name="header_edit_profile">Edit profile</string>
+    <string name="header_change_password">Change password</string>
+</resources>

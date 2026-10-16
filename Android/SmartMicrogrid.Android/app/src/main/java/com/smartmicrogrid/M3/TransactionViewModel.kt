@@ -180,9 +180,7 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
     }
 
     private fun isActionable(transaction: Transaction): Boolean {
-        return transaction.status.equals("Pending", ignoreCase = true) ||
-            transaction.status.equals("QRGenerated", ignoreCase = true) ||
-            transaction.status.equals("VerificationPending", ignoreCase = true)
+        return transaction.status in com.smartmicrogrid.operator.OperatorRules.attentionStatuses
     }
 
     private fun reservationLoadError(statusCode: Int): String = when (statusCode) {

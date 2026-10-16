@@ -27,13 +27,14 @@
                 android:orientation="vertical"
                 android:padding="@dimen/screen_gutter">
 
-                <TextView
+                <com.google.android.material.imageview.ShapeableImageView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/confirm_energy_transfer"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textSize="@dimen/screen_title_size"
-                    android:textStyle="bold" />
+                    android:layout_height="78dp"
+                    android:layout_marginBottom="12dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/img_battery_storage"
+                    android:importantForAccessibility="no"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Operator.Photo" />
 
                 <TextView
                     android:layout_width="match_parent"

@@ -17,6 +17,7 @@ import java.io.ByteArrayInputStream
 class OpenStreetMapView(context: Context) : WebView(context) {
     private var ready = false
     private var selection: JSONObject? = null
+    private var locationPicking = false
 
     init {
         settings.javaScriptEnabled = true
@@ -43,6 +44,7 @@ class OpenStreetMapView(context: Context) : WebView(context) {
             override fun onPageFinished(view: WebView, url: String) {
                 if (url != PAGE_URL) return
                 ready = true
+                evaluateJavascript("window.enableLocationPicker($locationPicking);", null)
                 renderSelection()
             }
 
@@ -68,6 +70,24 @@ class OpenStreetMapView(context: Context) : WebView(context) {
     }
 
     fun clearLocation() { selection = null; renderSelection() }
+
+    fun enableLocationPicking() {
+        locationPicking = true
+        if (ready) evaluateJavascript("window.enableLocationPicker(true);", null)
+    }
+
+    fun readPickedLocation(result: (Pair<Double, Double>?) -> Unit) {
+        if (!ready) { result(null); return }
+        evaluateJavascript("window.getPickedLocation();") { value ->
+            val point = runCatching {
+                val json = JSONObject(value)
+                val lat = json.getDouble("latitude"); val lng = json.getDouble("longitude")
+                require(lat in -90.0..90.0 && lng in -180.0..180.0)
+                lat to lng
+            }.getOrNull()
+            result(point)
+        }
+    }
 
     private fun renderSelection() {
         if (ready) evaluateJavascript("window.showMicrogrid(${selection ?: "null"});", null)

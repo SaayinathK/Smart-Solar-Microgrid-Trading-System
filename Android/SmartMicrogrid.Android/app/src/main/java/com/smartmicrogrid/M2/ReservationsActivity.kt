@@ -9,7 +9,16 @@ class ReservationsActivity : WorkspaceActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_m2_available_slots) // Uses standard container layout or frame
+        if (com.smartmicrogrid.utils.SessionManager.getUserRole() == "Prosumer") {
+            startActivity(android.content.Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java).apply {
+                flags = android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
+                putExtra("prosumer_destination", "bookings")
+                putExtra("MICROGRID_ID", intent.getStringExtra("MICROGRID_ID"))
+            })
+            finish()
+            return
+        }
+        setContentView(android.widget.FrameLayout(this).apply { id = R.id.fragment_container })
         
         val role = SessionManager.getUserRole()
         val title = when (role) {
@@ -23,7 +32,7 @@ class ReservationsActivity : WorkspaceActivity() {
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(android.R.id.content, MyReservationsFragment())
+                .replace(R.id.fragment_container, MyReservationsFragment())
                 .commit()
         }
     }

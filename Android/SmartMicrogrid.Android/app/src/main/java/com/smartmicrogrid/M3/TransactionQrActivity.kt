@@ -79,7 +79,7 @@ class TransactionQrActivity : WorkspaceActivity() {
             return
         }
 
-        binding.heroContainer.animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(200L).start()
+        com.smartmicrogrid.operator.OperatorMotion.enter(binding.qrCard)
         renderQr(qrCodeData)
     }
 

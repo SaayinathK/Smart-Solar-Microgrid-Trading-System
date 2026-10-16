@@ -19,6 +19,8 @@
 
         <activity
             android:name=".auth.LoginActivity"
+            android:theme="@style/Theme.SmartMicrogrid.Auth"
+            android:windowSoftInputMode="adjustResize"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,7 +29,10 @@
         </activity>
 
         <activity android:name=".MainActivity" />
-        <activity android:name=".auth.RegisterActivity" />
+        <activity
+            android:name=".auth.RegisterActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.SmartMicrogrid.Auth" />
         <activity android:name=".auth.EditProfileActivity" />
         <activity android:name=".auth.ChangePasswordActivity" />
 
@@ -48,6 +53,7 @@
             android:windowSoftInputMode="stateAlwaysHidden"
             android:exported="false" />
         <activity android:name=".M3.MicrogridOperatorMainActivity" />
+        <activity android:name=".operator.OperatorProfileActivity" />
         <activity android:name=".M2.AvailableSlotsActivity" />
         <activity android:name=".M2.ReservationsActivity" />
 

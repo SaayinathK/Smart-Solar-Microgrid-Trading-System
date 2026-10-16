@@ -24,6 +24,15 @@ class AvailableSlotsActivity : WorkspaceActivity() {
     private lateinit var adapter: AvailableSlotsAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (com.smartmicrogrid.utils.SessionManager.getUserRole() == "Prosumer") {
+            startActivity(android.content.Intent(this, com.smartmicrogrid.M2.ProsumerMainActivity::class.java).apply {
+                flags = android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
+                putExtra("prosumer_destination", "explore")
+                putExtra("MICROGRID_ID", intent.getStringExtra("MICROGRID_ID"))
+            })
+            finish()
+            return
+        }
         setContentView(R.layout.activity_m2_available_slots)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Available energy"

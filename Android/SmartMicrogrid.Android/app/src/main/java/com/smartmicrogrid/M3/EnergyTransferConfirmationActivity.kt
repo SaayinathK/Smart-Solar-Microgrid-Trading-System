@@ -106,6 +106,9 @@ class EnergyTransferConfirmationActivity : WorkspaceActivity() {
             getString(com.smartmicrogrid.R.string.not_available)
         }
         binding.confirmationContent.visibility = View.VISIBLE
+        if (com.smartmicrogrid.utils.SessionManager.getUserRole() == "MicrogridOperator") {
+            com.smartmicrogrid.operator.OperatorMotion.enter(binding.confirmationContent)
+        }
 
         val status = transaction.status
         val isCompleted = status.equals("Completed", ignoreCase = true)

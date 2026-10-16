@@ -42,10 +42,11 @@
       <div class="auth-card">
         <div class="auth-header">
           <h1>Welcome Back</h1>
-          <p>Sign in to access your microgrid portal</p>
+          <p>Grid Operator and Administrator web access</p>
         </div>
 
         <div id="alert-box" class="alert alert-danger"></div>
+        <p class="form-help">Prosumers use the Smart Microgrid Android app to sign in, reserve energy and manage transfers.</p>
 
         <form id="login-form">
           <div class="form-group">
@@ -99,14 +100,15 @@
       try {
         const response = await AuthApi.login({ email, password });
         if (response.success) {
+          if (response.data.user.role === 'Prosumer') {
+            SessionManager.clearSession();
+            window.location.replace(getAuthAppUrl('mobile-redirect.html'));
+            return;
+          }
           SessionManager.setSession(response.data.token, response.data.user);
           ApiClient.showToast('Login successful! Redirecting...', 'success');
           setTimeout(() => {
-            if (response.data.user.role === 'Prosumer') {
-              window.location.href = 'mobile-redirect.html';
-            } else {
-              window.location.href = AuthGuard.getHomeUrl();
-            }
+            window.location.href = AuthGuard.getHomeUrl();
           }, 800);
         } else {
           showError(response.message || 'Login failed.');

@@ -57,6 +57,7 @@ class ProfileFragment : Fragment() {
 
         setupListeners()
         observeViewModel()
+        com.smartmicrogrid.operator.OperatorMotion.enter(view)
     }
 
     override fun onResume() {
@@ -77,7 +78,7 @@ class ProfileFragment : Fragment() {
         binding.btnDeactivateAccount.setOnClickListener {
             androidx.appcompat.app.AlertDialog.Builder(requireContext())
                 .setTitle("Deactivate Account")
-                .setMessage("Are you sure you want to deactivate your account? You will be signed out immediately and will require Backoffice administrator approval to reactivate your access.")
+                .setMessage("You will be signed out immediately. An administrator must reactivate your account before you can sign in again. Continue?")
                 .setPositiveButton("Deactivate Account") { _, _ ->
                     viewModel.deactivateAccount("Requested via mobile app")
                 }
@@ -131,10 +132,11 @@ class ProfileFragment : Fragment() {
 
     private fun populateUI(user: User) {
         binding.tvName.text = "${user.firstName} ${user.lastName}"
-        binding.tvInitials.text = user.firstName.take(1).uppercase()
+        binding.tvInitials.text = (user.firstName.take(1) + user.lastName.take(1)).uppercase()
         binding.tvRole.text = user.role
         binding.tvEmail.text = user.email
         binding.tvPhone.text = user.phoneNumber
+        binding.tvNic.text = user.nic.ifBlank { "Not provided" }
         
         if (user.isActive) {
             binding.tvStatus.text = "Active"

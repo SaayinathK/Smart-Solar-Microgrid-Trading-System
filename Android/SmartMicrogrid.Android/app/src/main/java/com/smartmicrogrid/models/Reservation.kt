@@ -17,7 +17,8 @@ data class Reservation(
     @SerializedName("prosumerName") val prosumerName: String? = null,
     @SerializedName("microgridName") val microgridName: String? = null,
     @SerializedName("pricePerUnit") val pricePerUnit: Double = 0.0,
-    @SerializedName("totalEstimatedCost") val totalEstimatedCost: Double = 0.0
+    @SerializedName("totalEstimatedCost") val totalEstimatedCost: Double = 0.0,
+    @SerializedName("statusHistory") val statusHistory: List<ReservationStatusEvent> = emptyList()
 )
 
 data class CreateReservationRequest(

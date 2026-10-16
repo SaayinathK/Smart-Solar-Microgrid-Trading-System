@@ -6,50 +6,120 @@
     android:orientation="vertical"
     android:background="?android:attr/colorBackground">
 
-    <LinearLayout
+    <!-- Professional Modern Top Bar -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/workspace_topbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:minHeight="60dp"
         android:paddingStart="12dp"
-        android:paddingEnd="20dp"
-        android:background="?attr/colorSurface">
+        android:paddingEnd="16dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:background="@drawable/bg_topbar_gradient"
+        android:elevation="4dp">
 
         <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/workspace_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="13dp"
+            android:padding="8dp"
             android:contentDescription="@string/solar_back"
             app:srcCompat="@drawable/ic_arrow_back"
-            app:tint="?android:attr/textColorPrimary" />
+            app:tint="#FFFFFF"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <ImageView
             android:id="@+id/workspace_logo"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="10dp"
-            android:padding="8dp"
-            android:background="@drawable/bg_icon_badge"
-            android:src="@drawable/ic_solar_panel"
-            app:tint="?attr/colorPrimary"
-            android:importantForAccessibility="no" />
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="2dp"
+            android:src="@drawable/smart_micro"
+            android:importantForAccessibility="no"
+            app:layout_constraintStart_toEndOf="@id/workspace_back"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-        <TextView
+        <LinearLayout
+            android:id="@+id/workspace_title_group"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/workspace_brand"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="18sp"
-            android:fontFamily="sans-serif-medium"
-            android:paddingVertical="12dp" />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintStart_toEndOf="@id/workspace_logo"
+            app:layout_constraintEnd_toStartOf="@id/workspace_status_pill"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-    <View android:layout_width="match_parent" android:layout_height="1dp"
-        android:background="@color/surface_outline" />
+            <TextView
+                android:id="@+id/workspace_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/workspace_brand"
+                android:textColor="#FFFFFF"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.01"
+                android:fontFamily="sans-serif-medium"
+                android:ellipsize="end"
+                android:accessibilityHeading="true"
+                android:singleLine="true" />
+
+            <TextView
+                android:id="@+id/workspace_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ENERGY NETWORK"
+                android:textColor="#BFDBFE"
+                android:textSize="9.5sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                android:singleLine="true" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/workspace_status_pill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="5dp"
+            android:background="@drawable/bg_topbar_pill"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <View
+                android:id="@+id/workspace_status_dot"
+                android:layout_width="7dp"
+                android:layout_height="7dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/bg_status_dot"
+                app:backgroundTint="#10B981" />
+
+            <TextView
+                android:id="@+id/workspace_status_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ONLINE"
+                android:textColor="#FFFFFF"
+                android:textSize="10.5sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.05" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Bottom Accent Hairline -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1.5dp"
+        android:background="#2E60A5FA" />
 
     <FrameLayout
         android:id="@+id/workspace_content"

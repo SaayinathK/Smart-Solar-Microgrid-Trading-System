@@ -50,17 +50,17 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center"
-                    android:padding="24dp"
-                    android:minHeight="240dp"
+                    android:padding="16dp"
+                    android:minHeight="0dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
                     <FrameLayout
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
                         android:background="@drawable/bg_circle_primary"
-                        android:layout_marginBottom="16dp">
+                        android:layout_marginBottom="8dp">
 
                         <TextView
                             android:id="@+id/tv_initials"
@@ -68,7 +68,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center"
                             android:text="U"
-                            android:textSize="32sp"
+                            android:textSize="22sp"
                             android:textStyle="bold"
                             android:textColor="#ffffff" />
                     </FrameLayout>
@@ -78,10 +78,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="User Name"
-                        android:textSize="@dimen/screen_title_size"
+                        android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="#ffffff"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginBottom="4dp" />
 
                     <TextView
                         android:id="@+id/tv_role"
@@ -132,6 +132,21 @@
                     android:textSize="16sp"
                     android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="NIC"
+                    android:textSize="12sp"
+                    android:textColor="?attr/android:textColorSecondary" />
+
+                <TextView
+                    android:id="@+id/tv_nic"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:textSize="16sp"
+                    android:textColor="?attr/colorOnSurface" />
 
                 <TextView
                     android:layout_width="wrap_content"

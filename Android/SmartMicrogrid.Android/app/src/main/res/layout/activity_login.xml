@@ -1,253 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#0A0E17">
-
-    <!-- Solar Rooftop Background Image -->
-    <ImageView
-        android:id="@+id/iv_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/bg_energy_login"
-        android:alpha="0.5"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Dark Gradient Overlay for optimal contrast -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/bg_gradient_header_overlay" />
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="28dp"
-            android:gravity="center">
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="144dp"
-                android:layout_height="144dp"
-                android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="#F8FAFC"
-                app:cardCornerRadius="22dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="0dp">
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:contentDescription="@string/app_name"
-                    android:padding="4dp"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/smart_micro" />
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/bg_auth_screen" android:fillViewport="true" android:scrollbars="none" android:overScrollMode="never">
+    <androidx.constraintlayout.widget.ConstraintLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="16dp" android:paddingTop="12dp" android:paddingBottom="12dp" app:layout_constraintWidth_max="480dp" app:layout_constraintVertical_bias="0" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent">
+            <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="168dp" app:cardCornerRadius="20dp" app:cardElevation="0dp" app:strokeWidth="0dp" app:cardBackgroundColor="#102B46">
+                <FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+                    <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/bg_energy_login" android:scaleType="centerCrop" android:importantForAccessibility="no"/>
+                    <View android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/bg_auth_photo_overlay"/>
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btn_theme" style="@style/Widget.SmartMicrogrid.Auth.PhotoControl" android:layout_width="wrap_content" android:layout_height="48dp" android:layout_gravity="top|end" android:layout_margin="8dp" android:text="Theme" app:icon="@drawable/ic_auth_theme"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="bottom" android:orientation="horizontal" android:gravity="center_vertical" android:padding="16dp">
+                        <ImageView android:layout_width="56dp" android:layout_height="56dp" android:background="@drawable/bg_auth_brand_badge" android:padding="6dp" android:src="@drawable/smart_micro" android:scaleType="fitCenter" android:importantForAccessibility="no"/>
+                        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="12dp" android:orientation="vertical">
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Smart Microgrid" android:textColor="#FFFFFF" android:textSize="21sp" android:textStyle="bold"/>
+                            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="Solar energy trading" android:textColor="#DBEAFE" android:textSize="12sp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Solar Energy Trading &amp; Monitoring"
-                android:textSize="14sp"
-                android:textColor="#94A3B8"
-                android:layout_marginBottom="32dp" />
-
-            <!-- Glassy Form Card -->
-            <com.google.android.material.card.MaterialCardView
-                style="?attr/materialCardViewStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="#CC111827"
-                app:strokeColor="#332563EB"
-                app:strokeWidth="1dp"
-                app:cardCornerRadius="24dp"
-                app:cardElevation="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="24dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Sign In"
-                        android:textSize="@dimen/screen_title_size"
-                        android:textStyle="bold"
-                        android:textColor="#FFFFFF"
-                        android:layout_marginBottom="4dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Access your microgrid prosumer account"
-                        android:textSize="13sp"
-                        android:textColor="#94A3B8"
-                        android:layout_marginBottom="20dp" />
-
-                    <!-- Error Message -->
-                    <TextView
-                        android:id="@+id/tv_error"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="#33ef4444"
-                        android:textColor="#ef4444"
-                        android:padding="12dp"
-                        android:textSize="13sp"
-                        android:visibility="gone"
-                        android:layout_marginBottom="16dp" />
-
-                    <!-- Email Field -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Email Address"
-                        android:textColor="#CBD5E1"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="6dp" />
-
-                    <EditText
-                        android:id="@+id/et_email"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:background="@drawable/bg_glass_input"
-                        android:textColor="#FFFFFF"
-                        android:textColorHint="#64748B"
-                        android:hint="name@domain.com"
-                        android:inputType="textEmailAddress"
-                        android:padding="14dp"
-                        android:textSize="15sp"
-                        android:layout_marginBottom="18dp"
-                        android:autofillHints="emailAddress" />
-
-                    <!-- Password Field -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Password"
-                        android:textColor="#CBD5E1"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="6dp" />
-
-                    <EditText
-                        android:id="@+id/et_password"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:background="@drawable/bg_glass_input"
-                        android:textColor="#FFFFFF"
-                        android:textColorHint="#64748B"
-                        android:hint="••••••••"
-                        android:inputType="textPassword"
-                        android:padding="14dp"
-                        android:textSize="15sp"
-                        android:layout_marginBottom="24dp"
-                        android:autofillHints="password" />
-
-                    <!-- Sign In Button -->
-                    <Button
-                        android:id="@+id/btn_login"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:text="Sign In to Microgrid"
-                        android:textAllCaps="false"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        app:cornerRadius="14dp" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Loading Indicator -->
-            <ProgressBar
-                android:id="@+id/progress_bar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:layout_marginTop="16dp" />
-
-            <!-- Register Link -->
-            <TextView
-                android:id="@+id/tv_register_link"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Don't have an account? Register"
-                android:textColor="#10B981"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <!-- Server Connection Status & Configuration Card -->
-            <LinearLayout
-                android:id="@+id/card_server_status"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/bg_glass_input"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp">
-
-                <TextView
-                    android:id="@+id/tv_server_status_dot"
-                    android:layout_width="10dp"
-                    android:layout_height="10dp"
-                    android:background="@drawable/bg_status_dot"
-                    android:layout_marginEnd="10dp" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tv_server_status_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Server Connection"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tv_server_config"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Checking..."
-                        android:textColor="#94A3B8"
-                        android:textSize="11sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/btn_auto_detect_server"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Auto-Detect"
-                    android:textColor="#3B82F6"
-                    android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="10dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:orientation="vertical" android:background="@drawable/bg_auth_card" android:padding="16dp">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Welcome back" android:textSize="25sp" android:textStyle="bold" android:textColor="@color/auth_text" android:accessibilityHeading="true"/>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:layout_marginBottom="4dp" android:text="Sign in to your account" android:textSize="13sp" android:textColor="@color/auth_muted"/>
+                <TextView android:id="@+id/tv_error" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" android:layout_marginTop="10dp" android:padding="12dp" android:textSize="13sp" android:accessibilityLiveRegion="polite" android:textColor="@color/auth_error" android:background="@drawable/bg_auth_error"/>
+                <com.google.android.material.textfield.TextInputLayout style="@style/Widget.SmartMicrogrid.Auth.Field" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:hint="Email address" app:startIconDrawable="@drawable/ic_auth_email" app:startIconTint="@color/auth_muted">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_email" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:paddingTop="15dp" android:paddingBottom="15dp" android:inputType="textEmailAddress" android:singleLine="true" android:textSize="15sp" android:textColor="@color/auth_text" android:imeOptions="actionNext" android:autofillHints="emailAddress"/>
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout style="@style/Widget.SmartMicrogrid.Auth.Field" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:hint="Password" app:endIconMode="password_toggle" app:startIconDrawable="@drawable/ic_auth_lock" app:startIconTint="@color/auth_muted">
+                    <com.google.android.material.textfield.TextInputEditText android:id="@+id/et_password" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="52dp" android:paddingTop="15dp" android:paddingBottom="15dp" android:inputType="textPassword" android:singleLine="true" android:textSize="15sp" android:textColor="@color/auth_text" android:imeOptions="actionDone" android:autofillHints="password"/>
+                </com.google.android.material.textfield.TextInputLayout>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btn_login" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="14dp" android:background="@drawable/bg_auth_btn_gradient" app:backgroundTint="@null" android:text="Sign in" android:textAllCaps="false" android:textColor="#FFFFFF" android:textSize="15sp" android:textStyle="bold"/>
+                <ProgressBar android:id="@+id/progress_bar" android:layout_width="24dp" android:layout_height="24dp" android:layout_gravity="center_horizontal" android:layout_marginTop="10dp" android:visibility="gone" android:indeterminateTint="@color/auth_link" android:contentDescription="Please wait"/>
             </LinearLayout>
-
+            <com.google.android.material.button.MaterialButton android:id="@+id/tv_register_link" style="@style/Widget.SmartMicrogrid.Auth.Link" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="New here? Create an account"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_connection" style="@style/Widget.SmartMicrogrid.Auth.Link" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:text="Connection settings" android:textColor="@color/auth_muted" android:textSize="12sp"/>
         </LinearLayout>
-    </ScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

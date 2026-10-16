@@ -21,6 +21,8 @@ class TransactionDetailsActivity : WorkspaceActivity() {
     private val viewModel: TransactionDetailsViewModel by viewModels()
     private var displayedTransactionId = ""
     private var scannedQrData: String? = null
+    private var queuedQrData: String? = null
+    private val isOperator get() = com.smartmicrogrid.utils.SessionManager.getUserRole() == "MicrogridOperator"
     private var lastDisplayedStatus: String? = null
     private var verificationSuccessDialog: Dialog? = null
     private val scannerLauncher = registerForActivityResult(
@@ -80,6 +82,18 @@ class TransactionDetailsActivity : WorkspaceActivity() {
 
         val transactionId = intent.getStringExtra("TRANSACTION_ID") ?: ""
         displayedTransactionId = transactionId
+        queuedQrData = savedInstanceState?.getString("operator_scanned_qr") ?: intent.getStringExtra(QRScannerActivity.EXTRA_QR_DATA)
+        binding.btnManualQr.setOnClickListener {
+            val input = android.widget.EditText(this).apply { hint = "Transaction QR payload"; minLines = 3 }
+            val dialog = androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Paste transaction QR").setView(input).setNegativeButton("Cancel", null).setPositiveButton("Review", null).create()
+            dialog.setOnShowListener {
+                dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                    if (TransactionQrPayload.parse(input.text.toString().trim()) == null) input.error = "Enter a valid transaction QR payload."
+                    else { stageQrPayload(input.text.toString().trim()); dialog.dismiss() }
+                }
+            }
+            dialog.show()
+        }
 
         binding.btnScanQr.setOnClickListener {
             scannedQrData = null
@@ -117,7 +131,7 @@ class TransactionDetailsActivity : WorkspaceActivity() {
         }
 
         binding.btnConfirmEnergyTransfer.setOnClickListener {
-            if (viewModel.transaction.value?.status.equals("Verified", ignoreCase = true)) {
+            if (isOperator && viewModel.transaction.value?.status in setOf("Verified", "EnergyTransferInProgress")) {
                 startActivity(
                     Intent(this, EnergyTransferConfirmationActivity::class.java).apply {
                         putExtra(EXTRA_TRANSACTION_ID, displayedTransactionId)
@@ -148,7 +162,14 @@ class TransactionDetailsActivity : WorkspaceActivity() {
         }
 
         viewModel.transaction.observe(this) { transaction ->
-            transaction?.let { displayTransaction(it) }
+            transaction?.let {
+                displayTransaction(it)
+                queuedQrData?.let { payload -> queuedQrData = null; stageQrPayload(payload) }
+                val action = intent.getStringExtra("OPERATOR_ACTION")
+                intent.removeExtra("OPERATOR_ACTION")
+                if (isOperator && action == "Pending" && it.status == "Pending") binding.btnGenerateQr.performClick()
+                else if (isOperator && action in setOf("QRGenerated", "VerificationPending") && isVerificationEligible(it.status)) binding.btnScanQr.performClick()
+            }
         }
 
         viewModel.isLoading.observe(this) { loading ->
@@ -298,6 +319,9 @@ class TransactionDetailsActivity : WorkspaceActivity() {
         binding.progressBar.visibility = View.GONE
         binding.errorContent.visibility = View.GONE
         binding.detailsContent.visibility = View.VISIBLE
+        if (com.smartmicrogrid.utils.SessionManager.getUserRole() == "MicrogridOperator") {
+            com.smartmicrogrid.operator.OperatorMotion.enter(binding.detailsContent)
+        }
 
         binding.tvTransactionCode.text = valueOrFallback(transaction.transactionCode, transaction.id)
         binding.tvReservationId.text = valueOrFallback(transaction.reservationId)
@@ -338,15 +362,20 @@ class TransactionDetailsActivity : WorkspaceActivity() {
                 animate().alpha(1f).scaleX(1f).scaleY(1f).setDuration(210L).start()
             }
         }
-        val isPending = transaction.status.equals("Pending", ignoreCase = true)
+        val isPending = isOperator && transaction.status.equals("Pending", ignoreCase = true)
         val hasExistingQr = transaction.qrCodeData.isNotBlank() && (
             transaction.status.equals("QRGenerated", ignoreCase = true) ||
                 transaction.status.equals("VerificationPending", ignoreCase = true)
             )
         binding.btnGenerateQr.visibility = if (isPending) View.VISIBLE else View.GONE
         binding.btnViewQr.visibility = if (hasExistingQr) View.VISIBLE else View.GONE
-        val verificationEligible = isVerificationEligible(transaction.status)
+        val verificationEligible = isOperator && isVerificationEligible(transaction.status)
+        if (!verificationEligible) {
+            binding.verificationControls.visibility = View.GONE
+            scannedQrData = null
+        }
         binding.btnScanQr.visibility = if (verificationEligible) View.VISIBLE else View.GONE
+        binding.btnManualQr.visibility = if (verificationEligible) View.VISIBLE else View.GONE
         binding.btnScanQr.setText(
             if (verificationEligible) R.string.scan_transaction_qr else R.string.scan_again
         )
@@ -358,7 +387,7 @@ class TransactionDetailsActivity : WorkspaceActivity() {
         }
         val isVerified = transaction.status.equals("Verified", ignoreCase = true)
         val isTransferInProgress = transaction.status.equals("EnergyTransferInProgress", ignoreCase = true)
-        binding.btnConfirmEnergyTransfer.visibility = if (isVerified || isTransferInProgress) {
+        binding.btnConfirmEnergyTransfer.visibility = if (isOperator && (isVerified || isTransferInProgress)) {
             View.VISIBLE
         } else {
             View.GONE
@@ -488,5 +517,35 @@ class TransactionDetailsActivity : WorkspaceActivity() {
 
     companion object {
         const val EXTRA_TRANSACTION_ID = "TRANSACTION_ID"
+    }
+
+    private fun stageQrPayload(payload: String) {
+        val parsed = TransactionQrPayload.parse(payload)
+        val current = viewModel.transaction.value
+        when {
+            !isOperator -> showScanMessage("Only a grid operator can verify transactions.", false)
+            parsed == null -> showScanMessage(getString(R.string.invalid_transaction_qr), true)
+            parsed.transactionId != displayedTransactionId -> showScanMessage(getString(R.string.different_transaction_qr), true)
+            current == null || parsed.transactionCode != current.transactionCode -> showScanMessage(getString(R.string.invalid_transaction_qr), true)
+            current.status in setOf("Verified", "EnergyTransferInProgress") -> showScanMessage("This transaction is already verified. Confirm the transfer when physical delivery is complete.", false)
+            current.status == "Completed" -> showScanMessage("This transaction is completed. Its record is available for reference.", false)
+            !isVerificationEligible(current.status) -> showScanMessage(getString(R.string.transaction_cannot_be_verified), false)
+            else -> {
+                scannedQrData = payload
+                binding.tvScanResult.text = "Transaction code: ${parsed.transactionCode}"
+                binding.tvScanResult.visibility = View.VISIBLE
+                binding.verificationControls.visibility = View.VISIBLE
+                binding.tvVerificationMessage.text = "QR matches this transaction. Review the details, then select Verify Transaction."
+                binding.tvVerificationMessage.visibility = View.VISIBLE
+            }
+        }
+    }
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("operator_scanned_qr", scannedQrData ?: queuedQrData)
+    }
+    override fun onResume() {
+        super.onResume()
+        if (::binding.isInitialized && displayedTransactionId.isNotBlank() && viewModel.isLoading.value != true) viewModel.loadTransaction(displayedTransactionId)
     }
 }

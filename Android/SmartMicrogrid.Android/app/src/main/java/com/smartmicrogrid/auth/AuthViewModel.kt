@@ -4,14 +4,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.smartmicrogrid.data.remote.RetrofitClient
 import com.smartmicrogrid.data.repository.AuthRepository
 import com.smartmicrogrid.models.*
+import com.smartmicrogrid.utils.ServerDiscovery
+import com.smartmicrogrid.utils.SessionManager
 import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
 
-    private val repository = AuthRepository(RetrofitClient.apiService)
+    private val repository = AuthRepository()
 
     // ── Login State ──
     private val _loginResult = MutableLiveData<Result<LoginResponse>?>()
@@ -37,6 +38,7 @@ class AuthViewModel : ViewModel() {
     fun login(email: String, password: String) {
         _isLoading.value = true
         viewModelScope.launch {
+            connectToAvailableServer()
             _loginResult.value = repository.login(email, password)
             _isLoading.value = false
         }
@@ -45,6 +47,7 @@ class AuthViewModel : ViewModel() {
     fun register(request: RegisterRequest) {
         _isLoading.value = true
         viewModelScope.launch {
+            connectToAvailableServer()
             _registerResult.value = repository.register(request)
             _isLoading.value = false
         }
@@ -88,5 +91,9 @@ class AuthViewModel : ViewModel() {
 
     fun logout() {
         repository.logout()
+    }
+
+    private suspend fun connectToAvailableServer() {
+        ServerDiscovery.autoDiscoverServer(null)?.let { SessionManager.setBaseUrl(it) }
     }
 }

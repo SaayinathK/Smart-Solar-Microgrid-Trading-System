@@ -17,6 +17,7 @@ class ChangePasswordActivity : WorkspaceActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityChangePasswordBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        com.smartmicrogrid.operator.OperatorMotion.enter(binding.root)
         supportActionBar?.title = "Change Password"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 

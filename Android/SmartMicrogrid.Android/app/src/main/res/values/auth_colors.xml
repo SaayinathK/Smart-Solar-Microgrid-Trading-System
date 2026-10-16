@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="auth_background">#F5F7FB</color>
+    <color name="auth_surface">#FFFFFF</color>
+    <color name="auth_input">#F8FAFC</color>
+    <color name="auth_text">#15243B</color>
+    <color name="auth_muted">#52627A</color>
+    <color name="auth_outline">#D8E1ED</color>
+    <color name="auth_link">#1D4ED8</color>
+    <color name="auth_error">#B42318</color>
+    <color name="auth_error_bg">#FEF3F2</color>
+    <color name="auth_success">#087F5B</color>
+    <color name="auth_success_bg">#ECFDF3</color>
+    <color name="auth_background_top">#EAF2FC</color>
+</resources>

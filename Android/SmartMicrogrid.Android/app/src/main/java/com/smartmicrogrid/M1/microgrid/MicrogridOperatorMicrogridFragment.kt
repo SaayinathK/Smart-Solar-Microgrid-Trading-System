@@ -27,8 +27,6 @@ class MicrogridOperatorMicrogridFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[MicrogridViewModel::class.java]
 
-        binding.tvTitle.text = "Microgrid Operations"
-        binding.tvSubtitle.text = "Review microgrid capacities and battery levels before verifying energy transfers"
 
         adapter = MicrogridAdapter(emptyList()) { microgrid ->
             startActivity(Intent(requireContext(), com.smartmicrogrid.M1.slots.EnergySlotActivity::class.java).apply {

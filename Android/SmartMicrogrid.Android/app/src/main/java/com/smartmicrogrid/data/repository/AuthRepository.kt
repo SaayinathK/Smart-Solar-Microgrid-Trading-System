@@ -1,12 +1,16 @@
 package com.smartmicrogrid.data.repository
 
 import com.smartmicrogrid.data.remote.ApiService
+import com.smartmicrogrid.data.remote.RetrofitClient
 import com.smartmicrogrid.models.*
 import com.smartmicrogrid.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class AuthRepository(private val apiService: ApiService) {
+class AuthRepository(private val serviceProvider: () -> ApiService = { RetrofitClient.apiService }) {
+
+    // Resolve for every request so saved connection changes take effect immediately.
+    private val apiService: ApiService get() = serviceProvider()
 
     suspend fun login(email: String, password: String): Result<LoginResponse> {
         return withContext(Dispatchers.IO) {

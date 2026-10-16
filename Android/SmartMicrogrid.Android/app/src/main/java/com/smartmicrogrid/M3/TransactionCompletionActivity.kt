@@ -72,6 +72,9 @@ class TransactionCompletionActivity : WorkspaceActivity() {
         binding.progressBar.visibility = View.GONE
         binding.errorContent.visibility = View.GONE
         binding.completionContent.visibility = View.VISIBLE
+        if (com.smartmicrogrid.utils.SessionManager.getUserRole() == "MicrogridOperator") {
+            com.smartmicrogrid.operator.OperatorMotion.enter(binding.completionContent)
+        }
         binding.tvTransactionId.text = valueOrFallback(transaction.id, transactionId)
         binding.tvTransactionCode.text = valueOrFallback(transaction.transactionCode)
         binding.tvReservationId.text = valueOrFallback(transaction.reservationId)

@@ -15,6 +15,9 @@ function getAuthAppUrl(path) {
 
 const AuthGuard = {
   getHomeUrl() {
+    if (SessionManager.getUserRole() === 'Prosumer') {
+      return getAuthAppUrl('mobile-redirect.html');
+    }
     return getAuthAppUrl(SessionManager.getUserRole() === 'Admin'
       ? 'pages/M4/dashboard.html' : 'dashboard.html');
   },
@@ -22,6 +25,12 @@ const AuthGuard = {
   requireAuth(requiredRole = null) {
     if (!SessionManager.isAuthenticated()) {
       window.location.href = getAuthAppUrl('login.html');
+      return false;
+    }
+
+    if (SessionManager.getUserRole() === 'Prosumer') {
+      SessionManager.clearSession();
+      window.location.replace(getAuthAppUrl('mobile-redirect.html'));
       return false;
     }
 
@@ -51,7 +60,9 @@ const AuthGuard = {
 
   redirectIfAuthenticated() {
     if (SessionManager.isAuthenticated()) {
-      window.location.href = this.getHomeUrl();
+      const destination = this.getHomeUrl();
+      if (SessionManager.getUserRole() === 'Prosumer') SessionManager.clearSession();
+      window.location.replace(destination);
     }
   },
 
