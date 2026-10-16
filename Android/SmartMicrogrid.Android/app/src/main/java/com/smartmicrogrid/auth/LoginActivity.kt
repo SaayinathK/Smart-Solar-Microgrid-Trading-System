@@ -160,7 +160,9 @@ class LoginActivity : WorkspaceActivity() {
 
     private fun showServerConfigDialog() {
         val current = SessionManager.getBaseUrl()
-        val cleaned = ServerDiscovery.cleanDisplayUrl(current)
+        val cleaned = ServerDiscovery.cleanDisplayUrl(current).let {
+            if (it.contains("192.168.1.6")) "192.168.1.4:5050" else it
+        }
 
         val layout = android.widget.LinearLayout(this).apply {
             orientation = android.widget.LinearLayout.VERTICAL
@@ -169,7 +171,7 @@ class LoginActivity : WorkspaceActivity() {
 
         val input = android.widget.EditText(this).apply {
             setText(cleaned)
-            hint = "e.g. 192.168.1.6:5050"
+            hint = "e.g. 192.168.1.4:5050"
             setSelection(text.length)
         }
         layout.addView(input)
@@ -197,9 +199,8 @@ class LoginActivity : WorkspaceActivity() {
             }
         }
 
-        presetLayout.addView(makeChip("Emulator", "10.0.2.2:5050"))
-        presetLayout.addView(makeChip("Wi-Fi Default", "192.168.1.6:5050"))
-        presetLayout.addView(makeChip("IIS Port 80", "192.168.1.6:80"))
+        // LAN Default preset
+        presetLayout.addView(makeChip("LAN Default (192.168.1.4:5050)", "192.168.1.4:5050"))
         layout.addView(presetLayout)
 
         val tvProbeResult = android.widget.TextView(this).apply {
@@ -211,8 +212,8 @@ class LoginActivity : WorkspaceActivity() {
         layout.addView(tvProbeResult)
 
         val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("Server Connection Setup")
-            .setMessage("Set the API server IP and port. Kestrel runs on :5050, and IIS runs on :80 or :5000:")
+            .setTitle("LAN Server Connection")
+            .setMessage("Microgrid API server on local Wi-Fi LAN (Port 5050):")
             .setView(layout)
             .setNeutralButton("Test") { _, _ -> }
             .setPositiveButton("Save & Connect") { _, _ ->

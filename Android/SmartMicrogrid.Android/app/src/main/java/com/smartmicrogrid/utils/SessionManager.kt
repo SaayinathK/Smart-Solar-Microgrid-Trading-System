@@ -75,7 +75,12 @@ object SessionManager {
     fun getBaseUrl(): String {
         return if (::prefs.isInitialized) {
             val saved = prefs.getString(Constants.KEY_CUSTOM_API_BASE_URL, null)
-            if (!saved.isNullOrBlank()) saved else Constants.API_BASE_URL
+            if (!saved.isNullOrBlank() && !saved.contains("192.168.1.6")) {
+                saved
+            } else {
+                prefs.edit().putString(Constants.KEY_CUSTOM_API_BASE_URL, Constants.API_BASE_URL).apply()
+                Constants.API_BASE_URL
+            }
         } else {
             Constants.API_BASE_URL
         }

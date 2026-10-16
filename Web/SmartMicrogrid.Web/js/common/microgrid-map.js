@@ -89,8 +89,22 @@ class MicrogridMap {
     try {
       const response = await MicrogridApi.getMicrogrids({ status: 'Active', isActive: true });
       if (response.success === false || !Array.isArray(response.data)) throw new Error('Unable to load microgrids');
-      this.nodes = response.data;
-      this.container.querySelector('[data-map-summary]').textContent = `${this.nodes.length} active microgrids across the network`;
+      let data = response.data;
+      const user = SessionManager.getUser();
+      const role = SessionManager.getUserRole() || (user && user.role);
+      const isOperator = role && role.toLowerCase() === 'microgridoperator';
+      const operatorId = user?.id || user?._id || user?.Id;
+      if (isOperator && operatorId) {
+        data = data.filter(node => {
+          const op = node.operatorId || node.OperatorId;
+          return op && String(op) === String(operatorId);
+        });
+      }
+      this.nodes = data;
+      const summaryText = isOperator
+        ? `${this.nodes.length} active microgrid${this.nodes.length === 1 ? '' : 's'} managed by you`
+        : `${this.nodes.length} active microgrids across the network`;
+      this.container.querySelector('[data-map-summary]').textContent = summaryText;
       this.container.querySelector('[data-map-count]').textContent = `${this.nodes.length} nodes`;
       this.list.replaceChildren();
       this.nodes.forEach(node => {

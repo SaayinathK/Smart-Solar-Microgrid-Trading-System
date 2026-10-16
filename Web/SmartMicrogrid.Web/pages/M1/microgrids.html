@@ -47,7 +47,7 @@
 
       <!-- Filters & Search -->
       <div style="display: flex; gap: 1rem; margin-top: 1.25rem; flex-wrap: wrap;">
-        <input type="text" id="search-input" class="form-control" placeholder="Search by name or location..." style="flex: 1; min-width: 200px;">
+        <input type="text" id="search-input" class="form-control" placeholder="Search by name, location, or operator..." style="flex: 1; min-width: 200px;">
         <select id="status-filter" class="form-control" style="width: 180px;">
           <option value="">All Statuses</option>
           <option value="Active">Active</option>
@@ -66,6 +66,7 @@
           <thead>
             <tr>
               <th>Microgrid Name</th>
+              <th>Operator (ID)</th>
               <th>Location</th>
               <th>Capacity</th>
               <th>Battery Slots</th>
@@ -76,7 +77,7 @@
           </thead>
           <tbody id="microgrids-table-body">
             <tr>
-              <td colspan="7" style="text-align: center; padding: 2rem;">Loading microgrids...</td>
+              <td colspan="8" style="text-align: center; padding: 2rem;">Loading microgrids...</td>
             </tr>
           </tbody>
         </table>
@@ -146,7 +147,7 @@
   <script src="../../js/common/theme.js"></script>
   <script src="../../js/common/session.js"></script>
   <script src="../../js/api/api-client.js"></script>
-  <script src="../../js/api/microgrid-api.js"></script>
+  <script src="../../js/api/microgrid-api.js?v=20261016-rbac-1"></script>
   <script src="../../js/common/auth.js"></script>
   <script src="../../js/common/page-template.js"></script>
   <script src="../../js/common/sidebar.js?v=20261016-logo-1"></script>
@@ -163,6 +164,27 @@
       document.getElementById('operator-actions').style.display = 'block';
     }
 
+        let operatorMap = {};
+    async function ensureOperatorMap() {
+      if (Object.keys(operatorMap).length > 0) return operatorMap;
+      try {
+        const res = await ApiClient.get('/users');
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        list.forEach(u => {
+          const uid = u.id || u._id || u.Id;
+          if (uid) {
+            operatorMap[uid] = {
+              name: `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email || 'Microgrid Operator',
+              email: u.email
+            };
+          }
+        });
+      } catch (e) {
+        // Fallback for non-admin
+      }
+      return operatorMap;
+    }
+
     async function loadMicrogrids() {
       const search = document.getElementById('search-input').value;
       const status = document.getElementById('status-filter').value;
@@ -170,10 +192,36 @@
 
       try {
         const response = await MicrogridApi.getMicrogrids({ search, status });
-        const list = response.data || [];
+        let list = Array.isArray(response?.data) ? response.data : [];
+        const role = SessionManager.getUserRole() || (user && user.role);
+        const isAdmin = role && role.toLowerCase() === 'admin';
+        if (isAdmin) {
+          await ensureOperatorMap();
+        }
+
+        const isOperator = role && role.toLowerCase() === 'microgridoperator';
+        const operatorId = user?.id || user?._id || user?.Id;
+        if (isOperator && operatorId) {
+          list = list.filter(m => {
+            const op = m.operatorId || m.OperatorId;
+            return op && String(op) === String(operatorId);
+          });
+        }
+
+        if (search) {
+          const s = search.toLowerCase();
+          list = list.filter(m => {
+            const opName = m.operatorName || operatorMap[m.operatorId]?.name || '';
+            const opId = m.operatorId || '';
+            return (m.name && m.name.toLowerCase().includes(s)) ||
+                   (m.location && m.location.toLowerCase().includes(s)) ||
+                   opName.toLowerCase().includes(s) ||
+                   opId.toLowerCase().includes(s);
+          });
+        }
 
         if (list.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2rem;">No microgrids found matching criteria.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2rem;">No microgrids found matching criteria.</td></tr>`;
           return;
         }
 
@@ -183,11 +231,24 @@
           else if (m.status === 'Maintenance') statusBadgeClass = 'status-warning';
           else if (m.status === 'Offline') statusBadgeClass = 'status-offline';
 
+          const opName = m.operatorName || operatorMap[m.operatorId]?.name || (user && String(user.id) === String(m.operatorId) ? `${user.firstName} ${user.lastName}`.trim() : null) || 'Microgrid Operator';
+          const opEmail = m.operatorEmail || operatorMap[m.operatorId]?.email || '';
+
           return `
             <tr>
               <td>
                 <div style="font-weight: 600;">${m.name}</div>
                 <div style="font-size: 0.8rem; color: var(--text-secondary);">${m.description || 'Solar Node'}</div>
+              </td>
+              <td>
+                <div style="font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 0.35rem;">
+                  <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; flex-shrink: 0;"></span>
+                  <span>${opName}</span>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); font-family: monospace; margin-top: 3px;">
+                  ID: ${m.operatorId || 'N/A'}
+                </div>
+                ${opEmail ? `<div style="font-size: 0.72rem; color: var(--text-muted);">${opEmail}</div>` : ''}
               </td>
               <td>${m.location}<br><small>GPS ${Number(m.latitude).toFixed(4)}, ${Number(m.longitude).toFixed(4)}</small></td>
               <td>
@@ -216,7 +277,7 @@
           `;
         }).join('');
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--accent-danger); padding: 2rem;">Failed to load microgrids: ${err.message || 'Server error'}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--accent-danger); padding: 2rem;">Failed to load microgrids: ${err.message || 'Server error'}</td></tr>`;
       }
     }
 

@@ -13,6 +13,7 @@
   const btnQuickVerify = document.getElementById('btn-quick-verify');
   const btnNewReservation = document.getElementById('new-reservation');
 
+  const inputProsumerNic = document.getElementById('input-prosumer-nic');
   if (role === 'Admin') {
     if (roleEyebrow) roleEyebrow.textContent = 'SYSTEM AUDIT & OVERSIGHT';
     if (roleTitle) roleTitle.textContent = 'All Energy Reservations';
@@ -20,6 +21,7 @@
     if (roleBadge) roleBadge.textContent = 'System Administrator';
     if (toolbarHeading) toolbarHeading.textContent = 'Network Reservation Registry';
     if (btnQuickVerify) btnQuickVerify.style.display = 'none';
+    if (inputProsumerNic) inputProsumerNic.required = true;
   } else if (role === 'MicrogridOperator') {
     if (roleEyebrow) roleEyebrow.textContent = 'MICROGRID OPERATIONS';
     if (roleTitle) roleTitle.textContent = 'Microgrid Reservations Queue';
@@ -27,6 +29,7 @@
     if (roleBadge) roleBadge.textContent = 'Microgrid Operator';
     if (toolbarHeading) toolbarHeading.textContent = 'Hub Reservation Requests';
     if (btnQuickVerify) btnQuickVerify.style.display = 'inline-block';
+    if (inputProsumerNic) inputProsumerNic.required = true;
   } else {
     // Prosumer
     if (roleEyebrow) roleEyebrow.textContent = 'PROSUMER ENERGY TRADING';
@@ -35,6 +38,7 @@
     if (roleBadge) roleBadge.textContent = 'Prosumer Portal';
     if (toolbarHeading) toolbarHeading.textContent = 'My Active Claims & History';
     if (prosumerNicField) prosumerNicField.style.display = 'none';
+    if (inputProsumerNic) inputProsumerNic.required = false;
   }
 
   const body = document.getElementById('reservations-body');
@@ -49,6 +53,7 @@
 
   let reservations = [];
   let availableSlots = [];
+  let transactionMap = new Map();
   let activePillFilter = '';
 
   function render(rows) {
@@ -108,9 +113,16 @@
         actionButtons.push(`<button class="btn btn-danger btn-sm" data-action="reject" data-id="${id}">Reject</button>`);
       }
 
-      // Grid Operator Actions (verify and complete delivery)
+      // Grid Operator / Admin Actions (verify and complete delivery)
       if ((isOperator || isAdmin) && statusName === 'Approved') {
-        actionButtons.push(`<button class="btn btn-secondary btn-sm" data-action="transaction" data-id="${id}">${isOperator ? 'Process transaction' : 'View transaction'}</button>`);
+        const hasTx = transactionMap.has(id);
+        if (hasTx) {
+          actionButtons.push(`<button class="btn btn-secondary btn-sm" data-action="transaction" data-id="${id}" title="View transaction details and QR">View transaction</button>`);
+        } else {
+          actionButtons.push(`<button class="btn btn-secondary btn-sm" data-action="transaction" data-id="${id}" title="Initiate fulfillment transaction for this reservation">Process transaction</button>`);
+        }
+      } else if ((isOperator || isAdmin) && statusName === 'Completed' && transactionMap.has(id)) {
+        actionButtons.push(`<button class="btn btn-secondary btn-sm" data-action="transaction" data-id="${id}" title="View completed transaction record">View transaction</button>`);
       }
 
       // Prosumer & Admin Actions (Modify / Cancel)
@@ -166,13 +178,26 @@
     if (refresh) refresh.disabled = true;
 
     try {
-      const [listResult, summaryResult] = await Promise.allSettled([
+      const [listResult, summaryResult, txResult] = await Promise.allSettled([
         ReservationApi.list(),
-        ReservationApi.summary()
+        ReservationApi.summary(),
+        TransactionApi.getTransactions()
       ]);
 
       if (listResult.status === 'rejected') throw listResult.reason;
       reservations = unwrap(listResult.value);
+
+      transactionMap = new Map();
+      if (txResult.status === 'fulfilled') {
+        const txList = unwrap(txResult.value);
+        if (Array.isArray(txList)) {
+          txList.forEach(t => {
+            const resId = t.reservationId || t.reservation?.id;
+            if (resId) transactionMap.set(resId, t);
+          });
+        }
+      }
+
       render(reservations);
 
       if (summaryResult.status === 'fulfilled') {
@@ -217,12 +242,30 @@
     container.innerHTML = '<p class="slot-picker-state" role="status">Loading available slots…</p>';
 
     try {
-      const response = await ApiClient.get('/energy-availability');
+      const isOperator = role === 'MicrogridOperator';
+      let endpoint = '/energy-availability';
+      if (isOperator && user?.id) {
+        endpoint += `?operatorId=${encodeURIComponent(user.id)}`;
+      }
+
+      const response = await ApiClient.get(endpoint);
       const slots = unwrap(response);
-      availableSlots = slots.filter(s => Number(s.availableAmount || 0) > 0);
+      let filteredSlots = slots.filter(s => Number(s.availableAmount || 0) > 0);
+
+      // In case operator filtering is also checked client-side
+      if (isOperator && user?.id) {
+        filteredSlots = filteredSlots.filter(s => !s.operatorId || s.operatorId === user.id);
+      }
+
+      availableSlots = filteredSlots;
 
       if (!availableSlots.length) {
-        container.innerHTML = '<p class="slot-picker-state" role="status">No slots are available right now. Try again later, or enter a known slot ID below.</p>';
+        const noSlotsMsg = isOperator
+          ? 'No energy slots are currently available on your managed microgrid hubs. Publish an energy slot on your microgrid first, or select a managed hub.'
+          : 'No slots are available right now. Try again later, or enter a known slot ID below.';
+        container.innerHTML = `<p class="slot-picker-state" role="status">${esc(noSlotsMsg)}</p>`;
+        const inputSlot = document.getElementById('input-slot-id');
+        if (inputSlot) inputSlot.value = '';
         return;
       }
 
@@ -350,8 +393,8 @@
       message.textContent = displayed
         ? (transaction.status === 'Completed' ? 'Transfer completed. This QR is retained for reference.' : 'Show this transaction QR to the assigned operator.')
         : (transaction ? 'The assigned operator must issue the transaction QR before verification.' : 'No transaction has been started for this reservation.');
-      openTransaction.hidden = !transaction && !(role === 'MicrogridOperator' && r.status === 'Approved');
-      openTransaction.textContent = transaction ? 'View transaction' : 'Start transaction';
+      openTransaction.hidden = !transaction && !((role === 'MicrogridOperator' || role === 'Admin') && r.status === 'Approved');
+      openTransaction.textContent = transaction ? 'View transaction' : 'Process transaction';
     } catch (error) {
       if (version !== passRequestVersion || !dialog.open) return;
       qr.textContent = 'QR unavailable';
@@ -490,15 +533,36 @@
       const submit = document.getElementById('save-reservation');
       const errorMessage = document.getElementById('reservation-form-error');
       errorMessage.hidden = true;
+
+      const slotId = form.get('energySlotId')?.toString().trim();
+      const energyAmount = Number(form.get('energyAmount'));
+      const nicVal = form.get('prosumerId')?.toString().trim();
+
+      if ((role === 'MicrogridOperator' || role === 'Admin') && !nicVal) {
+        errorMessage.textContent = 'A prosumer NIC is required. Please enter the NIC of the prosumer booking energy.';
+        errorMessage.hidden = false;
+        document.getElementById('input-prosumer-nic')?.focus();
+        return;
+      }
+
+      if (role === 'MicrogridOperator' && user?.id) {
+        const chosenSlot = availableSlots.find(s => (s.energySlotId || s.id) === slotId);
+        if (chosenSlot && chosenSlot.operatorId && chosenSlot.operatorId !== user.id) {
+          errorMessage.textContent = 'You do not manage the microgrid node for this reservation. Please choose a slot from your assigned microgrid hub.';
+          errorMessage.hidden = false;
+          errorMessage.focus();
+          return;
+        }
+      }
+
       submit.disabled = true;
       submit.textContent = 'Reserving…';
 
       const payload = {
-        energySlotId: form.get('energySlotId')?.toString().trim(),
-        energyAmount: Number(form.get('energyAmount'))
+        energySlotId: slotId,
+        energyAmount: energyAmount
       };
 
-      const nicVal = form.get('prosumerId')?.toString().trim();
       if (nicVal) payload.prosumerId = nicVal;
 
       try {

@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: TransactionController.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M3 – Transaction & Verification Management
@@ -101,7 +101,7 @@ namespace SmartMicrogrid.API.Controllers
 
         // Create a transaction
         [HttpPost]
-        [Authorize(Roles = "MicrogridOperator")]
+        [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> Create(
             [FromBody] CreateTransactionRequest request)
         {
@@ -139,7 +139,7 @@ namespace SmartMicrogrid.API.Controllers
 
         // Generate transaction QR
         [HttpPost("{transactionId}/generate-qr")]
-        [Authorize(Roles = "MicrogridOperator")]
+        [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> GenerateQr(
             string transactionId)
         {
@@ -174,7 +174,7 @@ namespace SmartMicrogrid.API.Controllers
 
         // Verify transaction
         [HttpPost("{transactionId}/verify")]
-        [Authorize(Roles = "MicrogridOperator")]
+        [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> Verify(
             string transactionId,
             [FromBody] VerifyTransactionRequest request)
@@ -222,7 +222,7 @@ namespace SmartMicrogrid.API.Controllers
 
         // Complete transaction
         [HttpPost("{transactionId}/complete")]
-        [Authorize(Roles = "MicrogridOperator")]
+        [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> Complete(
             string transactionId,
             [FromBody] CompleteTransactionRequest request)
@@ -266,7 +266,7 @@ namespace SmartMicrogrid.API.Controllers
 
         // Update transaction status
         [HttpPatch("{transactionId}/status")]
-        [Authorize(Roles = "MicrogridOperator")]
+        [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> UpdateStatus(
             string transactionId,
             [FromQuery] string status)

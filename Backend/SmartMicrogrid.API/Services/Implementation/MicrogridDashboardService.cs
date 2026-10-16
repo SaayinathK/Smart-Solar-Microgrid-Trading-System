@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: MicrogridDashboardService.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -32,10 +32,13 @@ namespace SmartMicrogrid.API.Services.Implementation
         /// Retrieves dashboard stats async details.
         /// </summary>
 
-        public async Task<MicrogridDashboardDto> GetDashboardStatsAsync()
+        public async Task<MicrogridDashboardDto> GetDashboardStatsAsync(string? operatorId = null)
         {
             // Execute get dashboard stats async operations
-            var nodes = (await _microgridRepository.GetAllAsync()).ToList();
+            var allNodes = (await _microgridRepository.GetAllAsync()).ToList();
+            var nodes = string.IsNullOrWhiteSpace(operatorId)
+                ? allNodes
+                : allNodes.Where(n => n.OperatorId == operatorId).ToList();
 
             var totalCount = nodes.Count;
             var activeCount = nodes.Count(n => n.Status == "Active");
@@ -52,8 +55,25 @@ namespace SmartMicrogrid.API.Services.Implementation
             var currentBatteryLvl = nodes.Sum(n => n.CurrentBatteryLevel);
             var avgBatteryPct = nodes.Any() ? nodes.Average(n => n.BatteryPercentage) : 0.0;
 
-            var activeSlotsCount = await _slotRepository.GetCountAsync("Available");
-            var availableEnergy = await _slotRepository.GetTotalAvailableEnergyAsync();
+            long activeSlotsCount;
+            double availableEnergy;
+
+            if (string.IsNullOrWhiteSpace(operatorId))
+            {
+                activeSlotsCount = await _slotRepository.GetCountAsync("Available");
+                availableEnergy = await _slotRepository.GetTotalAvailableEnergyAsync();
+            }
+            else
+            {
+                var nodeIds = nodes.Select(n => n.Id).Where(id => !string.IsNullOrWhiteSpace(id)).ToHashSet();
+                var allSlots = (await _slotRepository.GetAllAsync()).ToList();
+                var operatorSlots = allSlots.Where(s => nodeIds.Contains(s.MicrogridNodeId)).ToList();
+
+                activeSlotsCount = operatorSlots.Count(s => s.Status == "Available" || s.Status == "PartiallyReserved");
+                availableEnergy = operatorSlots
+                    .Where(s => s.Status == "Available" || s.Status == "PartiallyReserved")
+                    .Sum(s => s.AvailableAmount);
+            }
 
             return new MicrogridDashboardDto
             {

@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: IEnergySlotService.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -18,7 +18,7 @@ namespace SmartMicrogrid.API.Services.Interfaces
         /// <summary>
         /// Retrieves all async details.
         /// </summary>
-        Task<IEnumerable<EnergySlotResponseDto>> GetAllAsync(string? microgridId = null, string? status = null, DateTime? startTime = null, DateTime? endTime = null, double? minEnergy = null);
+        Task<IEnumerable<EnergySlotResponseDto>> GetAllAsync(string? microgridId = null, string? status = null, DateTime? startTime = null, DateTime? endTime = null, double? minEnergy = null, string? operatorId = null);
         /// <summary>
         /// Retrieves by id async details.
         /// </summary>

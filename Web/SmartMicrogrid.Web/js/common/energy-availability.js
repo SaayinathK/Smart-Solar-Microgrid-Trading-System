@@ -80,11 +80,32 @@ document.addEventListener('DOMContentLoaded', () => {
       if (V.number(minimum) === null) {ApiClient.showToast('Minimum energy must be zero or greater.', 'error'); button.disabled = false; button.textContent = 'Search supply'; results.setAttribute('aria-busy', 'false'); return;}
       params.minimumEnergy = minimum;
     }
+    const user = SessionManager.getUser();
+    const role = SessionManager.getUserRole() || (user && user.role);
+    const isOperator = role && role.toLowerCase() === 'microgridoperator';
+    const operatorId = user?.id || user?._id || user?.Id;
+    if (isOperator && operatorId) {
+      params.operatorId = operatorId;
+    }
     try {
       const response = await MicrogridApi.getEnergyAvailability(params);
       if (version !== requestVersion) return;
       if (!response?.success || !Array.isArray(response.data)) throw new Error(response?.message || 'Energy availability is unavailable.');
-      current = response.data;
+      let list = response.data;
+      if (isOperator && operatorId) {
+        const mgRes = await MicrogridApi.getMicrogrids();
+        const allMgs = Array.isArray(mgRes?.data) ? mgRes.data : [];
+        const myMgIds = new Set(allMgs.filter(m => {
+          const op = m.operatorId || m.OperatorId;
+          return op && String(op) === String(operatorId);
+        }).map(m => String(m.id || m._id || m.Id)));
+        list = list.filter(slot => {
+          const sNodeId = String(slot.microgridNodeId || slot.microgridId || '');
+          const sOpId = String(slot.operatorId || '');
+          return myMgIds.has(sNodeId) || sOpId === String(operatorId);
+        });
+      }
+      current = list;
       hasFilters = Boolean(location || minimum !== '');
       render(current);
     } catch (error) {

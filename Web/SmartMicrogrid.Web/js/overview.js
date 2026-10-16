@@ -8,9 +8,51 @@
       const button = document.getElementById('refresh-dashboard');
       if (button) { button.disabled = true; button.textContent = 'Refreshing...'; }
       try {
-        const response = await MicrogridApi.getDashboardStats();
-        if (!response.success || !response.data) throw new Error(response.message || 'Infrastructure data unavailable');
-        const d = response.data;
+        const user = SessionManager.getUser();
+        const role = SessionManager.getUserRole() || (user && user.role);
+        const isOperator = role && role.toLowerCase() === 'microgridoperator';
+        const operatorId = user?.id || user?._id || user?.Id;
+        let d;
+
+        if (isOperator && operatorId) {
+          const [mgRes, slotsRes] = await Promise.all([
+            MicrogridApi.getMicrogrids(),
+            MicrogridApi.getEnergySlots()
+          ]);
+          const allNodes = Array.isArray(mgRes?.data) ? mgRes.data : (Array.isArray(mgRes) ? mgRes : []);
+          const nodes = allNodes.filter(n => {
+            const op = n.operatorId || n.OperatorId;
+            return op && String(op) === String(operatorId);
+          });
+          const nodeIds = new Set(nodes.map(n => String(n.id || n._id || n.Id)));
+          const allSlots = Array.isArray(slotsRes?.data) ? slotsRes.data : (Array.isArray(slotsRes) ? slotsRes : []);
+          const operatorSlots = allSlots.filter(s => {
+            const sNodeId = String(s.microgridNodeId || s.microgridId || s.MicrogridNodeId || '');
+            return nodeIds.has(sNodeId);
+          });
+          const activeSlots = operatorSlots.filter(s => s.status === 'Available' || s.status === 'PartiallyReserved');
+
+          d = {
+            totalMicrogrids: nodes.length,
+            activeMicrogrids: nodes.filter(n => n.status === 'Active').length,
+            inactiveMicrogrids: nodes.filter(n => n.status === 'Inactive').length,
+            maintenanceMicrogrids: nodes.filter(n => n.status === 'Maintenance').length,
+            offlineMicrogrids: nodes.filter(n => n.status === 'Offline').length,
+            totalCapacity: nodes.reduce((sum, n) => sum + (Number(n.capacity) || 0), 0),
+            totalAvailableCapacity: nodes.reduce((sum, n) => sum + (Number(n.availableCapacity) || 0), 0),
+            totalReservedCapacity: nodes.reduce((sum, n) => sum + (Number(n.reservedCapacity) || 0), 0),
+            totalUsedCapacity: nodes.reduce((sum, n) => sum + (Number(n.usedCapacity) || 0), 0),
+            totalBatteryCapacity: nodes.reduce((sum, n) => sum + (Number(n.batteryCapacity) || 0), 0),
+            currentBatteryLevel: nodes.reduce((sum, n) => sum + (Number(n.currentBatteryLevel) || 0), 0),
+            averageBatteryPercentage: nodes.length ? (nodes.reduce((sum, n) => sum + (Number(n.batteryPercentage) || 0), 0) / nodes.length) : 0,
+            activeEnergySlots: activeSlots.length,
+            totalAvailableEnergy: activeSlots.reduce((sum, s) => sum + (Number(s.availableAmount) || 0), 0)
+          };
+        } else {
+          const response = await MicrogridApi.getDashboardStats();
+          if (!response.success || !response.data) throw new Error(response.message || 'Infrastructure data unavailable');
+          d = response.data;
+        }
         const availablePct = percent(value(d, 'totalAvailableCapacity'), value(d, 'totalCapacity'));
         const batteryPct = value(d, 'averageBatteryPercentage') || percent(value(d, 'currentBatteryLevel'), value(d, 'totalBatteryCapacity'));
         document.getElementById('dash-total-cap').textContent = `${energy(value(d, 'totalCapacity'))} kWh`;
@@ -32,6 +74,20 @@
       finally { if (button) { button.disabled = false; button.textContent = 'Refresh data'; } }
     }
     function renderInsights(d, availablePct, batteryPct) {
+      if (value(d, 'totalMicrogrids') === 0) {
+        document.getElementById('readiness-score').textContent = '—';
+        document.getElementById('capacity-headroom').textContent = '0%';
+        document.getElementById('capacity-meter').style.width = '0%';
+        document.getElementById('capacity-guidance').textContent = 'No microgrid hubs are currently assigned to your operator account.';
+        document.getElementById('battery-readiness').textContent = '0%';
+        document.getElementById('battery-meter').style.width = '0%';
+        document.getElementById('battery-guidance').textContent = 'No battery storage associated with your assigned hubs.';
+        document.getElementById('slot-energy').textContent = '0 kWh';
+        document.getElementById('slot-guidance').textContent = 'No active energy slots published for your hubs.';
+        document.getElementById('alert-count').textContent = 'Clear';
+        document.getElementById('operations-alerts').innerHTML = '<div class="alert-item healthy"><span class="alert-icon">&check;</span><div><strong>No managed microgrids</strong><p>Register a microgrid or contact an administrator to be assigned a solar hub.</p></div></div>';
+        return;
+      }
       const activePct = percent(value(d, 'activeMicrogrids'), value(d, 'totalMicrogrids'));
       document.getElementById('readiness-score').textContent = `${Math.round(availablePct * .4 + batteryPct * .35 + activePct * .25)}%`;
       document.getElementById('capacity-headroom').textContent = `${availablePct.toFixed(0)}%`; document.getElementById('capacity-meter').style.width = `${availablePct}%`;
@@ -49,17 +105,30 @@
     }
     function renderCharts(d) {
       const chartsAvailable = typeof Chart !== 'undefined';
-      document.querySelectorAll('.chart-unavailable').forEach(message => { message.hidden = chartsAvailable; });
-      document.querySelectorAll('.chart-canvas canvas').forEach(canvas => { canvas.hidden = !chartsAvailable; });
-      if (!chartsAvailable) return;
+      const hasGrids = value(d, 'totalMicrogrids') > 0;
+      document.querySelectorAll('.chart-unavailable').forEach(message => {
+        message.hidden = chartsAvailable && hasGrids;
+        if (!hasGrids) message.textContent = 'No microgrids assigned to display operational distribution.';
+      });
+      document.querySelectorAll('.chart-canvas canvas').forEach(canvas => {
+        canvas.hidden = !chartsAvailable || !hasGrids;
+      });
+      if (!chartsAvailable || !hasGrids) return;
       const common = { animation: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? false : { duration: 300 }, responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } } } };
       if (statusChartInstance) statusChartInstance.destroy(); statusChartInstance = new Chart(document.getElementById('statusChart'), { type: 'doughnut', data: { labels: ['Active', 'Inactive', 'Maintenance', 'Offline'], datasets: [{ data: [value(d, 'activeMicrogrids'), value(d, 'inactiveMicrogrids'), value(d, 'maintenanceMicrogrids'), value(d, 'offlineMicrogrids')], backgroundColor: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444'], borderWidth: 0 }] }, options: common });
       if (capacityChartInstance) capacityChartInstance.destroy(); capacityChartInstance = new Chart(document.getElementById('capacityChart'), { type: 'bar', data: { labels: ['Available', 'Reserved', 'Used', 'Total'], datasets: [{ label: 'Capacity (kWh)', data: [value(d, 'totalAvailableCapacity'), value(d, 'totalReservedCapacity'), value(d, 'totalUsedCapacity'), value(d, 'totalCapacity')], backgroundColor: ['#10b981', '#f59e0b', '#6366f1', '#06b6d4'], borderRadius: 7 }] }, options: { ...common, scales: { y: { beginAtZero: true, grid: { color: 'rgba(148,163,184,.15)' } }, x: { grid: { display: false } } } } });
     }
     window.InfrastructureOverview = { refresh: loadDashboard };
-    document.addEventListener('DOMContentLoaded', () => {
+
+    function initOverview() {
       if (!SessionManager.isAuthenticated() || SessionManager.isAdmin()) return;
       loadDashboard();
       document.getElementById('refresh-dashboard')?.addEventListener('click', loadDashboard);
-    });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initOverview);
+    } else {
+      initOverview();
+    }
 })();

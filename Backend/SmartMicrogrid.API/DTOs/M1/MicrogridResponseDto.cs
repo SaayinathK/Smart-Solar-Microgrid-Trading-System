@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: MicrogridResponseDto.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -29,6 +29,8 @@ namespace SmartMicrogrid.API.DTOs.M1
         public string Status { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public string OperatorId { get; set; } = string.Empty;
+        public string OperatorName { get; set; } = string.Empty;
+        public string? OperatorEmail { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }

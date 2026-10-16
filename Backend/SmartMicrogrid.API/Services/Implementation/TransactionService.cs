@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: TransactionService.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M3 – Transaction & Verification Management
@@ -49,13 +49,16 @@ namespace SmartMicrogrid.API.Services.Implementation
             string? operatorId = null)
         {
             // Execute create async operations
-            if (string.IsNullOrWhiteSpace(operatorId))
+            var user = await _userRepository.GetByIdAsync(currentUserId);
+            var isAdmin = user?.Role == Role.Admin;
+
+            if (!isAdmin && string.IsNullOrWhiteSpace(operatorId))
             {
                 throw new UnauthorizedAccessException(
                     "A valid authenticated MicrogridOperator is required.");
             }
 
-            await EnsureMicrogridOperatorIdentityAsync(currentUserId, operatorId);
+            await EnsureMicrogridOperatorIdentityAsync(currentUserId, isAdmin ? null : operatorId);
 
             if (request == null)
             {
@@ -72,7 +75,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             var reservation =
                 await _reservationService.GetByIdAsync(
                     request.ReservationId,
-                    operatorId);
+                    isAdmin ? null : operatorId);
 
             if (reservation == null)
             {
@@ -379,13 +382,16 @@ namespace SmartMicrogrid.API.Services.Implementation
                     "QR code data is required.");
             }
 
-            if (string.IsNullOrWhiteSpace(operatorId))
+            var user = await _userRepository.GetByIdAsync(currentUserId);
+            var isAdmin = user?.Role == Role.Admin;
+
+            if (!isAdmin && string.IsNullOrWhiteSpace(operatorId))
             {
                 throw new UnauthorizedAccessException(
                     "A valid authenticated MicrogridOperator is required.");
             }
 
-            await EnsureMicrogridOperatorIdentityAsync(currentUserId, operatorId);
+            await EnsureMicrogridOperatorIdentityAsync(currentUserId, isAdmin ? null : operatorId);
 
 
             var transaction =
@@ -434,7 +440,7 @@ namespace SmartMicrogrid.API.Services.Implementation
             var reservation =
                 await _reservationService.GetByIdAsync(
                     transaction.ReservationId,
-                    operatorId);
+                    isAdmin ? null : operatorId);
 
 
             if (reservation == null)
@@ -635,10 +641,12 @@ namespace SmartMicrogrid.API.Services.Implementation
             }
 
 
-            // Only the verifier who verified the transaction can complete it
-            if (!string.IsNullOrWhiteSpace(
-                    transaction.VerifiedBy)
-                &&
+            // Only the verifier who verified the transaction can complete it (unless Admin)
+            var user = await _userRepository.GetByIdAsync(currentUserId);
+            var isAdmin = user?.Role == Role.Admin;
+
+            if (!isAdmin &&
+                !string.IsNullOrWhiteSpace(transaction.VerifiedBy) &&
                 transaction.VerifiedBy != currentUserId)
             {
                 throw new UnauthorizedAccessException(
@@ -780,16 +788,28 @@ namespace SmartMicrogrid.API.Services.Implementation
             string? operatorId = null)
         {
             // Execute ensure microgrid operator identity async operations
-            if (string.IsNullOrWhiteSpace(currentUserId) ||
-                (!string.IsNullOrWhiteSpace(operatorId) &&
-                 !string.Equals(operatorId, currentUserId, StringComparison.Ordinal)))
+            if (string.IsNullOrWhiteSpace(currentUserId))
             {
                 throw new UnauthorizedAccessException(
-                    "A valid authenticated MicrogridOperator is required.");
+                    "A valid authenticated user is required.");
             }
 
             var user = await _userRepository.GetByIdAsync(currentUserId);
-            if (user == null || user.Role != Role.MicrogridOperator)
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException(
+                    "User account not found.");
+            }
+
+            // System Administrator has full access
+            if (user.Role == Role.Admin)
+            {
+                return;
+            }
+
+            if (user.Role != Role.MicrogridOperator ||
+                (!string.IsNullOrWhiteSpace(operatorId) &&
+                 !string.Equals(operatorId, currentUserId, StringComparison.Ordinal)))
             {
                 throw new UnauthorizedAccessException(
                     "A valid authenticated MicrogridOperator is required.");
@@ -798,12 +818,26 @@ namespace SmartMicrogrid.API.Services.Implementation
         /// <summary>
         /// Seeds and configures default/sample re microgrid operator access async data.
         /// </summary>
+        /// </summary>
 
         private async Task EnsureMicrogridOperatorAccessAsync(
             string currentUserId,
             string microgridNodeId)
         {
             // Execute ensure microgrid operator access async operations
+            var user = await _userRepository.GetByIdAsync(currentUserId);
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException(
+                    "User account not found.");
+            }
+
+            // System Administrator has full access across all microgrid nodes
+            if (user.Role == Role.Admin)
+            {
+                return;
+            }
+
             await EnsureMicrogridOperatorIdentityAsync(currentUserId);
 
             var assignedMicrogridIds =

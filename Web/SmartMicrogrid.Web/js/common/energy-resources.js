@@ -83,6 +83,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await MicrogridApi.getMicrogrids();
       if (!response?.success || !Array.isArray(response.data)) throw new Error(response?.message || 'Readings are unavailable.');
       microgrids = response.data;
+      const user = SessionManager.getUser();
+      const role = SessionManager.getUserRole() || (user && user.role);
+      const isOperator = role && role.toLowerCase() === 'microgridoperator';
+      const operatorId = user?.id || user?._id || user?.Id;
+      if (isOperator && operatorId) {
+        microgrids = microgrids.filter(m => {
+          const op = m.operatorId || m.OperatorId;
+          return op && String(op) === String(operatorId);
+        });
+      }
       render(microgrids);
       status.textContent = `Readings refreshed at ${new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}.`;
     } catch (error) {
