@@ -25,6 +25,9 @@ using SmartMicrogrid.API.Services.Interfaces.M4;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (args.Contains("--seed") && args.Contains("--reseed"))
+    throw new ArgumentException("Choose --seed to preserve existing records, or --reseed to reset collections; do not combine them.");
+
 // Optional machine-local settings are ignored by Git. Environment/CLI values still win.
 builder.Configuration
     .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true)
@@ -177,6 +180,14 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var mongoContext = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+
+    // Explicit one-shot insertion exits before background services or the HTTP server start.
+    if (args.Contains("--seed"))
+    {
+        await DbSeeder.SeedAllAsync(mongoContext);
+        return;
+    }
+
     await DbSeeder.MigrateLegacyRolesAsync(mongoContext);
 
     // Drop and reseed if --reseed flag is passed

@@ -26,7 +26,7 @@ namespace SmartMicrogrid.API.Data
     /// User, MicrogridNode, EnergySlot, Reservation, Transaction, SystemConfiguration, and SystemActivity.
     /// All seeded entities are inter-related by valid foreign keys, prosumer NICs, and lifecycle states.
     /// </summary>
-    public static class DbSeeder
+    public static partial class DbSeeder
     {
         /// <summary>
         /// Performs migrate legacy roles async operation to map legacy verifier accounts.
@@ -49,7 +49,7 @@ namespace SmartMicrogrid.API.Data
             var userCount = await context.Users.CountDocumentsAsync(Builders<User>.Filter.Empty);
             if (userCount == 0)
             {
-                await ReseedAllAsync(context);
+                await SeedAllAsync(context);
             }
         }
 
@@ -71,31 +71,40 @@ namespace SmartMicrogrid.API.Data
             // Recreate all database indexes cleanly
             context.EnsureIndexes();
 
-            var now = DateTime.UtcNow;
+            await SeedAllAsync(context);
+        }
+
+        /// <summary>
+        /// Builds linked demonstration records for all seven collections.
+        /// Energy prices and estimated costs are denominated in LKR, without currency conversion.
+        /// Delivery windows are relative to the supplied UTC time.
+        /// </summary>
+        public static IReadOnlyDictionary<string, List<BsonDocument>> CreateDemoData(DateTime now)
+        {
 
             // ─────────────────────────────────────────────────────────────
             //  1. USERS (18 records across Admin, Operator, and Prosumer)
             // ─────────────────────────────────────────────────────────────
-            var idAdmin1 = ObjectId.GenerateNewId().ToString();
-            var idAdmin2 = ObjectId.GenerateNewId().ToString();
-            var idAdmin3 = ObjectId.GenerateNewId().ToString();
-            var idAdmin4 = ObjectId.GenerateNewId().ToString();
+            var idAdmin1 = SeedId("idAdmin1");
+            var idAdmin2 = SeedId("idAdmin2");
+            var idAdmin3 = SeedId("idAdmin3");
+            var idAdmin4 = SeedId("idAdmin4");
 
-            var idOpAlex = ObjectId.GenerateNewId().ToString();
-            var idOpKavindu = ObjectId.GenerateNewId().ToString();
-            var idOpLakshmi = ObjectId.GenerateNewId().ToString();
-            var idOpMenaka = ObjectId.GenerateNewId().ToString();
-            var idOpRoshan = ObjectId.GenerateNewId().ToString();
-            var idOpIshara = ObjectId.GenerateNewId().ToString();
+            var idOpAlex = SeedId("idOpAlex");
+            var idOpKavindu = SeedId("idOpKavindu");
+            var idOpLakshmi = SeedId("idOpLakshmi");
+            var idOpMenaka = SeedId("idOpMenaka");
+            var idOpRoshan = SeedId("idOpRoshan");
+            var idOpIshara = SeedId("idOpIshara");
 
-            var idProSam = ObjectId.GenerateNewId().ToString();
-            var idProAmaya = ObjectId.GenerateNewId().ToString();
-            var idProRuwan = ObjectId.GenerateNewId().ToString();
-            var idProTharushi = ObjectId.GenerateNewId().ToString();
-            var idProChamara = ObjectId.GenerateNewId().ToString();
-            var idProNadeesha = ObjectId.GenerateNewId().ToString();
-            var idProSuresh = ObjectId.GenerateNewId().ToString();
-            var idProDilini = ObjectId.GenerateNewId().ToString();
+            var idProSam = SeedId("idProSam");
+            var idProAmaya = SeedId("idProAmaya");
+            var idProRuwan = SeedId("idProRuwan");
+            var idProTharushi = SeedId("idProTharushi");
+            var idProChamara = SeedId("idProChamara");
+            var idProNadeesha = SeedId("idProNadeesha");
+            var idProSuresh = SeedId("idProSuresh");
+            var idProDilini = SeedId("idProDilini");
 
             var nicAdmin1 = "200012345678";
             var nicAdmin2 = "199812345679";
@@ -149,21 +158,20 @@ namespace SmartMicrogrid.API.Data
                 new() { Id = idProDilini, FirstName = "Dilini", LastName = "Wickramasinghe", Email = "dilini@microgrid.com", PhoneNumber = "+94770000016", Nic = nicProDilini, PasswordHash = prosumerHash, Role = Role.Prosumer, AccountStatus = AccountStatus.Inactive, IsActive = false, StatusChangedAt = now.AddDays(-25), StatusChangedBy = "System Administrator", CreatedAt = now.AddDays(-65), UpdatedAt = now.AddDays(-25) }
             };
 
-            await context.Users.InsertManyAsync(users);
 
             // ─────────────────────────────────────────────────────────────
             //  2. MICROGRID NODES (10 distributed nodes across Sri Lanka)
             // ─────────────────────────────────────────────────────────────
-            var idMg1 = ObjectId.GenerateNewId().ToString();
-            var idMg2 = ObjectId.GenerateNewId().ToString();
-            var idMg3 = ObjectId.GenerateNewId().ToString();
-            var idMg4 = ObjectId.GenerateNewId().ToString();
-            var idMg5 = ObjectId.GenerateNewId().ToString();
-            var idMg6 = ObjectId.GenerateNewId().ToString();
-            var idMg7 = ObjectId.GenerateNewId().ToString();
-            var idMg8 = ObjectId.GenerateNewId().ToString();
-            var idMg9 = ObjectId.GenerateNewId().ToString();
-            var idMg10 = ObjectId.GenerateNewId().ToString();
+            var idMg1 = SeedId("idMg1");
+            var idMg2 = SeedId("idMg2");
+            var idMg3 = SeedId("idMg3");
+            var idMg4 = SeedId("idMg4");
+            var idMg5 = SeedId("idMg5");
+            var idMg6 = SeedId("idMg6");
+            var idMg7 = SeedId("idMg7");
+            var idMg8 = SeedId("idMg8");
+            var idMg9 = SeedId("idMg9");
+            var idMg10 = SeedId("idMg10");
 
             var microgrids = new List<MicrogridNode>
             {
@@ -179,29 +187,28 @@ namespace SmartMicrogrid.API.Data
                 MakeGrid(idMg10, "Anuradhapura Heritage Grid", "Anuradhapura", "Ancient heritage zone eco-solar array currently undergoing scheduled inverter overhaul.", 8.3114, 80.4037, 280, 0, 0, 0, 110, 22, 20.0, 14, "Maintenance", false, idOpAlex, now)
             };
 
-            await context.Microgrids.InsertManyAsync(microgrids);
 
             // ─────────────────────────────────────────────────────────────
             //  3. ENERGY SLOTS (18 slots covering past, current, future)
             // ─────────────────────────────────────────────────────────────
-            var idSlot1 = ObjectId.GenerateNewId().ToString();
-            var idSlot2 = ObjectId.GenerateNewId().ToString();
-            var idSlot3 = ObjectId.GenerateNewId().ToString();
-            var idSlot4 = ObjectId.GenerateNewId().ToString();
-            var idSlot5 = ObjectId.GenerateNewId().ToString();
-            var idSlot6 = ObjectId.GenerateNewId().ToString();
-            var idSlot7 = ObjectId.GenerateNewId().ToString();
-            var idSlot8 = ObjectId.GenerateNewId().ToString();
-            var idSlot9 = ObjectId.GenerateNewId().ToString();
-            var idSlot10 = ObjectId.GenerateNewId().ToString();
-            var idSlot11 = ObjectId.GenerateNewId().ToString();
-            var idSlot12 = ObjectId.GenerateNewId().ToString();
-            var idSlot13 = ObjectId.GenerateNewId().ToString();
-            var idSlot14 = ObjectId.GenerateNewId().ToString();
-            var idSlot15 = ObjectId.GenerateNewId().ToString();
-            var idSlot16 = ObjectId.GenerateNewId().ToString();
-            var idSlot17 = ObjectId.GenerateNewId().ToString();
-            var idSlot18 = ObjectId.GenerateNewId().ToString();
+            var idSlot1 = SeedId("idSlot1");
+            var idSlot2 = SeedId("idSlot2");
+            var idSlot3 = SeedId("idSlot3");
+            var idSlot4 = SeedId("idSlot4");
+            var idSlot5 = SeedId("idSlot5");
+            var idSlot6 = SeedId("idSlot6");
+            var idSlot7 = SeedId("idSlot7");
+            var idSlot8 = SeedId("idSlot8");
+            var idSlot9 = SeedId("idSlot9");
+            var idSlot10 = SeedId("idSlot10");
+            var idSlot11 = SeedId("idSlot11");
+            var idSlot12 = SeedId("idSlot12");
+            var idSlot13 = SeedId("idSlot13");
+            var idSlot14 = SeedId("idSlot14");
+            var idSlot15 = SeedId("idSlot15");
+            var idSlot16 = SeedId("idSlot16");
+            var idSlot17 = SeedId("idSlot17");
+            var idSlot18 = SeedId("idSlot18");
 
             var slots = new List<EnergySlot>
             {
@@ -243,27 +250,26 @@ namespace SmartMicrogrid.API.Data
                 MakeSlot(idSlot18, idMg1, 85, 67, now.AddDays(-1).AddHours(4), now.AddDays(-1).AddHours(8), 27.00m, "PartiallyReserved", idOpAlex, now)
             };
 
-            await context.EnergySlots.InsertManyAsync(slots);
 
             // ─────────────────────────────────────────────────────────────
             //  4. RESERVATIONS (16 reservations across lifecycle states)
             // ─────────────────────────────────────────────────────────────
-            var idRes1 = ObjectId.GenerateNewId().ToString();
-            var idRes2 = ObjectId.GenerateNewId().ToString();
-            var idRes3 = ObjectId.GenerateNewId().ToString();
-            var idRes4 = ObjectId.GenerateNewId().ToString();
-            var idRes5 = ObjectId.GenerateNewId().ToString();
-            var idRes6 = ObjectId.GenerateNewId().ToString();
-            var idRes7 = ObjectId.GenerateNewId().ToString();
-            var idRes8 = ObjectId.GenerateNewId().ToString();
-            var idRes9 = ObjectId.GenerateNewId().ToString();
-            var idRes10 = ObjectId.GenerateNewId().ToString();
-            var idRes11 = ObjectId.GenerateNewId().ToString();
-            var idRes12 = ObjectId.GenerateNewId().ToString();
-            var idRes13 = ObjectId.GenerateNewId().ToString();
-            var idRes14 = ObjectId.GenerateNewId().ToString();
-            var idRes15 = ObjectId.GenerateNewId().ToString();
-            var idRes16 = ObjectId.GenerateNewId().ToString();
+            var idRes1 = SeedId("idRes1");
+            var idRes2 = SeedId("idRes2");
+            var idRes3 = SeedId("idRes3");
+            var idRes4 = SeedId("idRes4");
+            var idRes5 = SeedId("idRes5");
+            var idRes6 = SeedId("idRes6");
+            var idRes7 = SeedId("idRes7");
+            var idRes8 = SeedId("idRes8");
+            var idRes9 = SeedId("idRes9");
+            var idRes10 = SeedId("idRes10");
+            var idRes11 = SeedId("idRes11");
+            var idRes12 = SeedId("idRes12");
+            var idRes13 = SeedId("idRes13");
+            var idRes14 = SeedId("idRes14");
+            var idRes15 = SeedId("idRes15");
+            var idRes16 = SeedId("idRes16");
 
             var reservations = new List<Reservation>
             {
@@ -308,7 +314,6 @@ namespace SmartMicrogrid.API.Data
                 MakeReservation(idRes16, nicProTharushi, idMg1, idSlot18, 18.0, now.AddDays(-1).AddHours(4), now.AddDays(-1).AddHours(8), "Completed", now.AddDays(-1).AddHours(-6), nicProTharushi, idOpAlex, idOpAlex)
             };
 
-            await context.Reservations.InsertManyAsync(reservations);
 
             // ─────────────────────────────────────────────────────────────
             //  5. TRANSACTIONS (12 M3 transactions covering all statuses)
@@ -319,7 +324,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 1: Sam Jayawardena - QR Generated (Colombo Solar Hub)
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes1"),
                     ReservationId = idRes1,
                     ProsumerId = nicProSam,
                     MicrogridNodeId = idMg1,
@@ -334,7 +339,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 2: Sam Jayawardena - Pending (Kandy Highland)
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes2"),
                     ReservationId = idRes2,
                     ProsumerId = nicProSam,
                     MicrogridNodeId = idMg2,
@@ -349,7 +354,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 3: Sam Jayawardena - Completed (Galle Coastal)
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes4"),
                     ReservationId = idRes4,
                     ProsumerId = nicProSam,
                     MicrogridNodeId = idMg3,
@@ -367,7 +372,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 4: Amaya De Silva - Verified (Colombo Solar Hub)
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes5"),
                     ReservationId = idRes5,
                     ProsumerId = nicProAmaya,
                     MicrogridNodeId = idMg1,
@@ -384,7 +389,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 5: Amaya De Silva - Completed (Nuwara Eliya)
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes7"),
                     ReservationId = idRes7,
                     ProsumerId = nicProAmaya,
                     MicrogridNodeId = idMg6,
@@ -402,7 +407,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 6: Amaya De Silva - Verification Pending (Trincomalee)
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes8"),
                     ReservationId = idRes8,
                     ProsumerId = nicProAmaya,
                     MicrogridNodeId = idMg7,
@@ -417,7 +422,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 7: Ruwan Bandara - Completed (Jaffna Northern Grid)
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes9"),
                     ReservationId = idRes9,
                     ProsumerId = nicProRuwan,
                     MicrogridNodeId = idMg4,
@@ -435,7 +440,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 8: Ruwan Bandara - QR Generated (Trincomalee Eastern Hub)
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes10"),
                     ReservationId = idRes10,
                     ProsumerId = nicProRuwan,
                     MicrogridNodeId = idMg7,
@@ -450,7 +455,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 9: Tharushi Kumari - Completed (Colombo Solar Hub)
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes16"),
                     ReservationId = idRes16,
                     ProsumerId = nicProTharushi,
                     MicrogridNodeId = idMg1,
@@ -468,7 +473,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 10: Cancelled Transaction
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes15"),
                     ReservationId = idRes15,
                     ProsumerId = nicProTharushi,
                     MicrogridNodeId = idMg2,
@@ -483,7 +488,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 11: Rejected Transaction
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes14"),
                     ReservationId = idRes14,
                     ProsumerId = nicProTharushi,
                     MicrogridNodeId = idMg9,
@@ -498,7 +503,7 @@ namespace SmartMicrogrid.API.Data
                 // Tx 12: Rejected Transaction
                 new()
                 {
-                    Id = ObjectId.GenerateNewId().ToString(),
+                    Id = SeedId("transaction-idRes12"),
                     ReservationId = idRes12,
                     ProsumerId = nicProRuwan,
                     MicrogridNodeId = idMg8,
@@ -512,7 +517,11 @@ namespace SmartMicrogrid.API.Data
                 }
             };
 
-            await context.Transactions.InsertManyAsync(transactions);
+            foreach (var transaction in transactions)
+            {
+                if (!string.IsNullOrEmpty(transaction.QrCodeData))
+                    transaction.QrCodeData = $"SMART-MICROGRID|TRANSACTION|{transaction.Id}|{transaction.TransactionCode}";
+            }
 
             // ─────────────────────────────────────────────────────────────
             //  6. SYSTEM CONFIGURATION (Singleton document)
@@ -521,7 +530,7 @@ namespace SmartMicrogrid.API.Data
             {
                 Id = SystemConfiguration.SingletonId,
                 PlatformName = "Smart Microgrid Energy Management & Trading Platform",
-                PlatformDescription = "Client-server platform for microgrid energy management, reservation and transaction administration.",
+                PlatformDescription = "Microgrid energy management, reservations and transaction administration. All energy prices and costs are in LKR.",
                 MaintenanceMode = false,
                 MaintenanceMessage = null,
                 AllowRegistration = true,
@@ -533,7 +542,6 @@ namespace SmartMicrogrid.API.Data
                 UpdatedBy = "System Administrator"
             };
 
-            await context.SystemConfiguration.InsertOneAsync(config);
 
             // ─────────────────────────────────────────────────────────────
             //  7. SYSTEM ACTIVITY (30+ rich audit trail entries)
@@ -583,7 +591,19 @@ namespace SmartMicrogrid.API.Data
                 MakeActivity(idOpAlex, "Alex Perera", Role.MicrogridOperator.ToString(), AuditAction.ReportGenerated, AuditModule.Reporting, "Generated daily dispatch and capacity utilization report for Colombo Hub.", "Report", "MicrogridReport", "192.168.1.20", now.AddHours(-36), AuditStatus.Success)
             };
 
-            await context.SystemActivity.InsertManyAsync(activityLogs);
+            for (var i = 0; i < activityLogs.Count; i++)
+                activityLogs[i].Id = SeedId($"activity-{i + 1}");
+
+            return new Dictionary<string, List<BsonDocument>>
+            {
+                [MongoCollections.Users] = users.Select(item => item.ToBsonDocument()).ToList(),
+                [MongoCollections.Microgrids] = microgrids.Select(item => item.ToBsonDocument()).ToList(),
+                [MongoCollections.EnergySlots] = slots.Select(item => item.ToBsonDocument()).ToList(),
+                [MongoCollections.Reservations] = reservations.Select(item => item.ToBsonDocument()).ToList(),
+                [MongoCollections.Transactions] = transactions.Select(item => item.ToBsonDocument()).ToList(),
+                [MongoCollections.SystemConfiguration] = new() { config.ToBsonDocument() },
+                [MongoCollections.SystemActivity] = activityLogs.Select(item => item.ToBsonDocument()).ToList()
+            };
         }
 
         /// <summary>
@@ -639,7 +659,7 @@ namespace SmartMicrogrid.API.Data
                 StartTime = startTime,
                 EndTime = endTime,
                 PricePerUnit = price,
-                Status = status,
+                Status = endTime <= now ? "Expired" : status,
                 CreatedBy = createdBy,
                 CreatedAt = now.AddDays(-2),
                 UpdatedAt = now

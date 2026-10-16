@@ -13,6 +13,18 @@ The `Deployment/` folder contains hosting scripts, environment setup guidelines,
 
 ## Deployment Quick Commands
 
+### Insert demonstration data for all system models
+
+From the repository root, run:
+
+```powershell
+dotnet run --project Backend/SmartMicrogrid.API --no-launch-profile -- --environment Development --seed
+```
+
+This one-shot command uses the API's configured MongoDB database and inserts missing users, microgrids, energy slots, reservations, transactions, system configuration, and activity records. Prices are in LKR and new delivery windows are relative to the execution time. It preserves existing records, passwords, configuration, and workflow changes. Repeating it does not duplicate the same demo dataset or refresh its delivery dates. It prints insertion counts and verifies every demo record before exiting.
+
+The separate `--reseed` option deletes the seven collections before rebuilding them; use it only when an intentional database reset is required.
+
 ### 1. Local Publish Command
 ```powershell
 cd Backend\SmartMicrogrid.API
