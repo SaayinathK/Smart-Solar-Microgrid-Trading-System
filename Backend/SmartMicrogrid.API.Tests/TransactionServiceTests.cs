@@ -328,7 +328,7 @@ namespace SmartMicrogrid.API.Tests
             await Assert.ThrowsAsync<InvalidOperationException>(() => _service.VerifyAsync(transaction.Id,
                 new VerifyTransactionRequest { QrCodeData = "valid-qr" }, "verifier1", "verifier1"));
             _reservations.Verify(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-            _reservations.Verify(x => x.MarkCompletedAsync(transaction.ReservationId, "verifier1", "verifier1"), Times.Once);
+            _reservations.Verify(x => x.MarkCompletedAsync(transaction.ReservationId, "verifier1", "verifier1"), Times.Never);
         }
         /// <summary>
         /// Verifies and validates async_missing reservation_is rejected and transaction rejected criteria.
@@ -671,6 +671,87 @@ namespace SmartMicrogrid.API.Tests
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
                 _service.GetByIdAsync("tx1", "user", "Admin"));
         }
+        [Fact]
+        public async Task VerifyAsync_UnassignedMicrogrid_IsForbiddenWithoutWrites()
+        {
+            var transaction = Transaction(status: "QRGenerated");
+            transaction.MicrogridNodeId = "unassigned-grid";
+            transaction.QrCodeData = $"SMART-MICROGRID|TRANSACTION|{transaction.Id}|code1";
+            _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
+            // ReservationService enforces grid ownership when given the operator ID.
+            var denied = new UnauthorizedAccessException("Unassigned microgrid.");
+            _reservations.Setup(x => x.GetByIdAsync(transaction.ReservationId, "operator1"))
+                .ThrowsAsync(denied);
+
+            var error = await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+                _service.VerifyAsync(transaction.Id,
+                    new VerifyTransactionRequest { QrCodeData = transaction.QrCodeData },
+                    "operator1", "operator1"));
+
+            Assert.Same(denied, error);
+            Assert.Equal("QRGenerated", transaction.Status);
+            Assert.Null(transaction.VerifiedBy);
+            Assert.Null(transaction.VerificationTime);
+            _reservations.Verify(x => x.GetByIdAsync(transaction.ReservationId, "operator1"), Times.Once);
+            _transactions.Verify(x => x.UpdateAsync(It.IsAny<Transaction>()), Times.Never);
+            _reservations.Verify(x => x.MarkCompletedAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Theory]
+        [InlineData("operator1", null, Role.MicrogridOperator)]
+        [InlineData("operator1", "", Role.MicrogridOperator)]
+        [InlineData("operator1", "  ", Role.MicrogridOperator)]
+        [InlineData(null, "operator1", Role.MicrogridOperator)]
+        [InlineData("", "operator1", Role.MicrogridOperator)]
+        [InlineData("  ", "operator1", Role.MicrogridOperator)]
+        [InlineData("operator1", "operator1", null)]
+        [InlineData("operator1", "operator1", Role.Prosumer)]
+        [InlineData("operator1", "operator2", Role.MicrogridOperator)]
+        public async Task VerifyAsync_InvalidOperatorIdentity_IsForbidden(
+            string? currentUserId, string? operatorId, Role? role)
+        {
+            _users.Setup(x => x.GetByIdAsync(It.IsAny<string>()))
+                .ReturnsAsync(role.HasValue ? new User { Id = currentUserId!, Role = role.Value } : null);
+
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+                _service.VerifyAsync("507f1f77bcf86cd799439011",
+                    new VerifyTransactionRequest
+                    {
+                        QrCodeData = "SMART-MICROGRID|TRANSACTION|507f1f77bcf86cd799439011|code1"
+                    }, currentUserId!, operatorId));
+
+            _transactions.Verify(x => x.GetByIdAsync(It.IsAny<string>()), Times.Never);
+            _transactions.Verify(x => x.UpdateAsync(It.IsAny<Transaction>()), Times.Never);
+            _reservations.Verify(x => x.GetByIdAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _reservations.Verify(x => x.MarkCompletedAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Theory]
+        [InlineData(null, Role.MicrogridOperator)]
+        [InlineData("", Role.MicrogridOperator)]
+        [InlineData("  ", Role.MicrogridOperator)]
+        [InlineData("operator1", null)]
+        [InlineData("operator1", Role.Prosumer)]
+        public async Task CompleteAsync_InvalidOperatorIdentity_IsForbiddenWithoutWrites(
+            string? currentUserId, Role? role)
+        {
+            var transaction = Transaction(status: "Verified");
+            transaction.VerifiedBy = "operator1";
+            transaction.VerificationTime = DateTime.UtcNow.AddMinutes(-1);
+            _transactions.Setup(x => x.GetByIdAsync(transaction.Id)).ReturnsAsync(transaction);
+            _users.Setup(x => x.GetByIdAsync(It.IsAny<string>()))
+                .ReturnsAsync(role.HasValue ? new User { Id = currentUserId!, Role = role.Value } : null);
+
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+                _service.CompleteAsync(transaction.Id,
+                    new CompleteTransactionRequest { Confirmation = "CONFIRMED" }, currentUserId!));
+
+            Assert.Equal("Verified", transaction.Status);
+            Assert.Null(transaction.EnergyTransferTime);
+            _transactions.Verify(x => x.UpdateAsync(It.IsAny<Transaction>()), Times.Never);
+            _reservations.Verify(x => x.MarkCompletedAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
         /// <summary>
         /// Performs reservation operation.
         /// </summary>
