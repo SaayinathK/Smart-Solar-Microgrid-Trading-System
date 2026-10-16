@@ -35,7 +35,24 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await MicrogridApi.getEnergySlots();
       if (version !== loadVersion) return;
       if (!response?.success || !Array.isArray(response.data)) throw new Error(response?.message || 'Could not load energy slots.');
-      const slots = [...response.data].sort((a,b) => new Date(b.startTime) - new Date(a.startTime));
+      let slots = [...response.data].sort((a,b) => new Date(b.startTime) - new Date(a.startTime));
+      const user = SessionManager.getUser();
+      const role = SessionManager.getUserRole() || (user && user.role);
+      const isOperator = role && role.toLowerCase() === 'microgridoperator';
+      const operatorId = user?.id || user?._id || user?.Id;
+      if (isOperator && operatorId) {
+        const mgRes = await MicrogridApi.getMicrogrids();
+        const allMgs = Array.isArray(mgRes?.data) ? mgRes.data : [];
+        const myMgIds = new Set(allMgs.filter(m => {
+          const op = m.operatorId || m.OperatorId;
+          return op && String(op) === String(operatorId);
+        }).map(m => String(m.id || m._id || m.Id)));
+        slots = slots.filter(slot => {
+          const sNodeId = String(slot.microgridNodeId || slot.microgridId || '');
+          const sCreatedBy = String(slot.createdBy || slot.operatorId || '');
+          return myMgIds.has(sNodeId) || sCreatedBy === String(operatorId);
+        });
+      }
       const open = slots.filter(slot => !isEnded(slot) && ['Available','PartiallyReserved'].includes(slot.status) && Number(slot.availableAmount)>0);
       document.getElementById('slot-summary').textContent = `${slots.length} published slots · ${open.length} with an open delivery window and remaining energy`;
       document.getElementById('slot-expiry-note').hidden = !slots.some(slot => displayStatus(slot) === 'Expired');
@@ -85,7 +102,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await MicrogridApi.getMicrogrids({status:'Active'});
       if (version !== openVersion || !dialog.open) return;
       if (!response?.success || !Array.isArray(response.data)) throw new Error(response?.message || 'Could not load microgrids. Close this form and retry.');
-      microgrids = response.data.filter(node => node.status === 'Active' && node.isActive !== false);
+      let activeNodes = response.data.filter(node => node.status === 'Active' && node.isActive !== false);
+      const user = SessionManager.getUser();
+      const role = SessionManager.getUserRole() || (user && user.role);
+      const isOperator = role && role.toLowerCase() === 'microgridoperator';
+      const operatorId = user?.id || user?._id || user?.Id;
+      if (isOperator && operatorId) {
+        activeNodes = activeNodes.filter(node => {
+          const op = node.operatorId || node.OperatorId;
+          return op && String(op) === String(operatorId);
+        });
+      }
+      microgrids = activeNodes;
       select.replaceChildren(new Option('Select a microgrid', ''), ...microgrids.map(node => new Option(`${node.name} — ${node.location}`, node.id)));
       if (microgrids.some(node => node.id === selectedId)) select.value = selectedId;
       select.disabled = !microgrids.length;

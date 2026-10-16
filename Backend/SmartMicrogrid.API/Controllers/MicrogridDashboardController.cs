@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: MicrogridDashboardController.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -6,6 +6,7 @@
 // Author: K. Saayinath (IT23304338)
 // Description: API Controller exposing REST endpoints for MicrogridDashboard management.
 // ===========================================================================================================
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using SmartMicrogrid.API.Models.Common;
@@ -32,10 +33,14 @@ namespace SmartMicrogrid.API.Controllers
         /// Get M1 infrastructure statistics dashboard summary.
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetDashboardStats()
+        public async Task<IActionResult> GetDashboardStats([FromQuery] string? operatorId = null)
         {
             // Execute get dashboard stats operations
-            var stats = await _dashboardService.GetDashboardStatsAsync();
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            var isOperator = User.IsInRole("MicrogridOperator");
+            var effectiveOperatorId = isOperator ? currentUserId : operatorId;
+
+            var stats = await _dashboardService.GetDashboardStatsAsync(effectiveOperatorId);
             return Ok(ApiResponse<object>.SuccessResponse(stats, "Infrastructure dashboard statistics retrieved successfully."));
         }
     }

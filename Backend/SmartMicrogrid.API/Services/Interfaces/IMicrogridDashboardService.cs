@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: IMicrogridDashboardService.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -16,6 +16,6 @@ namespace SmartMicrogrid.API.Services.Interfaces
         /// <summary>
         /// Retrieves dashboard stats async details.
         /// </summary>
-        Task<MicrogridDashboardDto> GetDashboardStatsAsync();
+        Task<MicrogridDashboardDto> GetDashboardStatsAsync(string? operatorId = null);
     }
 }

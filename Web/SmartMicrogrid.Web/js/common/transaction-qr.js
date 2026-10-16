@@ -31,19 +31,20 @@ const TransactionQr = (() => {
   }
   async function openForReservation(reservation) {
     let transaction = await findForReservation(reservation.id || reservation._id);
-    if (!transaction && SessionManager.getUserRole() === 'MicrogridOperator' && reservation.status === 'Approved') {
+    const role = SessionManager.getUserRole();
+    if (!transaction && (role === 'MicrogridOperator' || role === 'Admin') && reservation.status === 'Approved') {
       try {
         const response = await TransactionApi.createTransaction(reservation.id || reservation._id);
         if (response?.success !== true || !response.data?.id) throw new Error(response?.message || 'Unable to start the transaction.');
         transaction = response.data;
       } catch (error) {
-        // A second operator tab may have created the transaction first.
+        // A second operator or admin tab may have created the transaction first.
         if (error?.status !== 409) throw error;
         transaction = await findForReservation(reservation.id || reservation._id);
         if (!transaction) throw error;
       }
     }
-    if (!transaction) throw new Error('The assigned operator has not started a transaction for this reservation yet.');
+    if (!transaction) throw new Error('No transaction has been created yet.');
     window.location.href = getWebAppUrl(`pages/M3/transaction-details.html?id=${encodeURIComponent(transaction.id)}`);
   }
   return { parse, canDisplay, render, findForReservation, openForReservation };

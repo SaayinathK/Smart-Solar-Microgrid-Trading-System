@@ -84,7 +84,7 @@ const MicrogridApi = {
   },
 
   // Infrastructure Dashboard API
-  async getDashboardStats() {
-    return ApiClient.get('/microgrid-dashboard');
+  async getDashboardStats(params = {}) {
+    return ApiClient.get('/microgrid-dashboard', params);
   }
 };

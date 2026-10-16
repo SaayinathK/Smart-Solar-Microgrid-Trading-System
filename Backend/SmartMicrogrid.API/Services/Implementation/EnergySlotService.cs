@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: EnergySlotService.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -36,11 +36,20 @@ namespace SmartMicrogrid.API.Services.Implementation
         /// Retrieves all async details.
         /// </summary>
 
-        public async Task<IEnumerable<EnergySlotResponseDto>> GetAllAsync(string? microgridId = null, string? status = null, DateTime? startTime = null, DateTime? endTime = null, double? minEnergy = null)
+        public async Task<IEnumerable<EnergySlotResponseDto>> GetAllAsync(string? microgridId = null, string? status = null, DateTime? startTime = null, DateTime? endTime = null, double? minEnergy = null, string? operatorId = null)
         {
             // Execute get all async operations
             var slots = await _slotRepository.GetAllAsync(microgridId, status, startTime, endTime, minEnergy);
             var microgridDict = await GetMicrogridDictionaryAsync(slots.Select(s => s.MicrogridNodeId));
+
+            if (!string.IsNullOrWhiteSpace(operatorId))
+            {
+                slots = slots.Where(s =>
+                {
+                    var mg = microgridDict.GetValueOrDefault(s.MicrogridNodeId);
+                    return mg != null && string.Equals(mg.OperatorId, operatorId, StringComparison.OrdinalIgnoreCase);
+                });
+            }
 
             return slots.Select(s => MapToResponseDto(s, microgridDict.GetValueOrDefault(s.MicrogridNodeId)));
         }
@@ -189,6 +198,15 @@ namespace SmartMicrogrid.API.Services.Implementation
                 });
             }
 
+            if (!string.IsNullOrWhiteSpace(query.OperatorId))
+            {
+                slots = slots.Where(s =>
+                {
+                    var mg = microgridDict.GetValueOrDefault(s.MicrogridNodeId);
+                    return mg != null && string.Equals(mg.OperatorId, query.OperatorId, StringComparison.OrdinalIgnoreCase);
+                });
+            }
+
             return slots.Select(s =>
             {
                 var mg = microgridDict.GetValueOrDefault(s.MicrogridNodeId);
@@ -203,7 +221,8 @@ namespace SmartMicrogrid.API.Services.Implementation
                     StartTime = s.StartTime,
                     EndTime = s.EndTime,
                     PricePerUnit = s.PricePerUnit,
-                    Status = s.Status
+                    Status = s.Status,
+                    OperatorId = mg?.OperatorId ?? string.Empty
                 };
             });
         }

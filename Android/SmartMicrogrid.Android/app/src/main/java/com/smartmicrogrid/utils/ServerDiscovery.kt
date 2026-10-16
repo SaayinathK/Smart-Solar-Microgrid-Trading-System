@@ -80,16 +80,13 @@ object ServerDiscovery {
             candidates.add(formatBaseUrl(saved))
         }
 
-        // 2. Android emulator host loopback
+        // 2. Default LAN Wi-Fi backend
+        candidates.add("http://192.168.1.4:5050/api/")
+
+        // 3. Android emulator host loopback
         if (isEmulator()) {
             candidates.add("http://10.0.2.2:5050/api/")
-            candidates.add("http://10.0.2.2:80/api/")
-            candidates.add("http://10.0.2.2:5000/api/")
         }
-
-        // 3. Known default laptop Wi-Fi IP
-        candidates.add("http://192.168.1.6:5050/api/")
-        candidates.add("http://192.168.1.6:80/api/")
 
         // 4. Generate candidates based on current device subnet if available
         val deviceIp = getDeviceIp()
@@ -97,12 +94,11 @@ object ServerDiscovery {
             val parts = deviceIp.split(".")
             if (parts.size == 4) {
                 val subnetPrefix = "${parts[0]}.${parts[1]}.${parts[2]}"
-                // Common laptop / gateway addresses on same subnet
-                candidates.add("http://$subnetPrefix.6:5050/api/")
+                // Candidate addresses on same subnet
+                candidates.add("http://$subnetPrefix.4:5050/api/")
                 candidates.add("http://$subnetPrefix.1:5050/api/")
                 candidates.add("http://$subnetPrefix.2:5050/api/")
                 candidates.add("http://$subnetPrefix.100:5050/api/")
-                candidates.add("http://$subnetPrefix.6:80/api/")
             }
         }
 

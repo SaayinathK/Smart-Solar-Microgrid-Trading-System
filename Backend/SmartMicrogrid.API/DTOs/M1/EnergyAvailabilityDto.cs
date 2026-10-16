@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: EnergyAvailabilityDto.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -18,6 +18,7 @@ namespace SmartMicrogrid.API.DTOs.M1
         public DateTime? EndTime { get; set; }
         public double? MinimumEnergy { get; set; }
         public string? Status { get; set; } = "Available";
+        public string? OperatorId { get; set; }
     }
 
     public class EnergyAvailabilityResponseDto
@@ -32,5 +33,6 @@ namespace SmartMicrogrid.API.DTOs.M1
         public DateTime EndTime { get; set; }
         public decimal PricePerUnit { get; set; }
         public string Status { get; set; } = string.Empty;
+        public string OperatorId { get; set; } = string.Empty;
     }
 }

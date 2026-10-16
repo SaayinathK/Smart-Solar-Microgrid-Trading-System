@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: MicrogridController.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -36,10 +36,14 @@ namespace SmartMicrogrid.API.Controllers
         /// Get all microgrids with optional filters
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? status, [FromQuery] bool? isActive, [FromQuery] string? location, [FromQuery] string? search)
+        public async Task<IActionResult> GetAll([FromQuery] string? status, [FromQuery] bool? isActive, [FromQuery] string? location, [FromQuery] string? search, [FromQuery] string? operatorId = null)
         {
             // Execute get all operations
-            var data = await _service.GetAllAsync(status, isActive, location, search);
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            var isOperator = User.IsInRole("MicrogridOperator");
+            var effectiveOperatorId = isOperator ? currentUserId : operatorId;
+
+            var data = await _service.GetAllAsync(status, isActive, location, search, effectiveOperatorId);
             return Ok(ApiResponse<object>.SuccessResponse(data, "Microgrids retrieved successfully."));
         }
 

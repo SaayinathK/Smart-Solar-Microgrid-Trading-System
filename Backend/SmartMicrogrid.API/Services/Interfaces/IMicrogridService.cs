@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: IMicrogridService.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -17,7 +17,7 @@ namespace SmartMicrogrid.API.Services.Interfaces
         /// <summary>
         /// Retrieves all async details.
         /// </summary>
-        Task<IEnumerable<MicrogridResponseDto>> GetAllAsync(string? status = null, bool? isActive = null, string? location = null, string? search = null);
+        Task<IEnumerable<MicrogridResponseDto>> GetAllAsync(string? status = null, bool? isActive = null, string? location = null, string? search = null, string? operatorId = null);
         /// <summary>
         /// Retrieves by id async details.
         /// </summary>

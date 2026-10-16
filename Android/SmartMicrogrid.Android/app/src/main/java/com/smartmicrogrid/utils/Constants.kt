@@ -1,11 +1,10 @@
 package com.smartmicrogrid.utils
 
 object Constants {
-    const val DEFAULT_LAN_URL = "http://192.168.1.6:5050/api/"
+    const val DEFAULT_LAN_URL = "http://192.168.1.4:5050/api/"
     const val DEFAULT_EMULATOR_URL = "http://10.0.2.2:5050/api/"
-    const val DEFAULT_IIS_URL = "http://192.168.1.6:80/api/"
 
-    // Dynamically chooses emulator loopback (10.0.2.2) or LAN Wi-Fi as default fallback
+    // Dynamically chooses emulator loopback (10.0.2.2) or LAN Wi-Fi as default
     val API_BASE_URL: String
         get() = if (ServerDiscovery.isEmulator()) DEFAULT_EMULATOR_URL else DEFAULT_LAN_URL
 

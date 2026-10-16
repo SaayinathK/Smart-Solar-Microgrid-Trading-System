@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: EnergySlotController.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -36,10 +36,14 @@ namespace SmartMicrogrid.API.Controllers
         /// Get all energy slots with optional filters
         /// </summary>
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? microgridId, [FromQuery] string? status, [FromQuery] DateTime? startTime, [FromQuery] DateTime? endTime, [FromQuery] double? minEnergy)
+        public async Task<IActionResult> GetAll([FromQuery] string? microgridId, [FromQuery] string? status, [FromQuery] DateTime? startTime, [FromQuery] DateTime? endTime, [FromQuery] double? minEnergy, [FromQuery] string? operatorId = null)
         {
             // Execute get all operations
-            var data = await _slotService.GetAllAsync(microgridId, status, startTime, endTime, minEnergy);
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+            var isOperator = User.IsInRole("MicrogridOperator");
+            var effectiveOperatorId = isOperator ? currentUserId : operatorId;
+
+            var data = await _slotService.GetAllAsync(microgridId, status, startTime, endTime, minEnergy, effectiveOperatorId);
             return Ok(ApiResponse<object>.SuccessResponse(data, "Energy slots retrieved successfully."));
         }
 

@@ -1,4 +1,4 @@
-﻿// ===========================================================================================================
+// ===========================================================================================================
 // File: MicrogridService.cs
 // Project: Smart Solar Microgrid Trading System
 // Module: M1 – Microgrid & Energy Resource Management
@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SmartMicrogrid.API.DTOs.M1;
+using SmartMicrogrid.API.Models.Common;
 using SmartMicrogrid.API.Models.M1;
 using SmartMicrogrid.API.Repositories.Interfaces;
 using SmartMicrogrid.API.Services.Interfaces;
@@ -22,25 +23,36 @@ namespace SmartMicrogrid.API.Services.Implementation
     {
         private readonly IMicrogridRepository _repository;
         private readonly IReservationRepository _reservations;
+        private readonly IUserRepository? _users;
         /// <summary>
         /// Initializes a new instance of the MicrogridService class.
         /// </summary>
 
-        public MicrogridService(IMicrogridRepository repository, IReservationRepository reservations)
+        public MicrogridService(
+            IMicrogridRepository repository,
+            IReservationRepository reservations,
+            IUserRepository? users = null)
         {
             // Initialize dependencies and state
             _repository = repository;
             _reservations = reservations;
+            _users = users;
         }
         /// <summary>
         /// Retrieves all async details.
         /// </summary>
 
-        public async Task<IEnumerable<MicrogridResponseDto>> GetAllAsync(string? status = null, bool? isActive = null, string? location = null, string? search = null)
+        public async Task<IEnumerable<MicrogridResponseDto>> GetAllAsync(string? status = null, bool? isActive = null, string? location = null, string? search = null, string? operatorId = null)
         {
             // Execute get all async operations
             var nodes = await _repository.GetAllAsync(status, isActive, location, search);
-            return nodes.Select(MapToResponseDto);
+            if (!string.IsNullOrWhiteSpace(operatorId))
+            {
+                nodes = nodes.Where(n => string.Equals(n.OperatorId, operatorId, StringComparison.OrdinalIgnoreCase));
+            }
+            var dtos = nodes.Select(MapToResponseDto).ToList();
+            await PopulateOperatorDetailsAsync(dtos);
+            return dtos;
         }
         /// <summary>
         /// Retrieves by id async details.
@@ -50,7 +62,10 @@ namespace SmartMicrogrid.API.Services.Implementation
         {
             // Execute get by id async operations
             var node = await _repository.GetByIdAsync(id);
-            return node == null ? null : MapToResponseDto(node);
+            if (node == null) return null;
+            var dto = MapToResponseDto(node);
+            await PopulateOperatorDetailsAsync(dto);
+            return dto;
         }
         /// <summary>
         /// Creates or registers a new async record.
@@ -90,7 +105,9 @@ namespace SmartMicrogrid.API.Services.Implementation
             };
 
             var created = await _repository.CreateAsync(node);
-            return MapToResponseDto(created);
+            var response = MapToResponseDto(created);
+            await PopulateOperatorDetailsAsync(response);
+            return response;
         }
         /// <summary>
         /// Updates the specified async record.
@@ -135,7 +152,10 @@ namespace SmartMicrogrid.API.Services.Implementation
             existing.BatteryPercentage = BatteryValidator.CalculatePercentage(existing.CurrentBatteryLevel, existing.BatteryCapacity);
 
             var success = await _repository.UpdateAsync(id, existing);
-            return success ? MapToResponseDto(existing) : null;
+            if (!success) return null;
+            var response = MapToResponseDto(existing);
+            await PopulateOperatorDetailsAsync(response);
+            return response;
         }
         /// <summary>
         /// Deletes or removes the designated async record.
@@ -176,6 +196,65 @@ namespace SmartMicrogrid.API.Services.Implementation
             if (!isActive && string.Equals(status, "Inactive", StringComparison.OrdinalIgnoreCase) && await _reservations.HasActiveForNodeAsync(id))
             {
                 throw new InvalidOperationException("This microgrid cannot be deactivated while active energy reservations exist.");
+            }
+        }
+
+        private async Task PopulateOperatorDetailsAsync(IEnumerable<MicrogridResponseDto> dtos)
+        {
+            if (_users == null) return;
+            var list = dtos.ToList();
+            if (list.Count == 0) return;
+
+            var operatorIds = list
+                .Select(d => d.OperatorId)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
+
+            if (operatorIds.Count == 0) return;
+
+            var userMap = new Dictionary<string, User>(StringComparer.OrdinalIgnoreCase);
+            foreach (var opId in operatorIds)
+            {
+                try
+                {
+                    var u = await _users.GetByIdAsync(opId);
+                    if (u != null)
+                    {
+                        userMap[opId] = u;
+                    }
+                }
+                catch
+                {
+                    // Ignore individual user lookup errors
+                }
+            }
+
+            foreach (var dto in list)
+            {
+                if (!string.IsNullOrWhiteSpace(dto.OperatorId) && userMap.TryGetValue(dto.OperatorId, out var u))
+                {
+                    dto.OperatorName = $"{u.FirstName} {u.LastName}".Trim();
+                    dto.OperatorEmail = u.Email;
+                }
+            }
+        }
+
+        private async Task PopulateOperatorDetailsAsync(MicrogridResponseDto dto)
+        {
+            if (_users == null || string.IsNullOrWhiteSpace(dto.OperatorId)) return;
+            try
+            {
+                var u = await _users.GetByIdAsync(dto.OperatorId);
+                if (u != null)
+                {
+                    dto.OperatorName = $"{u.FirstName} {u.LastName}".Trim();
+                    dto.OperatorEmail = u.Email;
+                }
+            }
+            catch
+            {
+                // Ignore individual lookup errors
             }
         }
         /// <summary>
