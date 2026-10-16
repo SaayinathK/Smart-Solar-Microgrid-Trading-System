@@ -52,7 +52,7 @@ internal object TransactionUiFormatters {
 
     fun statusLabel(status: String?): String = when (status?.lowercase(Locale.ROOT)) {
         "pending" -> "Pending"
-        "qrgenerated" -> "QR Ready"
+        "qrgenerated" -> "Ready for Verification"
         "verificationpending" -> "Awaiting Verification"
         "verified" -> "Verified"
         "energytransferinprogress" -> "Energy Transfer"
@@ -60,5 +60,14 @@ internal object TransactionUiFormatters {
         "rejected" -> "Rejected"
         "cancelled" -> "Cancelled"
         else -> status?.takeIf(String::isNotBlank) ?: "Not available"
+    }
+
+    fun statusSummary(status: String?): Pair<String, String> = when (status?.lowercase(Locale.ROOT)) {
+        "pending" -> "PENDING" to "Waiting for QR generation"
+        "qrgenerated", "verificationpending" -> "QR READY" to "Waiting for verification"
+        "verified" -> "VERIFIED" to "Ready for energy transfer"
+        "energytransferinprogress" -> "ENERGY TRANSFER" to "Complete the energy transfer confirmation"
+        "completed" -> "COMPLETED" to "Energy transaction finished successfully"
+        else -> "STATUS" to "Current transaction status"
     }
 }

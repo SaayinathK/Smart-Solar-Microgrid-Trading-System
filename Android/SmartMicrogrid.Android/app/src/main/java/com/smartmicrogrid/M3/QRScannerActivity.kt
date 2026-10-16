@@ -39,7 +39,10 @@ class QRScannerActivity : AppCompatActivity() {
             .setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
             .setPrompt("Scan the Smart Microgrid transaction QR code")
             .setBeepEnabled(false)
-            .setOrientationLocked(false)
+            .setOrientationLocked(true)
+            // Use custom portrait-locked CaptureActivity to fix the 90° sideways
+            // camera preview on Samsung Galaxy devices (Issue #1 — camera rotation).
+            .setCaptureActivity(QRCaptureActivity::class.java)
             .initiateScan()
     }
 

@@ -35,13 +35,18 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
   layoutContainer.innerHTML = `
     <div class="app-layout">
       
-      <!-- Sidebar Navigation -->
+      <!-- Professional Sidebar Navigation -->
       <aside id="sidebar" class="sidebar">
         <div class="sidebar-header">
-          <svg class="sidebar-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-          </svg>
-          <span class="sidebar-title">SmartMicrogrid</span>
+          <div class="sidebar-brand-badge">
+            <svg class="sidebar-logo" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.3" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </div>
+          <div class="sidebar-brand-text">
+            <div class="sidebar-title">SmartMicrogrid</div>
+            <div class="sidebar-subtitle"><span class="status-dot-pulse"></span> Solar Trading</div>
+          </div>
         </div>
 
         <div class="sidebar-user-card">
@@ -50,8 +55,11 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
             <span class="status-dot"></span>
           </div>
           <div class="sidebar-user-info">
-            <div class="sidebar-user-name">${user ? `${user.firstName} ${user.lastName}` : 'User'}</div>
-            <span class="role-pill ${roleClass}">${role}</span>
+            <div class="sidebar-user-name" title="${user ? `${user.firstName} ${user.lastName}` : 'User'}">${user ? `${user.firstName} ${user.lastName}` : 'User'}</div>
+            <div class="sidebar-user-role-row">
+              <span class="role-pill ${roleClass}">${role}</span>
+              ${user && user.nic ? `<span class="nic-pill" title="Prosumer NIC">${user.nic}</span>` : ''}
+            </div>
           </div>
         </div>
 
@@ -60,11 +68,16 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
         </nav>
 
         <div class="sidebar-footer">
+          <div class="sidebar-system-status">
+            <span class="status-dot-pulse"></span>
+            <span>API Server: <strong>Port 5050</strong></span>
+          </div>
           <button id="theme-toggle-btn" onclick="ThemeManager.toggleTheme()" class="theme-toggle-btn">
             ${currentTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </button>
-          <button onclick="AuthGuard.logout()" class="btn btn-secondary btn-sm" style="width: 100%;">
-            Logout
+          <button onclick="AuthGuard.logout()" class="btn btn-secondary btn-sm sidebar-logout-btn" style="width: 100%;">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>
@@ -73,28 +86,35 @@ function renderAppLayout(activePage = 'dashboard', pageTitle = 'Dashboard') {
       <div class="app-main">
         <header class="app-header">
           <div class="header-left">
-            <button class="mobile-toggle-btn" onclick="toggleSidebar()">
-              <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button class="mobile-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation">
+              <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
               </svg>
             </button>
-            <div class="header-title">${pageTitle}</div>
+            <div class="header-title-group">
+              <div class="header-breadcrumb">Platform / ${role}</div>
+              <div class="header-title">${pageTitle}</div>
+            </div>
           </div>
 
           <div class="header-right">
+            <div class="header-live-badge">
+              <span class="status-dot-pulse"></span>
+              <span>Live Trading</span>
+            </div>
             <span class="role-pill ${roleClass}">${role} Portal</span>
           </div>
         </header>
 
         <main class="main-content">
-          <div class="container">
+          <div class="container animate-fade-in">
             ${innerContentHTML}
           </div>
         </main>
 
         <footer class="footer">
           <div class="container">
-            &copy; 2026 Smart Microgrid Energy System — Component 1 Infrastructure.
+            &copy; 2026 Smart Solar Microgrid Energy Management & Trading System.
           </div>
         </footer>
       </div>

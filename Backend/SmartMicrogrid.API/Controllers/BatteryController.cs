@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: BatteryController.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: API Controller exposing REST endpoints for Battery management.
+// ===========================================================================================================
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -13,9 +21,13 @@ namespace SmartMicrogrid.API.Controllers
     public class BatteryController : ControllerBase
     {
         private readonly IBatteryService _batteryService;
+        /// <summary>
+        /// Initializes a new instance of the BatteryController class.
+        /// </summary>
 
         public BatteryController(IBatteryService batteryService)
         {
+            // Initialize dependencies and state
             _batteryService = batteryService;
         }
 
@@ -25,6 +37,7 @@ namespace SmartMicrogrid.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetBattery(string id)
         {
+            // Execute get battery operations
             var battery = await _batteryService.GetBatteryAsync(id);
             if (battery == null)
             {
@@ -40,6 +53,7 @@ namespace SmartMicrogrid.API.Controllers
         [Authorize(Roles = "MicrogridOperator,Admin")]
         public async Task<IActionResult> UpdateBattery(string id, [FromBody] UpdateBatteryDto dto)
         {
+            // Execute update battery operations
             if (!ModelState.IsValid)
             {
                 return BadRequest(ApiResponse<object>.FailureResponse("Invalid battery payload."));

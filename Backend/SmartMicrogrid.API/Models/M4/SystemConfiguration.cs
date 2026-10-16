@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: SystemConfiguration.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Domain entity model representing SystemConfiguration in the database.
+// ===========================================================================================================
 using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;

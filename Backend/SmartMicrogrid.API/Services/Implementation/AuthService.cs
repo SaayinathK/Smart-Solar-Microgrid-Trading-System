@@ -1,3 +1,11 @@
+// ===========================================================================================================
+// File: AuthService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Business logic service implementing AuthService operations, rules, and workflows.
+// ===========================================================================================================
 using SmartMicrogrid.API.DTOs.Auth;
 using SmartMicrogrid.API.DTOs.Users;
 using SmartMicrogrid.API.Helpers;
@@ -14,27 +22,38 @@ namespace SmartMicrogrid.API.Services.Implementation
         private readonly IUserRepository _userRepository;
         private readonly JwtHelper _jwtHelper;
         private readonly IAuditService _auditService;
+        /// <summary>
+        /// Initializes a new instance of the AuthService class.
+        /// </summary>
 
         public AuthService(IUserRepository userRepository, JwtHelper jwtHelper, IAuditService auditService)
         {
+            // Initialize dependencies and state
             _userRepository = userRepository;
             _jwtHelper = jwtHelper;
             _auditService = auditService;
         }
+        /// <summary>
+        /// Creates or registers a new er async record.
+        /// </summary>
 
         public async Task<ApiResponse<UserResponseDto>> RegisterAsync(RegisterDto dto)
         {
+            // Execute register async operations
             var normalizedEmail = dto.Email.Trim().ToLower();
 
-            // Admin self-registration is strictly disallowed
-            if (dto.Role == Role.Admin)
+            // Public self-registration is strictly restricted to Prosumers.
+            // Web portal users (MicrogridOperator and Admin) must be created by Backoffice.
+            if (dto.Role != Role.Prosumer)
             {
-                return ApiResponse<UserResponseDto>.FailureResponse("Self-registration is not allowed for Admin role. Admin accounts must be created by a Backoffice officer.");
+                return ApiResponse<UserResponseDto>.FailureResponse(
+                    "Self-registration is not allowed for web portal accounts. " +
+                    "Grid Operator and Administrator accounts must be created by a Backoffice administrator.");
             }
 
-            // Prosumer role requires NIC as primary key/identifier
+            // Prosumer role requires NIC as natural primary key / identifier
             var nic = dto.Nic?.Trim().ToUpper() ?? string.Empty;
-            if (dto.Role == Role.Prosumer && string.IsNullOrWhiteSpace(nic))
+            if (string.IsNullOrWhiteSpace(nic))
             {
                 return ApiResponse<UserResponseDto>.FailureResponse("National Identity Card (NIC) is required for Prosumer registration.");
             }
@@ -58,7 +77,8 @@ namespace SmartMicrogrid.API.Services.Implementation
                 Nic = nic,
                 PasswordHash = PasswordHelper.HashPassword(dto.Password),
                 Role = dto.Role,
-                IsActive = true,
+                IsActive = false,
+                AccountStatus = AccountStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -66,11 +86,15 @@ namespace SmartMicrogrid.API.Services.Implementation
             var createdUser = await _userRepository.CreateAsync(user);
 
             var userResponse = MapToUserResponseDto(createdUser);
-            return ApiResponse<UserResponseDto>.SuccessResponse(userResponse, $"{user.Role} registration successful.");
+            return ApiResponse<UserResponseDto>.SuccessResponse(userResponse, $"{user.Role} registration successful. Your account is pending activation by a Backoffice administrator.");
         }
+        /// <summary>
+        /// Performs login async operation.
+        /// </summary>
 
         public async Task<ApiResponse<LoginResponseDto>> LoginAsync(LoginDto dto)
         {
+            // Execute login async operations
             var normalizedEmail = dto.Email.Trim().ToLower();
             var user = await _userRepository.GetByEmailAsync(normalizedEmail);
 
@@ -107,6 +131,17 @@ namespace SmartMicrogrid.API.Services.Implementation
                     entityId: user.Id,
                     status: AuditStatus.Failure);
 
+                var resolvedStatus = M4.DashboardService.ResolveStatus(user);
+                if (resolvedStatus == AccountStatus.Pending)
+                {
+                    return ApiResponse<LoginResponseDto>.FailureResponse("Your account is pending activation by a Backoffice administrator. Please wait for approval before logging in.");
+                }
+
+                if (resolvedStatus == AccountStatus.Suspended)
+                {
+                    return ApiResponse<LoginResponseDto>.FailureResponse("Your account has been suspended by an administrator. Please contact support.");
+                }
+
                 return ApiResponse<LoginResponseDto>.FailureResponse("Your account has been deactivated. Deactivated accounts can only be reactivated by a Backoffice officer.");
             }
 
@@ -133,9 +168,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return ApiResponse<LoginResponseDto>.SuccessResponse(loginResponse, "Login successful.");
         }
+        /// <summary>
+        /// Performs change password async operation.
+        /// </summary>
 
         public async Task<ApiResponse<bool>> ChangePasswordAsync(string userId, ChangePasswordDto dto)
         {
+            // Execute change password async operations
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
@@ -158,9 +197,13 @@ namespace SmartMicrogrid.API.Services.Implementation
 
             return ApiResponse<bool>.SuccessResponse(true, "Password changed successfully.");
         }
+        /// <summary>
+        /// Performs map to user response dto operation.
+        /// </summary>
 
         private static UserResponseDto MapToUserResponseDto(User user)
         {
+            // Execute map to user response dto operations
             return new UserResponseDto
             {
                 Id = user.Id,

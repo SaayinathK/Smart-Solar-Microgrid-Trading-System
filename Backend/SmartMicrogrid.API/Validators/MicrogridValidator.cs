@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: MicrogridValidator.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: FluentValidation rules for Microgrid data integrity.
+// ===========================================================================================================
 using System;
 using SmartMicrogrid.API.DTOs.M1;
 
@@ -5,8 +13,12 @@ namespace SmartMicrogrid.API.Validators
 {
     public static class MicrogridValidator
     {
+        /// <summary>
+        /// Verifies and validates te create criteria.
+        /// </summary>
         public static (bool isValid, string? errorMessage) ValidateCreate(CreateMicrogridDto dto)
         {
+            // Execute validate create operations
             if (string.IsNullOrWhiteSpace(dto.Name))
                 return (false, "Microgrid name cannot be empty.");
 
@@ -33,9 +45,13 @@ namespace SmartMicrogrid.API.Validators
 
             return (true, null);
         }
+        /// <summary>
+        /// Verifies and validates te update criteria.
+        /// </summary>
 
         public static (bool isValid, string? errorMessage) ValidateUpdate(UpdateMicrogridDto dto)
         {
+            // Execute validate update operations
             if (string.IsNullOrWhiteSpace(dto.Name))
                 return (false, "Microgrid name cannot be empty.");
 

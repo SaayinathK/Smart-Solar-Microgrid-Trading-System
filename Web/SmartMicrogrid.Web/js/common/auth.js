@@ -46,10 +46,7 @@ const AuthGuard = {
 
   redirectIfAuthenticated() {
     if (SessionManager.isAuthenticated()) {
-      const landingPage = SessionManager.getUserRole() === 'TransactionVerifier'
-        ? 'pages/M3/dashboard.html'
-        : 'dashboard.html';
-      window.location.href = getAuthAppUrl(landingPage);
+      window.location.href = getAuthAppUrl('dashboard.html');
     }
   },
 

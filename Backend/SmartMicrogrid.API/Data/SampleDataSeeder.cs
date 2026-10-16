@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: SampleDataSeeder.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Database seeder populating initial/sample data for SampleData.
+// ===========================================================================================================
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,12 +33,24 @@ namespace SmartMicrogrid.API.Data
     /// </summary>
     public static class SampleDataSeeder
     {
+        /// <summary>
+        /// Seeds and configures default/sample async data.
+        /// </summary>
         public static async Task SeedAsync(MongoDbContext context)
         {
+            // Execute seed async operations
+            var txCount = await context.Transactions.CountDocumentsAsync(Builders<Transaction>.Filter.Empty);
+            if (txCount > 0)
+            {
+                return;
+            }
             await SeedLifecycleUsersAsync(context);
             await SeedTransactionsAsync(context);
             await SeedAuditTrailAsync(context);
         }
+        /// <summary>
+        /// Seeds and configures default/sample lifecycle users async data.
+        /// </summary>
 
         // ──────────────────────────────────────────────
         //  USERS  (M4 lifecycle states)
@@ -96,6 +116,9 @@ namespace SmartMicrogrid.API.Data
 
             await context.Users.InsertManyAsync(samples);
         }
+        /// <summary>
+        /// Seeds and configures default/sample transactions async data.
+        /// </summary>
 
         // ──────────────────────────────────────────────
         //  TRANSACTIONS  (M3 ledger)
@@ -108,6 +131,7 @@ namespace SmartMicrogrid.API.Data
         // ──────────────────────────────────────────────
         private static async Task SeedTransactionsAsync(MongoDbContext context)
         {
+            // Execute seed transactions async operations
             if (await context.Transactions.CountDocumentsAsync(
                     Builders<Transaction>.Filter.Empty) > 0)
             {
@@ -187,6 +211,9 @@ namespace SmartMicrogrid.API.Data
 
             await context.Transactions.InsertManyAsync(transactions);
         }
+        /// <summary>
+        /// Seeds and configures default/sample re sample reservations async data.
+        /// </summary>
 
         // ──────────────────────────────────────────────
         //  SAMPLE RESERVATIONS  (support data for M3)
@@ -197,6 +224,7 @@ namespace SmartMicrogrid.API.Data
         private static async Task<List<Reservation>> EnsureSampleReservationsAsync(
             MongoDbContext context, DateTime now)
         {
+            // Execute ensure sample reservations async operations
             const string marker = "sample-data@microgrid.com";
 
             var existing = await context.Reservations
@@ -221,6 +249,38 @@ namespace SmartMicrogrid.API.Data
                 .Find(Builders<EnergySlot>.Filter.Empty)
                 .ToListAsync();
 
+            if (slots.Count == 0)
+            {
+                var newSlots = new List<EnergySlot>();
+                foreach (var mg in microgrids)
+                {
+                    if (string.IsNullOrEmpty(mg.Id) || !MongoDB.Bson.ObjectId.TryParse(mg.Id, out _))
+                        continue;
+
+                    newSlots.Add(new EnergySlot
+                    {
+                        MicrogridNodeId = mg.Id,
+                        CreatedBy = mg.OperatorId,
+                        EnergyAmount = 100,
+                        AvailableAmount = 80,
+                        StartTime = now.AddHours(1),
+                        EndTime = now.AddHours(5),
+                        PricePerUnit = 25.00m,
+                        Status = "Available",
+                        CreatedAt = now,
+                        UpdatedAt = now
+                    });
+                }
+
+                if (newSlots.Count > 0)
+                {
+                    await context.EnergySlots.InsertManyAsync(newSlots);
+                    slots = await context.EnergySlots
+                        .Find(Builders<EnergySlot>.Filter.Empty)
+                        .ToListAsync();
+                }
+            }
+
             var created = new List<Reservation>();
 
             // One reservation per microgrid, cycling if there are more
@@ -234,7 +294,17 @@ namespace SmartMicrogrid.API.Data
 
                 var slot = nodeSlots.Count > 0
                     ? nodeSlots[i % nodeSlots.Count]
-                    : null;
+                    : (slots.Count > 0 ? slots[i % slots.Count] : null);
+
+                var slotId = slot?.Id;
+                if (string.IsNullOrWhiteSpace(slotId) || !MongoDB.Bson.ObjectId.TryParse(slotId, out _))
+                {
+                    slotId = MongoDB.Bson.ObjectId.GenerateNewId().ToString();
+                }
+
+                var nodeId = !string.IsNullOrWhiteSpace(slot?.MicrogridNodeId) && MongoDB.Bson.ObjectId.TryParse(slot.MicrogridNodeId, out _)
+                    ? slot.MicrogridNodeId
+                    : (!string.IsNullOrWhiteSpace(node.Id) && MongoDB.Bson.ObjectId.TryParse(node.Id, out _) ? node.Id : MongoDB.Bson.ObjectId.GenerateNewId().ToString());
 
                 var status = TransactionStatusPlan[i];
                 var start = now.AddHours(2 + (i % 8));
@@ -242,8 +312,8 @@ namespace SmartMicrogrid.API.Data
                 created.Add(new Reservation
                 {
                     ProsumerId = marker,
-                    MicrogridNodeId = node.Id ?? string.Empty,
-                    EnergySlotId = slot?.Id ?? string.Empty,
+                    MicrogridNodeId = nodeId,
+                    EnergySlotId = slotId,
                     EnergyAmount = 5 + (i * 2.5),
                     ReservationDate = start.Date,
                     StartTime = start,
@@ -274,6 +344,9 @@ namespace SmartMicrogrid.API.Data
                 .Find(Builders<Reservation>.Filter.Eq("prosumerId", marker))
                 .ToListAsync();
         }
+        /// <summary>
+        /// Seeds and configures default/sample audit trail async data.
+        /// </summary>
 
         // ──────────────────────────────────────────────
         //  AUDIT TRAIL  (M4 activity log)
@@ -284,6 +357,7 @@ namespace SmartMicrogrid.API.Data
         // ──────────────────────────────────────────────
         private static async Task SeedAuditTrailAsync(MongoDbContext context)
         {
+            // Execute seed audit trail async operations
             var users = await context.Users
                 .Find(Builders<User>.Filter.Empty)
                 .ToListAsync();
@@ -398,6 +472,9 @@ namespace SmartMicrogrid.API.Data
 
             await context.SystemActivity.InsertManyAsync(records);
         }
+        /// <summary>
+        /// Performs make user operation.
+        /// </summary>
 
         // ── Helpers ──
 
@@ -407,6 +484,7 @@ namespace SmartMicrogrid.API.Data
             AccountStatus status, string? changedBy,
             DateTime createdAt, DateTime? statusChangedAt)
         {
+            // Execute make user operations
             return new User
             {
                 FirstName = firstName,
@@ -438,13 +516,22 @@ namespace SmartMicrogrid.API.Data
             "Verified", "VerificationPending", "QRGenerated", "QRGenerated",
             "Pending", "Pending", "Rejected", "Cancelled"
         };
+        /// <summary>
+        /// Performs has qr operation.
+        /// </summary>
 
         private static bool HasQr(string status) =>
             status is "QRGenerated" or "VerificationPending" or "Verified"
                 or "Completed";
+        /// <summary>
+        /// Performs is verified or beyond operation.
+        /// </summary>
 
         private static bool IsVerifiedOrBeyond(string status) =>
             status is "Verified" or "Completed";
+        /// <summary>
+        /// Performs has code operation.
+        /// </summary>
 
         private static bool HasCode(string status) =>
             status is not "Pending" and not "Rejected" and not "Cancelled";

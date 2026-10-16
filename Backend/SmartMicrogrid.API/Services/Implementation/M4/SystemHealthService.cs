@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: SystemHealthService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Business logic service implementing SystemHealthService operations, rules, and workflows.
+// ===========================================================================================================
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -24,6 +32,9 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
         private readonly IConfiguration _configuration;
         private readonly ILogger<SystemHealthService> _logger;
         private readonly Stopwatch _uptime = Stopwatch.StartNew();
+        /// <summary>
+        /// Initializes a new instance of the SystemHealthService class.
+        /// </summary>
 
         public SystemHealthService(
             MongoDbContext context,
@@ -31,14 +42,19 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
             IConfiguration configuration,
             ILogger<SystemHealthService> logger)
         {
+            // Initialize dependencies and state
             _context = context;
             _environment = environment;
             _configuration = configuration;
             _logger = logger;
         }
+        /// <summary>
+        /// Retrieves health async details.
+        /// </summary>
 
         public async Task<SystemHealthDto> GetHealthAsync()
         {
+            // Execute get health async operations
             var health = new SystemHealthDto
             {
                 Api = "Healthy",
@@ -55,9 +71,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
             await CheckDatabaseAsync(health);
             return health;
         }
+        /// <summary>
+        /// Verifies and validates database async criteria.
+        /// </summary>
 
         private async Task CheckDatabaseAsync(SystemHealthDto health)
         {
+            // Execute check database async operations
             var stopwatch = Stopwatch.StartNew();
             try
             {
@@ -90,9 +110,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 health.DatabaseDetail = "MongoDB is not responding.";
             }
         }
+        /// <summary>
+        /// Performs resolve version operation.
+        /// </summary>
 
         private static string ResolveVersion()
         {
+            // Execute resolve version operations
             var assembly = Assembly.GetExecutingAssembly();
             var version = assembly.GetName().Version;
             return version == null

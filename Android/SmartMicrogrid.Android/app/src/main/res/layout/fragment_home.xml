@@ -277,10 +277,51 @@
                 android:paddingBottom="4dp" />
         </HorizontalScrollView>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="14dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Location Map"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="?android:attr/textColorSecondary" />
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggle_map_provider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleSelection="true"
+                app:selectionRequired="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_map_google"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:textSize="11sp"
+                    android:text="Google Maps" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_map_leaflet"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:textSize="11sp"
+                    android:text="Leaflet OSM" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+        </LinearLayout>
+
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="260dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             app:cardCornerRadius="20dp">
 
             <FrameLayout
@@ -304,14 +345,31 @@
             </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <TextView
-            android:id="@+id/tv_map_hint"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="@string/grid_map_hint"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="13sp"
-            android:accessibilityLiveRegion="polite" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/tv_map_hint"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/grid_map_hint"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="13sp"
+                android:accessibilityLiveRegion="polite" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_open_google_maps"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Open in Maps ↗"
+                android:textSize="12sp"
+                android:visibility="gone" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

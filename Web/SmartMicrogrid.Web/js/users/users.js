@@ -1,5 +1,7 @@
 /* ==========================================================================
    Smart Microgrid Energy System - Users List Controller
+   Module: M4 – Platform Administration & Prosumer Activation
+   Author: K. Saayinath (IT23304338)
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initial Load
   loadUsers();
+  refreshPendingCount();
 
   // Event Listeners
   searchInput.addEventListener('input', () => {
@@ -22,7 +25,64 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   roleFilter.addEventListener('change', loadUsers);
-  statusFilter.addEventListener('change', loadUsers);
+  statusFilter.addEventListener('change', () => {
+    updateQuickTabs(statusFilter.value);
+    loadUsers();
+  });
+
+  window.setQuickStatus = (status) => {
+    statusFilter.value = status;
+    updateQuickTabs(status);
+    loadUsers();
+  };
+
+  function updateQuickTabs(status) {
+    const tabs = {
+      '': 'tab-all-users',
+      'Pending': 'tab-pending-users',
+      'Active': 'tab-active-users',
+      'Inactive': 'tab-inactive-users',
+      'Suspended': 'tab-suspended-users'
+    };
+
+    Object.entries(tabs).forEach(([val, tabId]) => {
+      const el = document.getElementById(tabId);
+      if (el) {
+        if (val === (status || '')) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      }
+    });
+
+    const banner = document.getElementById('pending-queue-banner');
+    if (banner) {
+      if (status === 'Pending') {
+        banner.classList.remove('d-none');
+      } else {
+        banner.classList.add('d-none');
+      }
+    }
+  }
+
+  async function refreshPendingCount() {
+    try {
+      const res = await UserApi.getAllUsers({ accountStatus: 'Pending' });
+      if (res.success && Array.isArray(res.data)) {
+        const count = res.data.length;
+        const badge = document.getElementById('pending-count-badge');
+        if (badge) {
+          badge.textContent = count;
+          if (count > 0) {
+            badge.classList.remove('d-none');
+          } else {
+            badge.classList.add('d-none');
+          }
+        }
+      }
+    } catch (_) {}
+  }
 
   async function loadUsers() {
     tableBody.innerHTML = `
@@ -64,6 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </tr>
       `;
     }
+
+    refreshPendingCount();
   }
 
   function renderUserTable(users) {
@@ -86,9 +148,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const accountStatus = user.accountStatus
         || (user.isActive ? 'Active' : 'Inactive');
 
-      const statusBadge = accountStatus === 'Active'
-        ? '<span class="status-badge status-active"><span class="status-dot"></span> Active</span>'
-        : `<span class="status-badge status-${accountStatus.toLowerCase()}">${accountStatus}</span>`;
+      let statusBadge = `<span class="status-badge status-${accountStatus.toLowerCase()}">${accountStatus}</span>`;
+      if (accountStatus === 'Active') {
+        statusBadge = '<span class="status-badge status-active"><span class="status-dot"></span> Active</span>';
+      } else if (accountStatus === 'Pending') {
+        statusBadge = '<span class="badge bg-warning text-dark px-2 py-1">⏳ Pending Activation</span>';
+      } else if (accountStatus === 'Inactive') {
+        statusBadge = '<span class="badge bg-secondary px-2 py-1">Inactive / Deactivated</span>';
+      } else if (accountStatus === 'Suspended') {
+        statusBadge = '<span class="badge bg-danger px-2 py-1">Suspended</span>';
+      }
 
       const createdDate = new Date(user.createdAt).toLocaleDateString(undefined, {
         year: 'numeric',
@@ -96,9 +165,14 @@ document.addEventListener('DOMContentLoaded', () => {
         day: 'numeric'
       });
 
-      const primaryAction = accountStatus === 'Active'
-        ? `<button onclick="changeUserStatus('${user.id}', 'Inactive')" class="btn btn-danger btn-sm">Deactivate</button>`
-        : `<button onclick="changeUserStatus('${user.id}', 'Active')" class="btn btn-primary btn-sm">Activate</button>`;
+      let primaryAction = '';
+      if (accountStatus === 'Active') {
+        primaryAction = `<button onclick="changeUserStatus('${user.id}', 'Inactive')" class="btn btn-outline-danger btn-sm">Deactivate</button>`;
+      } else if (accountStatus === 'Pending') {
+        primaryAction = `<button onclick="changeUserStatus('${user.id}', 'Active')" class="btn btn-success btn-sm font-weight-bold">✓ Activate</button>`;
+      } else {
+        primaryAction = `<button onclick="changeUserStatus('${user.id}', 'Active')" class="btn btn-primary btn-sm">Activate</button>`;
+      }
 
       return `
         <tr>
@@ -135,10 +209,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!newStatus) return;
 
     const actionText = {
-      Active: 'activate',
+      Active: 'activate and approve',
       Inactive: 'deactivate',
       Suspended: 'suspend',
-      Pending: 'move to pending review'
+      Pending: 'mark as pending review'
     }[newStatus] || `set to ${newStatus}`;
 
     if (!confirm(`Are you sure you want to ${actionText} this user account?`)) return;

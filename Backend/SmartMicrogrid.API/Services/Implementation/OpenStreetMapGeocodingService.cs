@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: OpenStreetMapGeocodingService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Business logic service implementing OpenStreetMapGeocodingService operations, rules, and workflows.
+// ===========================================================================================================
 using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
@@ -13,25 +21,37 @@ public sealed class OpenStreetMapGeocodingService(HttpClient httpClient, IConfig
     private readonly SemaphoreSlim gate = new(1, 1);
     private readonly MemoryCache cache = new(new MemoryCacheOptions { SizeLimit = 1000 });
     private DateTimeOffset nextRequest = DateTimeOffset.MinValue;
+    /// <summary>
+    /// Retrieves coordinates async details.
+    /// </summary>
 
     public Task<GeocodingResponseDto> GetCoordinatesAsync(string address, CancellationToken cancellationToken = default)
     {
+        // Execute get coordinates async operations
         address = (address ?? "").Trim();
         if (address.Length is < 3 or > 500)
             throw new GeocodingException(400, "Enter an address between 3 and 500 characters.");
         return LookupAsync("search?format=jsonv2&limit=1&addressdetails=1&q=" + Uri.EscapeDataString(address), true, cancellationToken);
     }
+    /// <summary>
+    /// Retrieves address async details.
+    /// </summary>
 
     public Task<GeocodingResponseDto> GetAddressAsync(double latitude, double longitude, CancellationToken cancellationToken = default)
     {
+        // Execute get address async operations
         if (!double.IsFinite(latitude) || !double.IsFinite(longitude) || Math.Abs(latitude) > 90 || Math.Abs(longitude) > 180)
             throw new GeocodingException(400, "Enter valid latitude and longitude.");
         return LookupAsync("reverse?format=jsonv2&addressdetails=1&lat=" + latitude.ToString("R", CultureInfo.InvariantCulture)
             + "&lon=" + longitude.ToString("R", CultureInfo.InvariantCulture), false, cancellationToken);
     }
+    /// <summary>
+    /// Performs lookup async operation.
+    /// </summary>
 
     private async Task<GeocodingResponseDto> LookupAsync(string query, bool search, CancellationToken cancellationToken)
     {
+        // Execute lookup async operations
         var endpoint = configuration["OpenStreetMap:GeocodingBaseUrl"] ?? "https://nominatim.openstreetmap.org/";
         if (!Uri.TryCreate(endpoint.TrimEnd('/') + "/", UriKind.Absolute, out var baseUri) || baseUri.Scheme != "https")
             throw new GeocodingException(503, "Address lookup is not configured correctly. Enter coordinates manually.");
@@ -102,15 +122,30 @@ public sealed class OpenStreetMapGeocodingService(HttpClient httpClient, IConfig
         }
         finally { gate.Release(); }
     }
+    /// <summary>
+    /// Performs try coordinate operation.
+    /// </summary>
 
     private static bool TryCoordinate(JsonElement item, string property, out double value)
     {
+        // Execute try coordinate operations
         value = double.NaN;
         return item.TryGetProperty(property, out var field)
             && double.TryParse(field.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out value) && double.IsFinite(value);
     }
+    /// <summary>
+    /// Performs not found operation.
+    /// </summary>
 
     private static GeocodingException NotFound() => new(404, "Address not found. Include the city and country or enter coordinates manually.");
+    /// <summary>
+    /// Performs invalid response operation.
+    /// </summary>
     private static GeocodingException InvalidResponse() => new(502, "The address lookup provider returned an invalid response. Try another address or enter coordinates manually.");
-    public void Dispose() { cache.Dispose(); gate.Dispose(); }
+    /// <summary>
+    /// Performs dispose operation.
+    /// </summary>
+    public void Dispose() { // Execute dispose operations
+// Execute dispose operations
+cache.Dispose(); gate.Dispose(); }
 }

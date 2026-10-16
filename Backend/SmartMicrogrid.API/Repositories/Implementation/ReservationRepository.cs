@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: ReservationRepository.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M2 – Marketplace & Reservation Management
+// Section Owned: M2 – Marketplace & Reservation Management
+// Author: J. Shathursini (IT23164062)
+// Description: Repository implementation handling MongoDB operations for Reservation.
+// ===========================================================================================================
 using MongoDB.Bson;
 using MongoDB.Driver;
 using SmartMicrogrid.API.Data;
@@ -10,21 +18,36 @@ namespace SmartMicrogrid.API.Repositories.Implementation;
 public class ReservationRepository : IReservationRepository
 {
     private readonly MongoDbContext _context;
+    /// <summary>
+    /// Initializes a new instance of the ReservationRepository class.
+    /// </summary>
     public ReservationRepository(MongoDbContext context) => _context = context;
+    /// <summary>
+    /// Creates or registers a new async record.
+    /// </summary>
 
     public async Task<Reservation> CreateAsync(Reservation reservation)
     {
+        // Execute create async operations
         await _context.Reservations.InsertOneAsync(reservation);
         return reservation;
     }
+    /// <summary>
+    /// Retrieves by id async details.
+    /// </summary>
     public async Task<Reservation?> GetByIdAsync(string id)
     {
+        // Execute get by id async operations
         if (!ObjectId.TryParse(id, out _)) return null;
         return await _context.Reservations.Find(r => r.Id == id).FirstOrDefaultAsync();
     }
+    /// <summary>
+    /// Retrieves async details.
+    /// </summary>
 
     public Task<List<Reservation>> GetAsync(string? prosumerId, string? status, string? nodeId, int page, int pageSize, IReadOnlyCollection<string>? allowedNodeIds = null)
     {
+        // Execute get async operations
         var f = Builders<Reservation>.Filter; var filter = f.Empty;
         if (!string.IsNullOrWhiteSpace(prosumerId)) filter &= f.Eq(r => r.ProsumerId, prosumerId);
         if (!string.IsNullOrWhiteSpace(status)) filter &= f.Eq(r => r.Status, status);
@@ -32,17 +55,25 @@ public class ReservationRepository : IReservationRepository
         if (allowedNodeIds != null) filter &= f.In(r => r.MicrogridNodeId, allowedNodeIds);
         return _context.Reservations.Find(filter).SortByDescending(r => r.CreatedAt).Skip((page - 1) * pageSize).Limit(pageSize).ToListAsync();
     }
+    /// <summary>
+    /// Performs transition async operation.
+    /// </summary>
 
     public async Task<bool> TransitionAsync(string id, string expectedStatus, string newStatus, string changedBy, string? reason = null)
     {
+        // Execute transition async operations
         if (!ObjectId.TryParse(id, out _)) return false;
         var evt = new ReservationStatusEvent { From = expectedStatus, To = newStatus, ChangedBy = changedBy, ChangedAt = DateTime.UtcNow, Reason = reason };
         var update = Builders<Reservation>.Update.Set(r => r.Status, newStatus).Set(r => r.UpdatedAt, DateTime.UtcNow).Push(r => r.StatusHistory, evt);
         var result = await _context.Reservations.UpdateOneAsync(r => r.Id == id && r.Status == expectedStatus, update);
         return result.ModifiedCount == 1;
     }
+    /// <summary>
+    /// Updates the specified booking async record.
+    /// </summary>
     public async Task<bool> UpdateBookingAsync(Reservation updated, string expectedStatus)
     {
+        // Execute update booking async operations
         if (!ObjectId.TryParse(updated.Id, out _)) return false;
         var change = Builders<Reservation>.Update
             .Set(r => r.EnergySlotId, updated.EnergySlotId)
@@ -55,26 +86,47 @@ public class ReservationRepository : IReservationRepository
         var result = await _context.Reservations.UpdateOneAsync(r => r.Id == updated.Id && r.Status == expectedStatus, change);
         return result.ModifiedCount == 1;
     }
+    /// <summary>
+    /// Performs count async operation.
+    /// </summary>
     public Task<long> CountAsync(string? status = null, string? prosumerId = null, IReadOnlyCollection<string>? allowedNodeIds = null)
     {
+        // Execute count async operations
         var f = Builders<Reservation>.Filter; var filter = f.Empty;
         if (!string.IsNullOrWhiteSpace(status)) filter &= f.Eq(r => r.Status, status);
         if (!string.IsNullOrWhiteSpace(prosumerId)) filter &= f.Eq(r => r.ProsumerId, prosumerId);
         if (allowedNodeIds != null) filter &= f.In(r => r.MicrogridNodeId, allowedNodeIds);
         return _context.Reservations.CountDocumentsAsync(filter);
     }
+    /// <summary>
+    /// Retrieves approved ended async details.
+    /// </summary>
     public Task<List<Reservation>> GetApprovedEndedAsync(DateTime now) => _context.Reservations.Find(r => r.Status == "Approved" && r.EndTime <= now).ToListAsync();
+    /// <summary>
+    /// Performs has active for node async operation.
+    /// </summary>
     public Task<bool> HasActiveForNodeAsync(string nodeId) => _context.Reservations.Find(r => r.MicrogridNodeId == nodeId && (r.Status == "Pending" || r.Status == "Approved")).AnyAsync();
+    /// <summary>
+    /// Performs mark completed async operation.
+    /// </summary>
     public Task<bool> MarkCompletedAsync(string id, string changedBy) => TransitionAsync(id, "Approved", "Completed", changedBy);
+    /// <summary>
+    /// Performs sum active energy async operation.
+    /// </summary>
     public async Task<double> SumActiveEnergyAsync(string? prosumerId = null, IReadOnlyCollection<string>? allowedNodeIds = null)
     {
+        // Execute sum active energy async operations
         var f = Builders<Reservation>.Filter; var filter = f.In(r => r.Status, new[] { "Pending", "Approved" });
         if (!string.IsNullOrWhiteSpace(prosumerId)) filter &= f.Eq(r => r.ProsumerId, prosumerId);
         if (allowedNodeIds != null) filter &= f.In(r => r.MicrogridNodeId, allowedNodeIds);
         var rows = await _context.Reservations.Find(filter).Project(r => r.EnergyAmount).ToListAsync(); return rows.Sum();
     }
+    /// <summary>
+    /// Performs count completed since async operation.
+    /// </summary>
     public Task<long> CountCompletedSinceAsync(DateTime since, string? prosumerId = null, IReadOnlyCollection<string>? allowedNodeIds = null)
     {
+        // Execute count completed since async operations
         var filter = Builders<Reservation>.Filter.Eq(r => r.Status, "Completed") & Builders<Reservation>.Filter.Gte(r => r.UpdatedAt, since);
         if (!string.IsNullOrWhiteSpace(prosumerId)) filter &= Builders<Reservation>.Filter.Eq(r => r.ProsumerId, prosumerId);
         if (allowedNodeIds != null) filter &= Builders<Reservation>.Filter.In(r => r.MicrogridNodeId, allowedNodeIds);

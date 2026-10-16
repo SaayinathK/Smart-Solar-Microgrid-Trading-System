@@ -74,6 +74,17 @@ class ProfileFragment : Fragment() {
             startActivity(Intent(requireActivity(), ChangePasswordActivity::class.java))
         }
 
+        binding.btnDeactivateAccount.setOnClickListener {
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Deactivate Account")
+                .setMessage("Are you sure you want to deactivate your account? You will be signed out immediately and will require Backoffice administrator approval to reactivate your access.")
+                .setPositiveButton("Deactivate Account") { _, _ ->
+                    viewModel.deactivateAccount("Requested via mobile app")
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
+
         binding.btnLogout.setOnClickListener {
             viewModel.logout()
             // Navigate back to Login and clear task stack
@@ -97,6 +108,22 @@ class ProfileFragment : Fragment() {
                     Toast.makeText(requireContext(), it.exceptionOrNull()?.message ?: "Failed to load profile", Toast.LENGTH_SHORT).show()
                     // Fallback to local session data if network fails
                     SessionManager.getUser()?.let { user -> populateUI(user) }
+                }
+            }
+        }
+
+        viewModel.deactivateResult.observe(viewLifecycleOwner) { result ->
+            result?.let {
+                if (it.isSuccess) {
+                    Toast.makeText(requireContext(), "Account deactivated successfully.", Toast.LENGTH_LONG).show()
+                    viewModel.logout()
+                    val intent = Intent(requireActivity(), LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    requireActivity().finish()
+                } else {
+                    val errorMsg = it.exceptionOrNull()?.message ?: "Failed to deactivate account."
+                    Toast.makeText(requireContext(), errorMsg, Toast.LENGTH_LONG).show()
                 }
             }
         }

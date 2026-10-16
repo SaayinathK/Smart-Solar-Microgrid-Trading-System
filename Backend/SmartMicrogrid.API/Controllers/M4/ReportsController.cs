@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: ReportsController.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: API Controller exposing REST endpoints for Reports management.
+// ===========================================================================================================
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -20,9 +28,13 @@ namespace SmartMicrogrid.API.Controllers.M4
     public class ReportsController : ControllerBase
     {
         private readonly IReportService _reportService;
+        /// <summary>
+        /// Initializes a new instance of the ReportsController class.
+        /// </summary>
 
         public ReportsController(IReportService reportService)
         {
+            // Initialize dependencies and state
             _reportService = reportService;
         }
 
@@ -40,6 +52,7 @@ namespace SmartMicrogrid.API.Controllers.M4
             [FromQuery] string? role,
             [FromQuery] string? status)
         {
+            // Execute get user report operations
             try
             {
                 var report = await _reportService.GetUserReportAsync(from, to, role, status);
@@ -62,6 +75,7 @@ namespace SmartMicrogrid.API.Controllers.M4
         [ProducesResponseType(typeof(ApiResponse<object>), StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> GetRoleReport()
         {
+            // Execute get role report operations
             var report = await _reportService.GetRoleReportAsync();
             return Ok(ApiResponse<System.Collections.Generic.List<RoleDistributionDto>>.SuccessResponse(
                 report,
@@ -80,6 +94,7 @@ namespace SmartMicrogrid.API.Controllers.M4
             [FromQuery] DateTime? from,
             [FromQuery] DateTime? to)
         {
+            // Execute get activity report operations
             try
             {
                 var report = await _reportService.GetActivityReportAsync(from, to);
@@ -105,6 +120,7 @@ namespace SmartMicrogrid.API.Controllers.M4
             [FromQuery] DateTime? from,
             [FromQuery] DateTime? to)
         {
+            // Execute get platform report operations
             try
             {
                 var report = await _reportService.GetPlatformReportAsync(from, to);

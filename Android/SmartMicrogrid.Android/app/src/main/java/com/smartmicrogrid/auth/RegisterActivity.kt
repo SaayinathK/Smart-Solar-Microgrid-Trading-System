@@ -84,11 +84,11 @@ class RegisterActivity : AppCompatActivity() {
         viewModel.registerResult.observe(this) { result ->
             result?.let {
                 if (it.isSuccess) {
-                    binding.tvSuccess.text = "Account created successfully! You can now sign in."
+                    binding.tvSuccess.text = "Registration successful! Your account is pending activation by a Backoffice administrator."
                     binding.tvSuccess.visibility = View.VISIBLE
                     hideError()
                     // Delay then go back to login
-                    binding.root.postDelayed({ finish() }, 1500)
+                    binding.root.postDelayed({ finish() }, 2500)
                 } else {
                     showError(it.exceptionOrNull()?.message ?: "Registration failed.")
                 }

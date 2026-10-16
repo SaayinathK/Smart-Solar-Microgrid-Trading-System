@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: AuditService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M4 – Platform Administration & System Operations
+// Section Owned: M4 – Platform Administration & System Operations
+// Author: S. Sriramana (IT23136724)
+// Description: Business logic service implementing AuditService operations, rules, and workflows.
+// ===========================================================================================================
 using System.Linq;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
@@ -14,16 +22,23 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
         private readonly ISystemActivityRepository _repository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<AuditService> _logger;
+        /// <summary>
+        /// Initializes a new instance of the AuditService class.
+        /// </summary>
 
         public AuditService(
             ISystemActivityRepository repository,
             IHttpContextAccessor httpContextAccessor,
             ILogger<AuditService> logger)
         {
+            // Initialize dependencies and state
             _repository = repository;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
+        /// <summary>
+        /// Performs record async operation.
+        /// </summary>
 
         public Task RecordAsync(
             string action,
@@ -37,6 +52,7 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
             string? ipAddress = null,
             string status = AuditStatus.Success)
         {
+            // Execute record async operations
             var principal = _httpContextAccessor.HttpContext?.User;
 
             var activity = new SystemActivity
@@ -58,9 +74,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
 
             return PersistAsync(activity);
         }
+        /// <summary>
+        /// Performs persist async operation.
+        /// </summary>
 
         private async Task PersistAsync(SystemActivity activity)
         {
+            // Execute persist async operations
             try
             {
                 await _repository.RecordAsync(activity);
@@ -71,9 +91,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
                 _logger.LogError(ex, "Failed to persist audit record for action {Action}", activity.Action);
             }
         }
+        /// <summary>
+        /// Performs resolve user name operation.
+        /// </summary>
 
         private static string ResolveUserName(ClaimsPrincipal? principal)
         {
+            // Execute resolve user name operations
             if (principal?.Identity?.IsAuthenticated != true)
                 return "Anonymous";
 
@@ -92,9 +116,13 @@ namespace SmartMicrogrid.API.Services.Implementation.M4
 
             return string.IsNullOrWhiteSpace(email) ? "Unknown" : email;
         }
+        /// <summary>
+        /// Performs resolve ip address operation.
+        /// </summary>
 
         private string? ResolveIpAddress()
         {
+            // Execute resolve ip address operations
             var context = _httpContextAccessor.HttpContext;
             if (context == null)
                 return null;

@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: EnergyCapacityService.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Business logic service implementing EnergyCapacityService operations, rules, and workflows.
+// ===========================================================================================================
 using System;
 using System.Threading.Tasks;
 using SmartMicrogrid.API.DTOs.M1;
@@ -9,14 +17,22 @@ namespace SmartMicrogrid.API.Services.Implementation
     public class EnergyCapacityService : IEnergyCapacityService
     {
         private readonly IMicrogridRepository _repository;
+        /// <summary>
+        /// Initializes a new instance of the EnergyCapacityService class.
+        /// </summary>
 
         public EnergyCapacityService(IMicrogridRepository repository)
         {
+            // Initialize dependencies and state
             _repository = repository;
         }
+        /// <summary>
+        /// Retrieves capacity async details.
+        /// </summary>
 
         public async Task<CapacityResponseDto?> GetCapacityAsync(string microgridId)
         {
+            // Execute get capacity async operations
             var microgrid = await _repository.GetByIdAsync(microgridId);
             if (microgrid == null) return null;
 
@@ -29,9 +45,13 @@ namespace SmartMicrogrid.API.Services.Implementation
                 UsedCapacity = microgrid.UsedCapacity
             };
         }
+        /// <summary>
+        /// Updates the specified capacity async record.
+        /// </summary>
 
         public async Task<CapacityResponseDto?> UpdateCapacityAsync(string microgridId, UpdateCapacityDto dto)
         {
+            // Execute update capacity async operations
             var microgrid = await _repository.GetByIdAsync(microgridId);
             if (microgrid == null) return null;
 

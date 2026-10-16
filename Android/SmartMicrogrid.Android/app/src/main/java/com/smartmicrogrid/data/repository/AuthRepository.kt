@@ -18,7 +18,7 @@ class AuthRepository(private val apiService: ApiService) {
                     SessionManager.setSession(loginData.token, loginData.user)
                     Result.success(loginData)
                 } else {
-                    val msg = response.body()?.message ?: "Login failed. Check your credentials."
+                    val msg = extractErrorMessage(response.errorBody()?.string(), response.body()?.message ?: "Login failed. Check your credentials.")
                     Result.failure(Exception(msg))
                 }
             } catch (e: Exception) {
@@ -34,12 +34,42 @@ class AuthRepository(private val apiService: ApiService) {
                 if (response.isSuccessful && response.body()?.success == true && response.body()?.data != null) {
                     Result.success(response.body()!!.data!!)
                 } else {
-                    val msg = response.body()?.message ?: "Registration failed."
+                    val msg = extractErrorMessage(response.errorBody()?.string(), response.body()?.message ?: "Registration failed.")
                     Result.failure(Exception(msg))
                 }
             } catch (e: Exception) {
                 Result.failure(Exception("Unable to connect to the server. Check network."))
             }
+        }
+    }
+
+    suspend fun deactivateAccount(reason: String? = null): Result<User> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val payload = if (reason != null) mapOf("reason" to reason) else emptyMap()
+                val response = apiService.deactivateAccount(payload)
+                if (response.isSuccessful && response.body()?.success == true && response.body()?.data != null) {
+                    val user = response.body()!!.data!!
+                    SessionManager.logout()
+                    Result.success(user)
+                } else {
+                    val errorMsg = extractErrorMessage(response.errorBody()?.string(), response.body()?.message ?: "Account deactivation failed.")
+                    Result.failure(Exception(errorMsg))
+                }
+            } catch (e: Exception) {
+                Result.failure(Exception("Unable to connect to the server. Check network."))
+            }
+        }
+    }
+
+    private fun extractErrorMessage(errorJson: String?, fallback: String): String {
+        if (errorJson.isNullOrBlank()) return fallback
+        return try {
+            val json = org.json.JSONObject(errorJson)
+            val msg = json.optString("message")
+            if (msg.isNotBlank()) msg else fallback
+        } catch (_: Exception) {
+            fallback
         }
     }
 

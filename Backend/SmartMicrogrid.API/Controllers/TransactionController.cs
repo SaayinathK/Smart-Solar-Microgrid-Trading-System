@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: TransactionController.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M3 – Transaction & Verification Management
+// Section Owned: M3 – Transaction & Verification Management
+// Author: J. Jathusan (IT23297418)
+// Description: API Controller exposing REST endpoints for Transaction management.
+// ===========================================================================================================
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,21 +26,26 @@ namespace SmartMicrogrid.API.Controllers
     public class TransactionController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
+        /// <summary>
+        /// Initializes a new instance of the TransactionController class.
+        /// </summary>
 
         public TransactionController(
             ITransactionService transactionService)
         {
+            // Initialize dependencies and state
             _transactionService = transactionService;
         }
+        /// <summary>
+        /// Retrieves all details.
+        /// </summary>
 
 
-        // ============================================================
-        // GET: /api/transactions
-        // Get transactions based on the logged-in user's role
-        // ============================================================
+        // Get transactions
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
+            // Execute get all operations
             var userId = GetCurrentUserId();
             var role = GetCurrentRole();
 
@@ -45,16 +58,17 @@ namespace SmartMicrogrid.API.Controllers
                 transactions,
                 "Transactions retrieved successfully."));
         }
+        /// <summary>
+        /// Retrieves by id details.
+        /// </summary>
 
 
-        // ============================================================
-        // GET: /api/transactions/{transactionId}
-        // Get a single transaction
-        // ============================================================
+        // Get transaction by ID
         [HttpGet("{transactionId}")]
         public async Task<IActionResult> GetById(
             string transactionId)
         {
+            // Execute get by id operations
             if (string.IsNullOrWhiteSpace(transactionId))
             {
                 return BadRequest(ApiResponse<object>.FailureResponse(
@@ -80,17 +94,18 @@ namespace SmartMicrogrid.API.Controllers
                 transaction,
                 "Transaction retrieved successfully."));
         }
+        /// <summary>
+        /// Creates or registers a new  record.
+        /// </summary>
 
 
-        // ============================================================
-        // POST: /api/transactions
-        // Create a transaction from an approved reservation
-        // ============================================================
+        // Create a transaction
         [HttpPost]
         [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> Create(
             [FromBody] CreateTransactionRequest request)
         {
+            // Execute create operations
             if (request == null ||
                 string.IsNullOrWhiteSpace(request.ReservationId))
             {
@@ -117,17 +132,18 @@ namespace SmartMicrogrid.API.Controllers
                 transaction,
                 "Transaction created successfully."));
         }
+        /// <summary>
+        /// Performs generate qr operation.
+        /// </summary>
 
 
-        // ============================================================
-        // POST: /api/transactions/{transactionId}/generate-qr
-        // Generate QR data for a transaction
-        // ============================================================
+        // Generate transaction QR
         [HttpPost("{transactionId}/generate-qr")]
         [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> GenerateQr(
             string transactionId)
         {
+            // Execute generate qr operations
             if (string.IsNullOrWhiteSpace(transactionId))
             {
                 return BadRequest(ApiResponse<object>.FailureResponse(
@@ -151,18 +167,19 @@ namespace SmartMicrogrid.API.Controllers
                 result,
                 "QR data generated successfully."));
         }
+        /// <summary>
+        /// Verifies and validates  criteria.
+        /// </summary>
 
 
-        // ============================================================
-        // POST: /api/transactions/{transactionId}/verify
-        // Verify QR and reservation information
-        // ============================================================
+        // Verify transaction
         [HttpPost("{transactionId}/verify")]
         [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> Verify(
             string transactionId,
             [FromBody] VerifyTransactionRequest request)
         {
+            // Execute verify operations
             if (string.IsNullOrWhiteSpace(transactionId))
             {
                 return BadRequest(ApiResponse<object>.FailureResponse(
@@ -179,10 +196,8 @@ namespace SmartMicrogrid.API.Controllers
             var userId = GetCurrentUserId();
             var operatorId = User.IsInRole("MicrogridOperator") ? userId : null;
 
-            // --------------------------------------------------------
-            // The transaction ID from the URL is now passed directly
+            // The transaction ID from the URL is passed directly
             // to the service together with the scanned QR data.
-            // --------------------------------------------------------
             var transaction =
                 await _transactionService.VerifyAsync(
                     transactionId,
@@ -200,18 +215,19 @@ namespace SmartMicrogrid.API.Controllers
                 transaction,
                 "Transaction verified successfully."));
         }
+        /// <summary>
+        /// Performs complete operation.
+        /// </summary>
 
 
-        // ============================================================
-        // POST: /api/transactions/{transactionId}/complete
-        // Complete the energy transaction
-        // ============================================================
+        // Complete transaction
         [HttpPost("{transactionId}/complete")]
         [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> Complete(
             string transactionId,
             [FromBody] CompleteTransactionRequest request)
         {
+            // Execute complete operations
             if (string.IsNullOrWhiteSpace(transactionId))
             {
                 return BadRequest(ApiResponse<object>.FailureResponse(
@@ -243,18 +259,19 @@ namespace SmartMicrogrid.API.Controllers
                 transaction,
                 "Energy transaction completed successfully."));
         }
+        /// <summary>
+        /// Updates the specified status record.
+        /// </summary>
 
 
-        // ============================================================
-        // PATCH: /api/transactions/{transactionId}/status
         // Update transaction status
-        // ============================================================
         [HttpPatch("{transactionId}/status")]
         [Authorize(Roles = "MicrogridOperator")]
         public async Task<IActionResult> UpdateStatus(
             string transactionId,
             [FromQuery] string status)
         {
+            // Execute update status operations
             if (string.IsNullOrWhiteSpace(transactionId))
             {
                 return BadRequest(ApiResponse<object>.FailureResponse(
@@ -285,26 +302,28 @@ namespace SmartMicrogrid.API.Controllers
                 transaction,
                 "Transaction status updated successfully."));
         }
+        /// <summary>
+        /// Retrieves current user id details.
+        /// </summary>
 
 
-        // ============================================================
-        // GET CURRENT USER ID FROM JWT
-        // ============================================================
         private string GetCurrentUserId()
         {
+            // Execute get current user id operations
             return User.FindFirstValue(
                        ClaimTypes.NameIdentifier)
                    ?? User.FindFirstValue("sub")
                    ?? throw new UnauthorizedAccessException(
                        "User ID was not found in the token.");
         }
+        /// <summary>
+        /// Retrieves current role details.
+        /// </summary>
 
 
-        // ============================================================
-        // GET CURRENT USER ROLE FROM JWT
-        // ============================================================
         private string GetCurrentRole()
         {
+            // Execute get current role operations
             return User.FindFirstValue(
                        ClaimTypes.Role)
                    ?? User.FindFirstValue("role")
@@ -313,8 +332,12 @@ namespace SmartMicrogrid.API.Controllers
 
         private sealed class M3ExceptionFilterAttribute : Attribute, IAsyncExceptionFilter
         {
+            /// <summary>
+            /// Performs on exception async operation.
+            /// </summary>
             public Task OnExceptionAsync(ExceptionContext context)
             {
+                // Execute on exception async operations
                 var (statusCode, message) = GetError(context.Exception);
 
                 context.Result = new ObjectResult(
@@ -326,10 +349,14 @@ namespace SmartMicrogrid.API.Controllers
 
                 return Task.CompletedTask;
             }
+            /// <summary>
+            /// Retrieves error details.
+            /// </summary>
 
             private static (int StatusCode, string Message) GetError(
                 Exception exception)
             {
+                // Execute get error operations
                 if (exception is MongoWriteException mongoException &&
                     mongoException.WriteError?.Code == 11000)
                 {

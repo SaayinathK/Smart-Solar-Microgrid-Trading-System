@@ -11,9 +11,23 @@ object RetrofitClient {
 
     private var jwtToken: String? = null
 
+    private var currentBaseUrl: String = Constants.API_BASE_URL
+    @Volatile
+    private var cachedApiService: ApiService? = null
+
     fun setJwtToken(token: String?) {
         jwtToken = token
     }
+
+    fun updateBaseUrl(newUrl: String) {
+        val formatted = if (!newUrl.endsWith("/")) "$newUrl/" else newUrl
+        if (currentBaseUrl != formatted) {
+            currentBaseUrl = formatted
+            cachedApiService = null
+        }
+    }
+
+    fun getBaseUrl(): String = currentBaseUrl
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -35,12 +49,16 @@ object RetrofitClient {
         .readTimeout(15, TimeUnit.SECONDS)
         .build()
 
-    val apiService: ApiService by lazy {
-        Retrofit.Builder()
-            .baseUrl(Constants.API_BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(ApiService::class.java)
-    }
+    val apiService: ApiService
+        get() {
+            return cachedApiService ?: synchronized(this) {
+                cachedApiService ?: Retrofit.Builder()
+                    .baseUrl(currentBaseUrl)
+                    .client(okHttpClient)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build()
+                    .create(ApiService::class.java)
+                    .also { cachedApiService = it }
+            }
+        }
 }

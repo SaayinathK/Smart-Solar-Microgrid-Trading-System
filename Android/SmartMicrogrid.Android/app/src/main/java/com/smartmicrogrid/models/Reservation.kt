@@ -28,6 +28,12 @@ data class CreateReservationRequest(
     @SerializedName("reservationDate") val reservationDate: String? = null
 )
 
+data class UpdateReservationRequest(
+    @SerializedName("energySlotId") val energySlotId: String? = null,
+    @SerializedName("energyAmount") val energyAmount: Double,
+    @SerializedName("startTime") val startTime: String? = null
+)
+
 data class ReservationSummary(
     @SerializedName("pendingCount") val pendingCount: Int = 0,
     @SerializedName("approvedFutureCount") val approvedFutureCount: Int = 0,

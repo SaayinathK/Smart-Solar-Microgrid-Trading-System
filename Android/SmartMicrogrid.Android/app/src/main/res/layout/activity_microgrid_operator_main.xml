@@ -17,9 +17,9 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
+        style="@style/Widget.SmartMicrogrid.BottomNavigationView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_nav_microgrid_operator"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -27,6 +27,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:itemIconSize="22dp"
         app:itemTextAppearanceActive="@style/TextAppearance.Material3.LabelSmall"
-        app:itemTextAppearanceInactive="@style/TextAppearance.Material3.LabelSmall"
-        app:elevation="3dp" />
+        app:itemTextAppearanceInactive="@style/TextAppearance.Material3.LabelSmall" />
 </androidx.constraintlayout.widget.ConstraintLayout>

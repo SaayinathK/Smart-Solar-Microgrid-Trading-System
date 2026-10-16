@@ -22,8 +22,10 @@
 
     <item
         android:id="@+id/nav_transactions"
-        android:icon="@android:drawable/ic_menu_view"
-        android:title="@string/my_transactions" />
+        android:icon="@drawable/ic_nav_transactions"
+        android:title="Transfers"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_nav_profile"

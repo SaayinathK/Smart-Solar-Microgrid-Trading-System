@@ -5,32 +5,73 @@
     android:layout_height="match_parent"
     android:background="?android:attr/windowBackground">
 
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/header_container"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginHorizontal="16dp"
         android:layout_marginTop="20dp"
-        android:text="@string/approved_reservations"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OPERATOR WORKSPACE"
+                android:textAppearance="@style/TextAppearance.Solar.Eyebrow" />
+
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/approved_reservations"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="24sp"
+                android:fontFamily="sans-serif-medium"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="8dp"
+            app:cardBackgroundColor="#F8FAFC"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="1dp"
+            app:strokeWidth="0dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/app_name"
+                android:padding="4dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/smart_micro" />
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_subtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="6dp"
         android:text="@string/m2_owns_reservations_create_an_m3_transaction_only_when_you_choose_to_continue"
         android:textColor="?android:attr/textColorSecondary"
-        android:textSize="14sp"
+        android:textSize="13sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_title" />
+        app:layout_constraintTop_toBottomOf="@id/header_container" />
 
     <LinearLayout
         android:id="@+id/transaction_navigation"

@@ -28,21 +28,38 @@
 
         <activity android:name=".MainActivity" />
         <activity android:name=".auth.RegisterActivity" />
-        <activity android:name=".auth.RegisterVerifierActivity" />
         <activity android:name=".auth.EditProfileActivity" />
         <activity android:name=".auth.ChangePasswordActivity" />
 
         <activity android:name=".M2.ProsumerMainActivity" />
-        <activity android:name=".M3.VerifierMainActivity" />
         <activity android:name=".M3.TransactionDetailsActivity" />
         <activity android:name=".M3.EnergyTransferConfirmationActivity" />
         <activity android:name=".M3.TransactionCompletionActivity" />
         <activity android:name=".M3.ProsumerTransactionDetailsActivity" />
         <activity android:name=".M3.TransactionQrActivity" />
-        <activity android:name=".M3.QRScannerActivity" />
+        <activity
+            android:name=".M3.QRScannerActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".M3.QRCaptureActivity"
+            android:screenOrientation="portrait"
+            android:stateNotNeeded="true"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            android:exported="false" />
         <activity android:name=".M3.MicrogridOperatorMainActivity" />
         <activity android:name=".M2.AvailableSlotsActivity" />
         <activity android:name=".M2.ReservationsActivity" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <activity android:name=".M1.microgrid.MicrogridListActivity" />
         <activity android:name=".M1.microgrid.MicrogridDetailsActivity" />

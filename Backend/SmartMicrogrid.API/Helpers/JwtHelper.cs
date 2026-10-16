@@ -1,3 +1,11 @@
+﻿// ===========================================================================================================
+// File: JwtHelper.cs
+// Project: Smart Solar Microgrid Trading System
+// Module: M1 – Microgrid & Energy Resource Management
+// Section Owned: M1 – Microgrid & Energy Resource Management
+// Author: K. Saayinath (IT23304338)
+// Description: Helper utilities providing Jwt functionalities.
+// ===========================================================================================================
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -9,14 +17,22 @@ namespace SmartMicrogrid.API.Helpers
     public class JwtHelper
     {
         private readonly IConfiguration _configuration;
+        /// <summary>
+        /// Initializes a new instance of the JwtHelper class.
+        /// </summary>
 
         public JwtHelper(IConfiguration configuration)
         {
+            // Initialize dependencies and state
             _configuration = configuration;
         }
+        /// <summary>
+        /// Performs generate jwt token operation.
+        /// </summary>
 
         public (string Token, DateTime ExpiresAt) GenerateJwtToken(User user)
         {
+            // Execute generate jwt token operations
             var secretKey = _configuration["Jwt:SecretKey"] ?? "SmartMicrogrid_Default_Super_Secret_Key_2026_EAD!";
             var issuer = _configuration["Jwt:Issuer"] ?? "SmartMicrogridAPI";
             var audience = _configuration["Jwt:Audience"] ?? "SmartMicrogridClients";
